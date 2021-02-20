@@ -4,6 +4,13 @@
 * 默认wifi密码:1234567890
 * 集成/取消新增插件请修改此文件: trunk/build_firmware_modify
 
+- 网件的闪存布局要求factory在ubi/firmware之后, 因此额外加入了NETGEAR_LAYOUT、FACTORY_OFFSET及RWFS_OFFSET选项。
+>- NETGEAR_LAYOUT表明布局为config及factory在firmware之后。
+>- FACTORY_OFFSET直接指定factory的起始位置, 跳过reserved0分区。
+>- RWFS_OFFSET直接指定RWFS的起始位置, 跳过reserved1分区。
+
+目前无法直接创建reserved0与reserved1分区, 否则开机时会提示factory尺寸溢出。
+
 - 已适配除官方适配外的以下机型
 >- MI-R3P(感谢群里emmmm适配,可能led控制有点问题,其它功能正常)
 >- 京东云路由(文件来自Lintel) 编译代码: JDC-1
