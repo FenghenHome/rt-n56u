@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <signal.h>
-#include <sys/select.h>
+#include <poll.h>
 #include <arpa/inet.h>
 #include <errno.h>
 #include <limits.h>
@@ -40,19 +40,24 @@
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #endif
 
-#if !defined(PTHREAD_STACK_MIN) || defined(__APPLE__)
-/* MAC says its min is 8KB, but then crashes in our face. thx hunkOLard */
-#undef PTHREAD_STACK_MIN
-#define PTHREAD_STACK_MIN 64*1024
-#elif defined(__GLIBC__)
-#undef PTHREAD_STACK_MIN
-#define PTHREAD_STACK_MIN 32*1024
+#ifdef PTHREAD_STACK_MIN
+#define THREAD_STACK_SIZE MAX(8*1024, PTHREAD_STACK_MIN)
+#else
+#define THREAD_STACK_SIZE 64*1024
+#endif
+
+#if defined(__APPLE__)
+#undef THREAD_STACK_SIZE
+#define THREAD_STACK_SIZE 64*1024
+#elif defined(__GLIBC__) || defined(__FreeBSD__)
+#undef THREAD_STACK_SIZE
+#define THREAD_STACK_SIZE 32*1024
 #endif
 
 static const char* auth_user;
 static const char* auth_pass;
 static sblist* auth_ips;
-static pthread_mutex_t auth_ips_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_rwlock_t auth_ips_lock = PTHREAD_RWLOCK_INITIALIZER;
 static const struct server* server;
 static union sockaddr_union bind_addr = {.v4.sin_family = AF_UNSPEC};
 
@@ -187,6 +192,18 @@ static int is_authed(union sockaddr_union *client, union sockaddr_union *authedi
 	return 0;
 }
 
+static int is_in_authed_list(union sockaddr_union *caddr) {
+	size_t i;
+	for(i=0;i<sblist_getsize(auth_ips);i++)
+		if(is_authed(caddr, sblist_get(auth_ips, i)))
+			return 1;
+	return 0;
+}
+
+static void add_auth_ip(union sockaddr_union *caddr) {
+	sblist_add(auth_ips, caddr);
+}
+
 static enum authmethod check_auth_method(unsigned char *buf, size_t n, struct client*client) {
 	if(buf[0] != 5) return AM_INVALID;
 	size_t idx = 1;
@@ -197,14 +214,11 @@ static enum authmethod check_auth_method(unsigned char *buf, size_t n, struct cl
 		if(buf[idx] == AM_NO_AUTH) {
 			if(!auth_user) return AM_NO_AUTH;
 			else if(auth_ips) {
-				size_t i;
 				int authed = 0;
-				pthread_mutex_lock(&auth_ips_mutex);
-				for(i=0;i<sblist_getsize(auth_ips);i++) {
-					if((authed = is_authed(&client->addr, sblist_get(auth_ips, i))))
-						break;
+				if(pthread_rwlock_rdlock(&auth_ips_lock) == 0) {
+					authed = is_in_authed_list(&client->addr);
+					pthread_rwlock_unlock(&auth_ips_lock);
 				}
-				pthread_mutex_unlock(&auth_ips_mutex);
 				if(authed) return AM_NO_AUTH;
 			}
 		} else if(buf[idx] == AM_USERNAME) {
@@ -214,12 +228,6 @@ static enum authmethod check_auth_method(unsigned char *buf, size_t n, struct cl
 		n_methods--;
 	}
 	return AM_INVALID;
-}
-
-static void add_auth_ip(struct client*client) {
-	pthread_mutex_lock(&auth_ips_mutex);
-	sblist_add(auth_ips, &client->addr);
-	pthread_mutex_unlock(&auth_ips_mutex);
 }
 
 static void send_auth_response(int fd, int version, enum authmethod meth) {
@@ -237,29 +245,25 @@ static void send_error(int fd, enum errorcode ec) {
 }
 
 static void copyloop(int fd1, int fd2) {
-	int maxfd = fd2;
-	if(fd1 > fd2) maxfd = fd1;
-	fd_set fdsc, fds;
-	FD_ZERO(&fdsc);
-	FD_SET(fd1, &fdsc);
-	FD_SET(fd2, &fdsc);
+	struct pollfd fds[2] = {
+		[0] = {.fd = fd1, .events = POLLIN},
+		[1] = {.fd = fd2, .events = POLLIN},
+	};
 
 	while(1) {
-		memcpy(&fds, &fdsc, sizeof(fds));
 		/* inactive connections are reaped after 15 min to free resources.
 		   usually programs send keep-alive packets so this should only happen
 		   when a connection is really unused. */
-		struct timeval timeout = {.tv_sec = 60*15, .tv_usec = 0};
-		switch(select(maxfd+1, &fds, 0, 0, &timeout)) {
+		switch(poll(fds, 2, 60*15*1000)) {
 			case 0:
 				send_error(fd1, EC_TTL_EXPIRED);
 				return;
 			case -1:
-				if(errno == EINTR) continue;
-				else perror("select");
+				if(errno == EINTR || errno == EAGAIN) continue;
+				else perror("poll");
 				return;
 		}
-		int infd = FD_ISSET(fd1, &fds) ? fd1 : fd2;
+		int infd = (fds[0].revents & POLLIN) ? fd1 : fd2;
 		int outfd = infd == fd2 ? fd1 : fd2;
 		char buf[1024];
 		ssize_t sent = 0, n = read(infd, buf, sizeof buf);
@@ -312,7 +316,11 @@ static void* clientthread(void *data) {
 				if(ret != EC_SUCCESS)
 					goto breakloop;
 				t->state = SS_3_AUTHED;
-				if(auth_ips) add_auth_ip(&t->client);
+				if(auth_ips && !pthread_rwlock_wrlock(&auth_ips_lock)) {
+					if(!is_in_authed_list(&t->client.addr))
+						add_auth_ip(&t->client.addr);
+					pthread_rwlock_unlock(&auth_ips_lock);
+				}
 				break;
 			case SS_3_AUTHED:
 				ret = connect_socks_target(buf, n, &t->client);
@@ -376,11 +384,11 @@ static void zero_arg(char *s) {
 }
 
 int main(int argc, char** argv) {
-	int c;
+	int ch;
 	const char *listenip = "0.0.0.0";
 	unsigned port = 1080;
-	while((c = getopt(argc, argv, ":1b:i:p:u:P:")) != -1) {
-		switch(c) {
+	while((ch = getopt(argc, argv, ":1b:i:p:u:P:")) != -1) {
+		switch(ch) {
 			case '1':
 				auth_ips = sblist_new(sizeof(union sockaddr_union), 8);
 				break;
@@ -403,6 +411,7 @@ int main(int argc, char** argv) {
 				break;
 			case ':':
 				dprintf(2, "error: option -%c requires an operand\n", optopt);
+				/* fall through */
 			case '?':
 				return usage();
 		}
@@ -423,7 +432,6 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	server = &s;
-	size_t stacksz = MAX(8192, PTHREAD_STACK_MIN);  /* 4KB for us, 4KB for libc */
 
 	while(1) {
 		collect(threads);
@@ -444,7 +452,7 @@ int main(int argc, char** argv) {
 		pthread_attr_t *a = 0, attr;
 		if(pthread_attr_init(&attr) == 0) {
 			a = &attr;
-			pthread_attr_setstacksize(a, stacksz);
+			pthread_attr_setstacksize(a, THREAD_STACK_SIZE);
 		}
 		if(pthread_create(&curr->pt, a, clientthread, curr) != 0)
 			dolog("pthread_create failed. OOM?\n");
