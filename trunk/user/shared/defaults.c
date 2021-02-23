@@ -420,9 +420,9 @@ struct nvram_pair router_defaults[] = {
 	{ "koolproxy_txt_0", "https://cdn.jsdelivr.net/gh/houzi-/CDN/koolproxy.txt"},
 	{ "daily_txt_0", "https://cdn.jsdelivr.net/gh/houzi-/CDN/daily.txt"},
 	{ "kp_dat_0", "https://cdn.jsdelivr.net/gh/houzi-/CDN/kp.dat"},
-	{ "koolproxy_txt_1", "https://gitee.com/bkye/kp/raw/master/mrules/koolproxy.txt"},
-	{ "daily_txt_1", "https://gitee.com/bkye/kp/raw/master/mrules/daily.txt"},
-	{ "kp_dat_1", "https://dev.tencent.com/u/dtid_39de1afb676d0d78/p/kp/git/raw/master/kp.dat"},
+	{ "koolproxy_txt_1", "https://cdn.jsdelivr.net/gh/bkye/K/rules/rules/koolproxy.txt"},
+	{ "daily_txt_1", "https://cdn.jsdelivr.net/gh/bkye/K/rules/rules/daily.txt"},
+	{ "kp_dat_1", "https://cdn.jsdelivr.net/gh/bkye/K/rules/rules/kp.dat"},
 	{ "koolproxy_txt_2", ""},
 	{ "daily_txt_2", ""},
 	{ "kp_dat_2", ""},
@@ -447,7 +447,7 @@ struct nvram_pair router_defaults[] = {
 	{ "block_ios", "0" },
 	{ "block_douyin", "0" },
 	{ "anti_ad", "0" },
-	{ "anti_ad_link", "https://anti-ad.net/anti-ad-for-dnsmasq.conf" },
+	{ "anti_ad_link", "https://cdn.jsdelivr.net/gh/FenghenHome/filters@gh-pages/dnsmasq.adblock-domains.conf" },
 	{ "anti_ad_count", "0" },
 	/* Pdnsd */
 	{ "dns_enable", "0" },
@@ -485,7 +485,7 @@ struct nvram_pair router_defaults[] = {
 	{ "w_men", "1" },
 	{ "w_adbyby", "1" },
 	{ "w_pdnsd", "1" },
-	
+
 	{ "ip6_service", "" },
 	{ "ip6_ppe_on", "0" },
 	{ "ip6_wan_if", "0" },
@@ -655,8 +655,8 @@ struct nvram_pair router_defaults[] = {
 	{ "ss_turn_s", "600" },
 	{ "ss_turn_ss", "5" },
 	{ "lan_con", "0" },
-	{ "ss_chnroute_url", "https://ispip.clang.cn/all_cn.txt"},
-	{ "ss_adblock_url", "https://gitee.com/privacy-protection-tools/anti-ad/raw/master/anti-ad-for-dnsmasq.conf"},
+	{ "ss_chnroute_url", "https://cdn.jsdelivr.net/gh/17mon/china_ip_list/china_ip_list.txt"},
+	{ "ss_adblock_url", "https://cdn.jsdelivr.net/gh/FenghenHome/filters@gh-pages/dnsmasq.adblock-domains.conf"},
 	{ "ss_schedule_enable", "0" },
 	{ "ss_schedule", "00000000000" },
 

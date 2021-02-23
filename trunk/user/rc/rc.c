@@ -1704,7 +1704,7 @@ main(int argc, char **argv)
 	}
 
 	if (!strcmp(base, "reboot")) {
-	    return sys_exit();
+		return sys_exit();
 	}
 
 	if (!strcmp(base, "shutdown") || !strcmp(base, "halt")) {

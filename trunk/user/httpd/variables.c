@@ -1056,7 +1056,7 @@
 			{"ss_turn","",NULL, EVM_RESTART_SHADOWSOCKS},
 			{"lan_con","",NULL, EVM_RESTART_SHADOWSOCKS},
 			{"ss_chnroute_url","",NULL, FALSE},
-	        {"ss_watchcat", "",NULL, FALSE},
+			{"ss_watchcat","",NULL, FALSE},
 	        {"ss_turn_s","",NULL, EVM_RESTART_SHADOWSOCKS},
 	        {"ss_turn_ss","",NULL, EVM_RESTART_SHADOWSOCKS},
 			{"ss_keyword","",NULL, FALSE},

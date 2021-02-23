@@ -1617,3 +1617,5 @@ get_apcli_connected(const char *ifname)
 
 	return 0;
 }
+
+

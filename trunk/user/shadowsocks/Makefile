@@ -88,7 +88,7 @@ clean_ss:
 	( if [ -f $(SRC_SS_NAME)/Makefile ] ; then \
 		$(MAKE) -C $(SRC_SS_NAME) distclean ; \
 	fi )
-	
+
 romfs:
 ifeq ($(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS),y)
 	chmod -R +x scripts/

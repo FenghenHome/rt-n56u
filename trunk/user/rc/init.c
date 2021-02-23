@@ -131,7 +131,7 @@ catch_sig_fatal(int sig)
 	kill(-1, SIGTERM);
 	sleep(1);
 	sync();
-	
+
 	reboot(RB_AUTOBOOT);
 
 	do {

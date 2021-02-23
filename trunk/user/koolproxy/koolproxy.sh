@@ -80,7 +80,7 @@ cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
 addn-hosts=/etc/storage/dnsmasq/dns/hosts
 EOF
 cd /etc/storage/dnsmasq/dns
-wget --no-check-certificate https://raw.githubusercontent.com/vokins/yhosts/master/hosts -O hosts;sed -i "1 i\## update：$(date "+%Y-%m-%d %H:%M:%S")" hosts
+wget --no-check-certificate https://cdn.jsdelivr.net/gh/VeleSila/yhosts/hosts -O hosts;sed -i "1 i\## update：$(date "+%Y-%m-%d %H:%M:%S")" hosts
 if [ ! -f "hosts" ]; then
 logger -t "dnsmasq" "host文件下载失败，可能是地址失效或者网络异常！"
 sed -i '/hosts/d' /etc/storage/dnsmasq/dnsmasq.conf
@@ -96,7 +96,7 @@ cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
 addn-hosts=/etc/storage/dnsmasq/dns/tvhosts
 EOF
 cd /etc/storage/dnsmasq/dns
-wget --no-check-certificate https://dev.tencent.com/u/shaoxia1991/p/yhosts/git/raw/master/data/tvbox.txt -O tvhosts;sed -i "1 i\## update：$(date "+%Y-%m-%d %H:%M:%S")" tvhosts
+wget --no-check-certificate https://cdn.jsdelivr.net/gh/vokins/yhosts/data/tvbox.txt -O tvhosts;sed -i "1 i\## update：$(date "+%Y-%m-%d %H:%M:%S")" tvhosts
 if [ ! -f "tvhosts" ]; then
 logger -t "dnsmasq" "tvbox规则文件下载失败，可能是地址失效或者网络异常！"
 sed -i '/tvhosts/d' /etc/storage/dnsmasq/dnsmasq.conf

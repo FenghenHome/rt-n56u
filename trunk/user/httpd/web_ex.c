@@ -2009,7 +2009,6 @@ static int shadowsocks_action_hook(int eid, webs_t wp, int argc, char **argv)
 	}else if (!strcmp(ss_action, "Reset_dlink")) {
 		notify_rc(RCN_RESTART_REDLINK);
 	}
-	
 	websWrite(wp, "<script>restart_needed_time(%d);</script>\n", needed_seconds);
 	return 0;
 }
@@ -3543,7 +3542,7 @@ apply_cgi(const char *url, webs_t wp)
 	}
 	else if (!strcmp(value, " Reboot "))
 	{
-	    sys_reboot();
+		sys_reboot();
 		return 0;
 	}
 	else if (!strcmp(value, " Shutdown "))
@@ -4242,7 +4241,6 @@ struct mime_handler mime_handlers[] = {
 	{ "client.ovpn", "application/force-download", NULL, NULL, do_export_ovpn_client, 1 },
 #endif
 
-
 	/* no-cached POST objects */
 	{ "update.cgi*", "text/javascript", no_cache_IE, do_html_apply_post, do_update_cgi, 1 },
 	{ "apply.cgi*", "text/html", no_cache_IE, do_html_apply_post, do_apply_cgi, 1 },
@@ -4552,7 +4550,7 @@ struct ej_handler ej_handlers[] =
 	{ "koolproxy_action", koolproxy_action_hook},
 	{ "koolproxy_status", koolproxy_status_hook},
 #endif
-#if defined(APP_DNSFORWARDER)
+#if defined (APP_DNSFORWARDER)
 	{ "dnsforwarder_status", dnsforwarder_status_hook},
 #endif
 #if defined(APP_CADDY)
@@ -4575,3 +4573,4 @@ struct ej_handler ej_handlers[] =
 	{ "openvpn_cli_cert_hook", openvpn_cli_cert_hook},
 	{ NULL, NULL }
 };
+
