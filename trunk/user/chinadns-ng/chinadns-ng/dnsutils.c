@@ -7,55 +7,9 @@
 #include <netinet/in.h>
 #undef _GNU_SOURCE
 
-#define DNS_QR_QUERY 0
-#define DNS_QR_REPLY 1
-#define DNS_OPCODE_QUERY 0
-#define DNS_RCODE_NOERROR 0
-#define DNS_CLASS_INTERNET 1
-#define DNS_RECORD_TYPE_A 1 /* ipv4 address */
-#define DNS_RECORD_TYPE_AAAA 28 /* ipv6 address */
-#define DNS_DNAME_LABEL_MAXLEN 63 /* domain-name label maxlen */
-#define DNS_DNAME_COMPRESSION_MINVAL 192 /* domain-name compression minval */
-
-/* check query packet header */
-static inline bool dns_qheader_check(const void *packet_buf) {
-    const dns_header_t *header = packet_buf;
-    if (header->qr != DNS_QR_QUERY) {
-        LOGERR("[dns_qheader_check] this is a query packet, but header->qr != 0");
-        return false;
-    }
-    if (header->opcode != DNS_OPCODE_QUERY) {
-        LOGERR("[dns_qheader_check] this is not a standard query, opcode: %hhu", header->opcode);
-        return false;
-    }
-    if (ntohs(header->question_count) != 1) {
-        LOGERR("[dns_qheader_check] there should be one and only one question section");
-        return false;
-    }
-    return true;
-}
-
-/* check reply packet header */
-static inline bool dns_rheader_check(const void *packet_buf) {
-    const dns_header_t *header = packet_buf;
-    if (header->qr != DNS_QR_REPLY) {
-        LOGERR("[dns_rheader_check] this is a reply packet, but header->qr != 1");
-        return false;
-    }
-    if (header->opcode != DNS_OPCODE_QUERY) {
-        LOGERR("[dns_rheader_check] this is not a standard query, opcode: %hhu", header->opcode);
-        return false;
-    }
-    if (ntohs(header->question_count) != 1) {
-        LOGERR("[dns_rheader_check] there should be one and only one question section");
-        return false;
-    }
-    return true;
-}
-
 /* check dns packet */
 static bool dns_packet_check(const void *packet_buf, ssize_t packet_len, char *name_buf, bool is_query, const void **answer_ptr) {
-    /* check packet length */ 
+    /* check packet length */
     if (packet_len < (ssize_t)sizeof(dns_header_t) + (ssize_t)sizeof(dns_query_t) + 1) {
         LOGERR("[dns_packet_check] the dns packet is too small: %zd", packet_len);
         return false;
@@ -66,8 +20,19 @@ static bool dns_packet_check(const void *packet_buf, ssize_t packet_len, char *n
     }
 
     /* check packet header */
-    if (is_query) if (!dns_qheader_check(packet_buf)) return false;
-    if (!is_query) if (!dns_rheader_check(packet_buf)) return false;
+    const dns_header_t *header = packet_buf;
+    if (header->qr != (is_query ? DNS_QR_QUERY : DNS_QR_REPLY)) {
+        LOGERR("[dns_packet_check] this is a %s packet, but header->qr != %d", is_query ? "query" : "reply", is_query ? DNS_QR_QUERY : DNS_QR_REPLY);
+        return false;
+    }
+    if (header->opcode != DNS_OPCODE_QUERY) {
+        LOGERR("[dns_packet_check] this is not a standard query, opcode: %hhu", header->opcode);
+        return false;
+    }
+    if (ntohs(header->question_count) != 1) {
+        LOGERR("[dns_packet_check] there should be one and only one question section");
+        return false;
+    }
 
     /* move ptr to question section */
     packet_buf += sizeof(dns_header_t);
@@ -124,9 +89,8 @@ static bool dns_packet_check(const void *packet_buf, ssize_t packet_len, char *n
         return false;
     }
 
-    /* save answer section ptr (used for reply) */
-    if (answer_ptr) *answer_ptr = packet_buf + sizeof(dns_query_t);
-
+    /* save answer section ptr */
+    *answer_ptr = packet_buf + sizeof(dns_query_t);
     return true;
 }
 
@@ -192,17 +156,17 @@ static bool dns_ipset_check(const void *packet_ptr, const void *ans_ptr, ssize_t
         }
         switch (ntohs(record->rtype)) {
             case DNS_RECORD_TYPE_A:
-                if (rdatalen != sizeof(inet4_ipaddr_t)) {
+                if (rdatalen != IPV4_BINADDR_LEN) {
                     LOGERR("[dns_ipset_check] the format of the dns packet is incorrect");
                     return false;
                 }
-                return ipset_addr4_is_exists((void *)record->rdataptr);
+                return ipset_addr_is_exists(record->rdataptr, true); /* in chnroute? */
             case DNS_RECORD_TYPE_AAAA:
-                if (rdatalen != sizeof(inet6_ipaddr_t)) {
+                if (rdatalen != IPV6_BINADDR_LEN) {
                     LOGERR("[dns_ipset_check] the format of the dns packet is incorrect");
                     return false;
                 }
-                return ipset_addr6_is_exists((void *)record->rdataptr);
+                return ipset_addr_is_exists(record->rdataptr, false); /* in chnroute6? */
             default:
                 ans_ptr += sizeof(dns_record_t) + rdatalen;
                 ans_len -= sizeof(dns_record_t) + rdatalen;
@@ -215,14 +179,17 @@ static bool dns_ipset_check(const void *packet_ptr, const void *ans_ptr, ssize_t
     return g_noip_as_chnip; /* not found A/AAAA record */
 }
 
-/* check a dns query packet, `name_buf` used to get domain name */
-bool dns_query_check(const void *packet_buf, ssize_t packet_len, char *name_buf) {
-    return dns_packet_check(packet_buf, packet_len, name_buf, true, NULL);
+/* check dns query, `name_buf` used to get domain name, return true if valid */
+bool dns_query_check(const void *packet_buf, ssize_t packet_len, char *name_buf, uint16_t *qtype) {
+    const void *answer_ptr = NULL;
+    if (!dns_packet_check(packet_buf, packet_len, name_buf, true, &answer_ptr)) return false;
+    *qtype = ntohs(((dns_query_t *)(answer_ptr - sizeof(dns_query_t)))->qtype);
+    return true;
 }
 
-/* check a dns reply packet, `name_buf` used to get domain name */
-bool dns_reply_check(const void *packet_buf, ssize_t packet_len, char *name_buf) {
+/* check dns reply, `name_buf` used to get domain name, return true if accept */
+bool dns_reply_check(const void *packet_buf, ssize_t packet_len, char *name_buf, bool chk_ipset) {
     const void *answer_ptr = NULL;
     if (!dns_packet_check(packet_buf, packet_len, name_buf, false, &answer_ptr)) return false;
-    return dns_ipset_check(packet_buf, answer_ptr, packet_len - (answer_ptr - packet_buf));
+    return chk_ipset ? dns_ipset_check(packet_buf, answer_ptr, packet_len - (answer_ptr - packet_buf)) : true;
 }
