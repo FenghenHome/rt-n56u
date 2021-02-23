@@ -27,5 +27,5 @@ base64 -d       </dev/null &>/dev/null && base64_decode='base64 -d'
 base64 --decode </dev/null &>/dev/null && base64_decode='base64 --decode'
 [ "$base64_decode" ] || { echo "option not supported: base64 -d/--decode"; exit 1; }
 
-url='https://raw.github.com/gfwlist/gfwlist/master/gfwlist.txt'
+url='https://cdn.jsdelivr.net/gh/gfwlist/gfwlist/gfwlist.txt'
 curl -4sSkL "$url" | $base64_decode | { perl -pe "$gfwlist_txt_perl_script_string"; gfwlist_txt_append_domain_names; } | sort | uniq >gfwlist.txt
