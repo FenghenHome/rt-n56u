@@ -17,8 +17,6 @@ SSTRIP_NAME = ELFkickers-3.1
 CFLAGS    = -Wall -O2
 LDFLAGS   =
 
-
-
 -include $(LINUX_CONFIG)
 
 all:go_build
