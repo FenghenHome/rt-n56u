@@ -61,7 +61,7 @@ static sock_port_t     g_bind_port                                        = 6535
 static inet6_skaddr_t  g_bind_skaddr                                      = {0};
 static int             g_bind_socket                                      = -1;
 static int             g_remote_sockets[SERVER_MAXCOUNT]                  = {-1, -1, -1, -1};
-static char            g_remote_servers[SERVER_MAXCOUNT][ADDRPORT_STRLEN] = {"114.114.114.114#53", "", "8.8.8.8#53", ""};
+static char            g_remote_servers[SERVER_MAXCOUNT][ADDRPORT_STRLEN] = {"119.29.29.29#53", "", "8.8.8.8#53", ""};
 static inet6_skaddr_t  g_remote_skaddrs[SERVER_MAXCOUNT]                  = {{0}};
 static char            g_socket_buffer[SOCKBUFF_MAXSIZE]                  = {0};
 static time_t          g_upstream_timeout_sec                             = 3;
@@ -290,7 +290,7 @@ static void parse_command_args(int argc, char *argv[]) {
         strcpy(dnsserver_optstring, chinadns_optarg);
         parse_dns_server_opt(dnsserver_optstring, true);
     } else {
-        build_ipv4_addr((void *)&g_remote_skaddrs[CHINADNS1_IDX], "114.114.114.114", 53);
+        build_ipv4_addr((void *)&g_remote_skaddrs[CHINADNS1_IDX], "119.29.29.29", 53);
     }
     if (trustdns_optarg) {
         char dnsserver_optstring[strlen(trustdns_optarg) + 1];
