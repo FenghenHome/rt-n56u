@@ -1,3 +1,9 @@
+### 上游 ###
+* https://github.com/chongshengB/rt-n56u
+* https://github.com/Yh793/rt-n56u/tree/chongshengB
+* https://github.com/hanwckf/rt-n56u
+
+
 ### 固件说明 ###
 * 默认登陆IP:192.168.2.1 
 * 默认用户名/密码:admin/admin
