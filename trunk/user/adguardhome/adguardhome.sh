@@ -79,7 +79,7 @@ dns:
   ratelimit_whitelist: []
   refuse_any: true
   bootstrap_dns:
-  - 1.1.1.1
+  - 119.29.29.29
   all_servers: true
   allowed_clients: []
   disallowed_clients: []
@@ -90,7 +90,7 @@ dns:
   safebrowsing_enabled: false
   resolveraddress: ""
   upstream_dns:
-  - 1.1.1.1
+  - https://dns.rubyfish.cn/dns-query
 tls:
   enabled: false
   server_name: ""
