@@ -90,6 +90,7 @@ dns:
   safebrowsing_enabled: false
   resolveraddress: ""
   upstream_dns:
+  - https://i.233py.com/dns-query
   - https://dns.rubyfish.cn/dns-query
 tls:
   enabled: false
