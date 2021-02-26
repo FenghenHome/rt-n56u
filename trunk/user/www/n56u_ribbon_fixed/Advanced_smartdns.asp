@@ -667,7 +667,7 @@ function showMRULESList(){
 											  <tr>
 											 <th>加入ipset(解析gfwlist要用):</th>
 										 <td>
-                                                <input type="text" maxlength="255" class="span12" style="width: 200px" size="200" name="sdnss_ipset_x_0" value="<% nvram_get_x("", "sdnss_ipset_x_0"); %>" />注意IP直接填,如果是域名:例如https://ndns.233py.com/dns-query 只填写ndns.233py.com就可以了.
+                                                <input type="text" maxlength="255" class="span12" style="width: 200px" size="200" name="sdnss_ipset_x_0" value="<% nvram_get_x("", "sdnss_ipset_x_0"); %>" />注意IP直接填,如果是域名:例如https://i.233py.com/dns-query 只填写ndns.233py.com就可以了.
 											</td>
 											 </tr>
 											 <tr>
