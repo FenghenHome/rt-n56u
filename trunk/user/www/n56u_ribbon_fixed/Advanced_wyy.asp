@@ -441,7 +441,7 @@ function markGroupMDHCP(o, c, b) {
 										<tr>
 											<th>HTTPS 证书</th>
 											<td>
-				<input type="button" class="btn btn-success" value="下载CA根证书" onclick="window.open('https://raw.githubusercontent.com/nondanee/UnblockNeteaseMusic/master/ca.crt')" size="0"><br>Mac/iOS客户端需要安装 CA根证书并信任<br>iOS系统需要在“设置 -&gt; 通用 -&gt; 关于本机 -&gt; 证书信任设置”中，信任 UnblockNeteaseMusic Root CA <br>Linux 设备请在启用时加入 --ignore-certificate-errors 参数
+				<input type="button" class="btn btn-success" value="下载CA根证书" onclick="window.open('https://cdn.jsdelivr.net/gh/nondanee/UnblockNeteaseMusic/ca.crt')" size="0"><br>Mac/iOS客户端需要安装 CA根证书并信任<br>iOS系统需要在“设置 -&gt; 通用 -&gt; 关于本机 -&gt; 证书信任设置”中，信任 UnblockNeteaseMusic Root CA <br>Linux 设备请在启用时加入 --ignore-certificate-errors 参数
 											</td>
 										</tr>
 										<table width="100%" align="center" cellpadding="4" cellspacing="0" class="table">
