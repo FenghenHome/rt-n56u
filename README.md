@@ -3,6 +3,8 @@
 * https://github.com/Yh793/rt-n56u/tree/chongshengB
 * https://github.com/hanwckf/rt-n56u
 * https://github.com/vb1980/rt-n56u
+* https://github.com/presisco/rt-n56u
+* https://github.com/silveryxx/rt-n56u
 
 
 ### 固件说明 ###
