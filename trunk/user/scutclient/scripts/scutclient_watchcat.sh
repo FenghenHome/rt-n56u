@@ -1,6 +1,6 @@
 #!/bin/sh
 pidfile="/var/scutclient_watchcat.pid"
-net="114.114.114.114 119.29.29.29"
+net="223.5.5.5 119.29.29.29"
 auth_flag="/tmp/scutclient_status"
 
 [ -f $pidfile ] && kill -9 "$(cat $pidfile)" || echo "$$" > $pidfile

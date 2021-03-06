@@ -451,7 +451,7 @@ struct nvram_pair router_defaults[] = {
 	{ "anti_ad_count", "0" },
 	/* Pdnsd */
 	{ "dns_enable", "0" },
-	{ "dns_server", "223.5.5.5,114.114.114.114" },
+	{ "dns_server", "223.5.5.5,119.29.29.29" },
 	{ "dns_server_port", "5333" },
 	{ "dns_server_bind", "0.0.0.0" },
 
@@ -903,7 +903,7 @@ struct nvram_pair router_defaults[] = {
 	{ "di_lost_delay", "1" },
 	{ "di_lost_action", "0" },
 	{ "di_recon_pause", "0" },
-	{ "di_addr0", "114.114.114.114" },
+	{ "di_addr0", "119.29.29.29" },
 	{ "di_addr1", "208.67.222.222" },
 	{ "di_addr2", "183.232.231.172" },
 	{ "di_addr3", "8.8.8.8" },

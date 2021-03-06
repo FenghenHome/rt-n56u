@@ -25,7 +25,7 @@ func_start(){
 	echo -n "Starting scutclient:..."
 	start-stop-daemon -S -b -x "$scutclient_exec" -- -u "$(nvram get scutclient_username)" -p "$(nvram get scutclient_password)" \
 	-i "$(nvram get wan_ifname)" \
-	-n "${sysdns:-"114.114.114.114"}" \
+	-n "${sysdns:-"119.29.29.29"}" \
 	-H "$(nvram get scutclient_hostname)" \
 	-s "$(nvram get scutclient_server_auth_ip)" \
 	-c "$(nvram get scutclient_version)" \
