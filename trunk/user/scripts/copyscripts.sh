@@ -103,3 +103,8 @@ mkdir -p /etc/storage/gfwlist
 cp -rf /etc_ro/gfwlist_list.conf /etc/storage/gfwlist/
 chmod 755 "/etc/storage/gfwlist/gfwlist_list.conf"
 fi
+if [ ! -f "/etc/storage/dnsmasq.adblock/adblock_list.conf" ] ; then
+mkdir -p /etc/storage/dnsmasq.adblock
+cp -rf /etc_ro/adblock_list.conf /etc/storage/dnsmasq.adblock/
+chmod 755 "/etc/storage/dnsmasq.adblock/adblock_list.conf"
+fi

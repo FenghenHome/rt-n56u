@@ -1068,6 +1068,7 @@
 			{"ss_keyword","",NULL, FALSE},
 			{"ss_update_chnroute","",NULL, EVM_RESTART_SHADOWSOCKS},
 			{"ss_update_gfwlist","",NULL, EVM_RESTART_SHADOWSOCKS},
+			{"ss_update_adblock","",NULL, EVM_RESTART_SHADOWSOCKS},
 			{"ss-tunnel_enable","",NULL, EVM_RESTART_SS_TUNNEL},
 			{"ss-tunnel_local_port","",NULL, EVM_RESTART_SS_TUNNEL},
 			{"ss-tunnel_remote","",NULL, EVM_RESTART_SS_TUNNEL},

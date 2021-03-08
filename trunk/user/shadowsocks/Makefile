@@ -100,6 +100,7 @@ ifeq ($(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS),y)
 	#$(ROMFSINST) $(THISDIR)/gfwlist/gfwlist.bz2 /etc_ro/gfwlist.bz2
 	$(ROMFSINST) $(THISDIR)/oversea/oversea_list.conf /etc_ro/oversea_list.conf
 	$(ROMFSINST) $(THISDIR)/gfwlist/gfwlist_list.conf /etc_ro/gfwlist_list.conf
+	$(ROMFSINST) $(THISDIR)/adblock/adblock_list.conf /etc_ro/adblock_list.conf
 	$(ROMFSINST) /etc_ro/ss_dom.sh
 	$(ROMFSINST) /etc_ro/uss_dom.sh
 	$(ROMFSINST) /etc_ro/ss_ip.sh

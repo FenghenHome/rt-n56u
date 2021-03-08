@@ -1290,6 +1290,10 @@ handle_notifications(void)
 		{
 			update_gfwlist();
 		}
+		else if (strcmp(entry->d_name, RCN_RESTART_ADBLOCK_UPD) == 0)
+		{
+			update_adblock();
+		}
 		else if (strcmp(entry->d_name, RCN_RESTART_DLINK) == 0)
 		{
 			update_dlink();

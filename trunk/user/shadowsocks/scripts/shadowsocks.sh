@@ -475,6 +475,7 @@ start_watchcat() {
 auto_update() {
 	sed -i '/update_chnroute/d' /etc/storage/cron/crontabs/$http_username
 	sed -i '/update_gfwlist/d' /etc/storage/cron/crontabs/$http_username
+	sed -i '/update_adblock/d' /etc/storage/cron/crontabs/$http_username
 	sed -i '/ss-watchcat/d' /etc/storage/cron/crontabs/$http_username
 	if [ $(nvram get ss_update_chnroute) = "1" ]; then
 		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
@@ -484,6 +485,11 @@ EOF
 	if [ $(nvram get ss_update_gfwlist) = "1" ]; then
 		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
 0 7 */10 * * /usr/bin/update_gfwlist.sh > /dev/null 2>&1
+EOF
+	fi
+	if [ $(nvram get ss_update_adblock) = "1" ]; then
+		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
+0 9 */10 * * /usr/bin/update_adblock.sh > /dev/null 2>&1
 EOF
 	fi
 }

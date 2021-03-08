@@ -691,6 +691,7 @@ struct nvram_pair router_defaults[] = {
 	
 	{ "ss_update_chnroute", "0" },
 	{ "ss_update_gfwlist", "0" },
+	{ "ss_update_adblock", "0" },
 	{ "ssp_staticnum_x", "0" },
 	
 	{ "v2_type_tcp", "none" },
@@ -809,6 +810,7 @@ struct nvram_pair router_defaults[] = {
 	{ "ss_watchcat", "1" },
 	{ "ss_update_chnroute", "0" },
 	{ "ss_update_gfwlist", "0" },
+	{ "ss_update_adblock", "0" },
 #endif
 
 	/* DHCP server parameters */

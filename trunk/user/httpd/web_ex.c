@@ -2004,6 +2004,8 @@ static int shadowsocks_action_hook(int eid, webs_t wp, int argc, char **argv)
 		notify_rc(RCN_RESTART_SS_TUNNEL);
 	} else if (!strcmp(ss_action, "Update_gfwlist")) {
 		notify_rc(RCN_RESTART_GFWLIST_UPD);
+	} else if (!strcmp(ss_action, "Update_adblock")) {
+		notify_rc(RCN_RESTART_ADBLOCK_UPD);
 	}else if (!strcmp(ss_action, "Update_dlink")) {
 		notify_rc(RCN_RESTART_DLINK);
 	}else if (!strcmp(ss_action, "Reset_dlink")) {
@@ -2225,6 +2227,17 @@ static int rules_count_hook(int eid, webs_t wp, int argc, char **argv)
 	if (strlen(count) > 0)
 		count[strlen(count) - 1] = 0;
 	websWrite(wp, "function gfwlist_count() { return '%s';}\n", count);	
+	memset(count, 0, sizeof(count));
+	fstream = popen("cat /etc/storage/dnsmasq.adblock/adblock_list.conf |wc -l","r");
+	if(fstream) {
+		fgets(count, sizeof(count), fstream);
+		pclose(fstream);
+	} else {
+		sprintf(count, "%d", 0);
+	}
+	if (strlen(count) > 0)
+		count[strlen(count) - 1] = 0;
+	websWrite(wp, "function adblock_count() { return '%s';}\n", count);	
 #endif
 	return 0;
 }

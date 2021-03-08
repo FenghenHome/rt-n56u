@@ -345,6 +345,10 @@ void update_gfwlist(void){
 	eval("/bin/sh","-c","/usr/bin/update_gfwlist.sh force &");
 }
 
+void update_adblock(void){
+	eval("/bin/sh","-c","/usr/bin/update_adblock.sh force &");
+}
+
 void update_dlink(void){
 	eval("/bin/sh","-c","/usr/bin/update_dlink.sh start &");
 }
