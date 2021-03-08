@@ -9,7 +9,7 @@ if [ $count -gt 1000 ]; then
 rm -f /etc/storage/dnsmasq.adblock/adblock_list.conf
 cp -r /tmp/adblock_list.conf /etc/storage/dnsmasq.adblock/adblock_list.conf
 mtd_storage.sh save >/dev/null 2>&1
-mkdir -p /etc/storage/adblock/
+mkdir -p /etc/storage/dnsmasq.adblock/
 logger -st "adblock" "Update done"
 if [ $(nvram get ss_enable) = 1 ]; then
 logger -st "SS" "重启ShadowSocksR Plus+..."
