@@ -66,6 +66,7 @@ flush_r() {
 	sed -i '/dnsmasq.dom/d' /etc/storage/dnsmasq/dnsmasq.conf
 	rm -rf /tmp/dnsmasq.dom
 	sed -i '/dnsmasq.adblock/d' /etc/storage/dnsmasq/dnsmasq.conf
+	sed -i '/gfwlist/d' /etc/storage/dnsmasq/dnsmasq.conf
 	flush_iptables nat
 	flush_iptables mangle
 	ip rule del fwmark 100 lookup 100 2>/dev/null
@@ -118,7 +119,12 @@ EOF
 	mkdir -p /etc/storage/gfwlist
 	cp -rf /etc_ro/gfwlist_list.conf /etc/storage/gfwlist/gfwlist_list.conf
 	fi
-	awk '{printf("server=/%s/127.0.0.1#5353\nipset=/%s/gfwlist\n", $1, $1 )}' /etc/storage/gfwlist/gfwlist_list.conf > /tmp/dnsmasq.dom/gfwlist_list.conf
+
+	sed -i '/gfwlist/d' /etc/storage/dnsmasq/dnsmasq.conf
+cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
+conf-dir=/etc/storage/gfwlist
+EOF
+
 	elif [ "$RUNMODE" = "oversea" ] ;then
 	ipset -N oversea hash:net 2>/dev/null
 	$ipt_n -N SS_SPEC_WAN_AC

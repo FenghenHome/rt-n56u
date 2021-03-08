@@ -657,6 +657,7 @@ struct nvram_pair router_defaults[] = {
 	{ "lan_con", "0" },
 	{ "ss_chnroute_url", "https://cdn.jsdelivr.net/gh/17mon/china_ip_list/china_ip_list.txt"},
 	{ "ss_adblock_url", "https://cdn.jsdelivr.net/gh/FenghenHome/filters@gh-pages/dnsmasq.adblock-domains.conf"},
+	{ "ss_gfwlist_url", "https://cdn.jsdelivr.net/gh/FenghenHome/filters@gh-pages/dnsmasq.gfw-domains-padavan.conf"},
 	{ "ss_schedule_enable", "0" },
 	{ "ss_schedule", "00000000000" },
 

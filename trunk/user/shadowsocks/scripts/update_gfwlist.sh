@@ -2,9 +2,8 @@
 
 set -e -o pipefail
 [ "$1" != "force" ] && [ "$(nvram get ss_update_gfwlist)" != "1" ] && exit 0
-#GFWLIST_URL="$(nvram get gfwlist_url)"
 logger -st "gfwlist" "Starting update..."
-curl -k -s -o /tmp/gfwlist_list.conf --connect-timeout 15 --retry 5 https://cdn.jsdelivr.net/gh/cokebar/gfwlist2dnsmasq@gh-pages/gfwlist_domain.txt
+curl -k -s -o /tmp/gfwlist_list.conf --connect-timeout 15 --retry 5 $(nvram get ss_gfwlist_url)
 count=`awk '{print NR}' /tmp/gfwlist_list.conf|tail -n1`
 if [ $count -gt 1000 ]; then
 rm -f /etc/storage/gfwlist/gfwlist_list.conf

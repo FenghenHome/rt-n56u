@@ -528,7 +528,6 @@ ssp_close() {
 	sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
 	sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
 	sed -i '/cdn/d' /etc/storage/dnsmasq/dnsmasq.conf
-	sed -i '/gfwlist/d' /etc/storage/dnsmasq/dnsmasq.conf
 	sed -i '/dnsmasq.oversea/d' /etc/storage/dnsmasq/dnsmasq.conf
 	if [ -f "/etc/storage/dnsmasq-ss.d" ]; then
 		rm -f /etc/storage/dnsmasq-ss.d

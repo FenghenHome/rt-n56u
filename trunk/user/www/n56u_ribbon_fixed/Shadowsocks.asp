@@ -128,7 +128,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			show_footer();
 			fill_ss_status(shadowsocks_status());
 			$("chnroute_count").innerHTML = '<#menu5_17_3#>' + chnroute_count();
-			$("gfwlist_count").innerHTML = '<#menu5_17_3#>' + gfwlist_count();
+			$("gfwlist_count").innerHTML = '<#menu5_17_3#>' + gfwlist_count()/2;
 			$("adblock_count").innerHTML = '<#menu5_17_3#>' + adblock_count();
 			switch_ss_type();
 			showTab(getHash());
