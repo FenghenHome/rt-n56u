@@ -2399,14 +2399,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 														</td>
 													</tr>
 													<tr>
-														<th width="50%">自定义国内IP更新地址:</th>
-														<td>
-															<input type="text" class="input" size="15"
-																name="ss_chnroute_url" style="width: 200px"
-																value="<% nvram_get_x("","ss_chnroute_url"); %>" />
-														</td>
-													</tr>
-													<tr>
 														<th>
 															<#menu5_16_19#>
 														</th>
