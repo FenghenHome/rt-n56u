@@ -136,20 +136,6 @@ function applyRule(){
 									<div>此选项只能屏蔽页面的显示，并不会删除程序。</div>
 									</div>
 									<table width="100%" align="center" cellpadding="4" cellspacing="0" class="table">
-																				<tr >
-											<th width="50%">VPN客户端</th>
-											<td>
-													<div class="main_itoggle">
-													<div id="w_vpn_c_on_of">
-														<input type="checkbox" id="w_vpn_c_fake" <% nvram_match_x("", "w_vpn_c", "1", "value=1 checked"); %><% nvram_match_x("", "w_vpn_c", "0", "value=0"); %>  />
-													</div>
-												</div>
-												<div style="position: absolute; margin-left: -10000px;">
-													<input type="radio" value="1" name="w_vpn_c" id="w_vpn_c_1" class="input" <% nvram_match_x("", "w_vpn_c", "1", "checked"); %> /><#checkbox_Yes#>
-													<input type="radio" value="0" name="w_vpn_c" id="w_vpn_c_0" class="input" <% nvram_match_x("", "w_vpn_c", "0", "checked"); %> /><#checkbox_No#>
-												</div>
-											</td>
-										</tr>
 										<tr >
 											<th width="50%">网络流量</th>
 											<td>
