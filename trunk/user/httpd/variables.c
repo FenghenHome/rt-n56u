@@ -1191,8 +1191,6 @@
 
     struct variable variables_DwebConf[] = {
 	        {"w_ai", "", NULL, FALSE},
-			{"w_vpn_s", "", NULL, FALSE},
-			{"w_vpn_c", "", NULL, FALSE},
 			{"w_wnet", "", NULL, FALSE},
 			{"w_sys", "", NULL, FALSE},
 			{"w_usb", "", NULL, FALSE},

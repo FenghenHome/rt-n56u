@@ -472,8 +472,6 @@ struct nvram_pair router_defaults[] = {
 	{ "hdd_apmoff", "0" },
 	/*WEB DIY*/
 	{ "w_ai", "1" },
-	{ "w_vpn_s", "1" },
-	{ "w_vpn_c", "1" },
 	{ "w_wnet", "1" },
 	{ "w_sys", "1" },
 	{ "w_usb", "1" },
