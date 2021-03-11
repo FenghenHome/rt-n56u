@@ -83,7 +83,7 @@ do
 		then
 			logger -t "$NAME" "pdnsd tunnel error.restart!"
 			kill -9 pdnsd
-			/usr/sbin/pdnsd -c /tmp/pdnsd.conf -d &
+			pdnsd -c /tmp/pdnsd.conf >/dev/null 2>&1 &
 		fi   
 	fi      
 	#dns2tcp
@@ -97,7 +97,7 @@ do
 		fi 
 	fi
 	#chinadns-ng
-	if [ $chinadnsng_process -gt 0 ] ;then
+	if [ $chinadnsng_process -gt 0 ] && [ $pdnsd_process -eq 0 ] ;then
 		icount=`ps -w  | grep chinadns-ng |grep -v grep| wc -l`
 		if [ $icount -lt $chinadnsng_process ]  #如果进程挂掉就重启它
 		then
@@ -120,6 +120,38 @@ EOF
 			kill -9 chinadns-ng
 			kill -9 dns2tcp
 			dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
+			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
+			sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
+			sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
+			cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
+no-resolv
+server=127.0.0.1#65353
+EOF
+		fi   
+	fi
+	if [ $chinadnsng_process -gt 0 ] && [ $pdnsd_process -eq 1 ] ;then
+		icount=`ps -w  | grep chinadns-ng |grep -v grep| wc -l`
+		if [ $icount -lt $chinadnsng_process ]  #如果进程挂掉就重启它
+		then
+			logger -t "$NAME" "chinadns-ng tunnel error.restart!"
+			kill -9 chinadns-ng
+			kill -9 pdnsd
+			pdnsd -c /tmp/pdnsd.conf >/dev/null 2>&1 &
+			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
+			sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
+			sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
+			cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
+no-resolv
+server=127.0.0.1#65353
+EOF
+		fi   
+		icount=`ps -w  | grep pdnsd |grep -v grep| wc -l`
+		if [ $icount -lt $chinadnsng_process ]  #如果进程挂掉就重启它
+		then
+			logger -t "$NAME" "chinadns-ng tunnel error.restart!"
+			kill -9 chinadns-ng
+			kill -9 pdnsd
+			pdnsd -c /tmp/pdnsd.conf >/dev/null 2>&1 &
 			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
 			sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
 			sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf

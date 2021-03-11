@@ -1602,7 +1602,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															<select name="pdnsd_enable" id="pdnsd_enable" class="input"
 																style="width: 200px;" onchange="switch_dns()">
 																<option value="0">使用dns2tcp查询</option>
-																<option value="1">使用其它服务器查询</option>
+																<option value="1">使用pdnsd查询</option>
 															</select>
 														</td>
 													</tr>
