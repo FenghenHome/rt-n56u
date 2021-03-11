@@ -2319,7 +2319,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 </td>
 </tr>
 -->
-													<tr>
+													<!--  <tr>
 														<th width="50%">自动切换检查周期(秒)</th>
 														<td>
 															<input type="text" class="input" size="15" name="ss_turn_s"
@@ -2334,7 +2334,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																style="width: 200px"
 																value="<% nvram_get_x("", "ss_turn_ss"); %>">
 														</td>
-													</tr>
+													</tr>-->
 													<!--
 <tr> <th width="50%">自定义国内IP更新地址:</th>
 	<td>
