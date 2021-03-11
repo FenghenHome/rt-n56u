@@ -427,7 +427,7 @@ EOF
 				global{
 				perm_cache=1024;
 				cache_dir="/tmp/pdnsd";
-				pid_file="/var/run/pdnsd.pid";
+				pid_file="/tmp/pdnsd.pid";
 				run_as="nobody";
 				server_ip=127.0.0.1;
 				server_port=5353;
