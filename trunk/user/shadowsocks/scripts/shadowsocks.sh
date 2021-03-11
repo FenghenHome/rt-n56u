@@ -370,6 +370,17 @@ EOF
 			pdnsd_enable_flag=0	
 			logger -st "SS" "开始处理gfwlist..."
 		fi
+		if [ $(nvram get pdnsd_enable) = 1 ]; then
+			dnsstr="$(nvram get tunnel_forward)"
+			dnsserver=$(echo "$dnsstr" | awk -F '#' '{print $1}')
+			dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
+			ipset add gfwlist $dnsserver 2>/dev/null
+			logger -st "SS" "启动pdnsd：5353端口..."
+			#dns2tcp -L"127.0.0.1#5353" -R"$dnsstr" >/dev/null 2>&1 &
+			/usr/sbin/pdnsd -c /tmp/pdnsd.conf -d &
+			pdnsd_enable_flag=1	
+			logger -st "SS" "开始处理gfwlist..."
+		fi
 		;;
 	oversea)
 		ipset add gfwlist $dnsserver 2>/dev/null
