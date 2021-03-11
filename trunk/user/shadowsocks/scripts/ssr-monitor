@@ -77,7 +77,7 @@ do
 		fi   
 	fi
 	#pdnsd
-	if [ $pdnsd_process -gt 0 ] ;then
+	if [ $pdnsd_process -eq 1 ] ;then
 		icount=`ps -w  | grep pdnsd |grep -v grep| wc -l`
 		if [ $icount -lt $pdnsd_process ]  #如果进程挂掉就重启它
 		then
