@@ -522,7 +522,7 @@ if rules; then
 ssp_close() {
 	rm -rf /tmp/cdn
 	/usr/bin/ss-rules -f
-	kill -9 $(ps | grep ssr-switch | grep -v grep | awk '{print $1}') >/dev/null 2>&1
+	#kill -9 $(ps | grep ssr-switch | grep -v grep | awk '{print $1}') >/dev/null 2>&1
 	kill -9 $(ps | grep ssr-monitor | grep -v grep | awk '{print $1}') >/dev/null 2>&1
 	kill_process
 	sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
@@ -652,7 +652,7 @@ start)
 	ssp_start
 	;;
 stop)
-	killall -q -9 ssr-switch
+	#killall -q -9 ssr-switch
 	ssp_close
 	;;
 restart)
