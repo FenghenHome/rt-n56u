@@ -86,6 +86,16 @@ do
 			/usr/sbin/pdnsd -c /tmp/pdnsd.conf -d &
 		fi   
 	fi      
+	#dns2tcp
+	if [ $pdnsd_process -eq 0 ] ;then
+		icount=`ps -w  | grep dns2tcp |grep -v grep| wc -l`
+		if [ $icount -eq $pdnsd_process ]  #如果进程挂掉就重启它
+		then
+			logger -t "$NAME" "dns2tcp tunnel error.restart!"
+			kill -9 dns2tcp
+			dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
+		fi 
+	fi
 	#chinadns-ng
 	if [ $chinadnsng_process -gt 0 ] ;then
 		icount=`ps -w  | grep chinadns-ng |grep -v grep| wc -l`
