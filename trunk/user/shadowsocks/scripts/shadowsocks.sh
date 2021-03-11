@@ -624,6 +624,13 @@ kill_process() {
 		kill -9 "$dns2tcp_process" >/dev/null 2>&1
 	fi
 	
+	pdnsd_process=$(pidof pdnsd)
+	if [ -n "$pdnsd_process" ]; then
+		logger -t "SS" "关闭pdnsd进程..."
+		killall pdnsd >/dev/null 2>&1
+		kill -9 "$pdnsd_process" >/dev/null 2>&1
+	fi
+	
 	microsocks_process=$(pidof microsocks)
 	if [ -n "$microsocks_process" ]; then
 		logger -t "SS" "关闭socks5服务端进程..."
