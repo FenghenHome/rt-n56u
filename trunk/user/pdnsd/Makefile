@@ -28,4 +28,5 @@ clean:
 
 romfs:
 	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_NAME)/src/pdnsd /usr/bin/pdnsd
-	#$(ROMFSINST) -p +x $(THISDIR)/pdnsd.sh /usr/bin/pdnsd.sh
+	$(ROMFSINST) -p +x $(THISDIR)/pdnsd-gfw.sh /usr/bin/pdnsd-gfw.sh
+	$(ROMFSINST) -p +x $(THISDIR)/pdnsd-cn.sh /usr/bin/pdnsd-cn.sh

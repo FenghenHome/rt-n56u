@@ -352,44 +352,7 @@ case "$run_mode" in
 				dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
 			fi
 			if [ $(nvram get pdnsd_enable) = 1 ]; then
-				dnsstr="$(nvram get tunnel_forward)"
-				dnsserver=$(echo "$dnsstr" | awk -F '#' '{print $1}')
-				dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
-				if [ ! -f "/tmp/pdnsd/pdnsd.cache" ]; then
-					mkdir -p /tmp/pdnsd
-					touch /tmp/pdnsd/pdnsd.cache
-					chown -R nobody:nogroup /tmp/pdnsd
-				fi
-				cat <<-EOF >/tmp/pdnsd.conf
-					global{
-					perm_cache=1024;
-					cache_dir="/tmp/pdnsd";
-					pid_file="/tmp/pdnsd.pid";
-					run_as="nobody";
-					server_ip=127.0.0.1;
-					server_port=5353;
-					status_ctl=on;
-					query_method=tcp_only;
-					min_ttl=1h;
-					max_ttl=1w;
-					timeout=10;
-					neg_domain_pol=on;
-					proc_limit=2;
-					procq_limit=8;
-					par_queries=1;
-					}
-					server{
-					label="ssr-usrdns";
-					ip=$dnsserver;
-					port=$dnsport;
-					timeout=6;
-					uptest=none;
-					interval=10m;
-					purge_cache=off;
-					reject=::/0;
-					}
-				EOF
-				pdnsd -c /tmp/pdnsd.conf >/dev/null 2>&1 &
+				/usr/bin/pdnsd-gfw.sh > /dev/null 2>&1 &
 			fi
 			logger -st "SS" "启动chinadns..."
 			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
@@ -415,44 +378,10 @@ EOF
 		if [ $(nvram get pdnsd_enable) = 1 ]; then
 			dnsstr="$(nvram get tunnel_forward)"
 			dnsserver=$(echo "$dnsstr" | awk -F '#' '{print $1}')
-			dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
+			#dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
 			ipset add gfwlist $dnsserver 2>/dev/null
 			logger -st "SS" "启动pdnsd：5353端口..."
-			if [ ! -f "/tmp/pdnsd/pdnsd.cache" ]; then
-				mkdir -p /tmp/pdnsd
-				touch /tmp/pdnsd/pdnsd.cache
-				chown -R nobody:nogroup /tmp/pdnsd
-			fi
-			cat <<-EOF >/tmp/pdnsd.conf
-				global{
-				perm_cache=1024;
-				cache_dir="/tmp/pdnsd";
-				pid_file="/tmp/pdnsd.pid";
-				run_as="nobody";
-				server_ip=127.0.0.1;
-				server_port=5353;
-				status_ctl=on;
-				query_method=tcp_only;
-				min_ttl=1h;
-				max_ttl=1w;
-				timeout=10;
-				neg_domain_pol=on;
-				proc_limit=2;
-				procq_limit=8;
-				par_queries=1;
-				}
-				server{
-				label="ssr-usrdns";
-				ip=$dnsserver;
-				port=$dnsport;
-				timeout=6;
-				uptest=none;
-				interval=10m;
-				purge_cache=off;
-				reject=::/0;
-				}
-			EOF
-			pdnsd -c /tmp/pdnsd.conf >/dev/null 2>&1 &
+			/usr/bin/pdnsd-gfw.sh > /dev/null 2>&1 &
 			pdnsd_enable_flag=1	
 			logger -st "SS" "开始处理gfwlist..."
 		fi
