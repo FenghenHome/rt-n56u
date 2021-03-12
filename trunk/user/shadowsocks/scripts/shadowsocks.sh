@@ -25,6 +25,7 @@ trojan_json_file="/tmp/tj-redir.json"
 server_count=0
 redir_tcp=0
 v2ray_enable=0
+trojan_enable=0
 redir_udp=0
 tunnel_enable=0
 local_enable=0
@@ -109,6 +110,7 @@ local type=$stype
 			tj_bin="/tmp/trojan"
 			fi
 		fi
+		trojan_enable=1
 		#tj_file=$trojan_json_file
 		if [ "$2" = "0" ]; then
 		lua /etc_ro/ss/gentrojanconfig.lua $1 nat 1080 >$trojan_json_file
@@ -479,10 +481,10 @@ rules() {
 
 start_watchcat() {
 	if [ $(nvram get ss_watchcat) = 1 ]; then
-		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+v2ray_enable+local_enable+pdnsd_enable_flag+chinadnsng_enable_flag
+		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+v2ray_enable+local_enable+pdnsd_enable_flag+chinadnsng_enable_flag+trojan_enable
 		if [ $total_count -gt 0 ]; then
 			#param:server(count) redir_tcp(0:no,1:yes)  redir_udp tunnel kcp local gfw
-			/usr/bin/ssr-monitor $server_count $redir_tcp $redir_udp $tunnel_enable $v2ray_enable $local_enable $pdnsd_enable_flag $chinadnsng_enable_flag >/dev/null 2>&1 &
+			/usr/bin/ssr-monitor $server_count $redir_tcp $redir_udp $tunnel_enable $v2ray_enable $local_enable $pdnsd_enable_flag $chinadnsng_enable_flag $trojan_enable >/dev/null 2>&1 &
 		fi
 	fi
 }

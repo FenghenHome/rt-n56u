@@ -15,6 +15,7 @@ v2ray_process=$5
 local_process=$6
 pdnsd_process=$7
 chinadnsng_process=$8
+trojan_process=$9
 i=0
 sock5_port=$(nvram get socks5_proxy_port)
 if echo $server|grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$">/dev/null; then         
@@ -63,7 +64,60 @@ do
 		then
 			logger -t "$NAME" "检测到V2ray进程挂掉，重新启动!"
 			killall -q -9 v2ray
-			/tmp/v2ray -config /tmp/v2-redir.json >/dev/null 2>&1 &
+			if [ -f "/usr/bin/v2ray" ] ; then
+				/usr/bin/v2ray -config /tmp/v2-redir.json >/dev/null 2>&1 &
+				if [ $redir_udp_process -gt 0 ] ;then
+					/usr/bin/v2ray -config /tmp/v2-ssr-reudp.json >/dev/null 2>&1 &
+				fi
+			else
+				/tmp/v2ray -config /tmp/v2-redir.json >/dev/null 2>&1 &
+				if [ $redir_udp_process -gt 0 ] ;then
+					/tmp/v2ray -config /tmp/v2-ssr-reudp.json >/dev/null 2>&1 &
+				fi
+			fi
+		fi   
+	fi
+	#TROJAN
+	if [ $trojan_process -gt 0 ] ;then
+		icount=`ps -w  | grep trojan |grep -v grep| wc -l`
+		if [ $icount -lt $trojan_process ]  #如果进程挂掉就重启它
+		then
+			logger -t "$NAME" "检测到trojan进程挂掉，重新启动!"
+			killall -q -9 trojan
+			killall -q -9 ipt2socks
+			if [ -f "/usr/bin/trojan" ] ; then
+				/usr/bin/trojan --config /tmp/tj-redir.json >/dev/null 2>&1 &
+				if [ $redir_udp_process -gt 0 ] ;then
+					/usr/bin/trojan --config /tmp/trojan-ssr-reudp.json >/dev/null 2>&1 &
+					ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l 1080 >/dev/null 2>&1 &
+				fi
+			else
+				/tmp/trojan --config /tmp/tj-redir.json >/dev/null 2>&1 &
+				if [ $redir_udp_process -gt 0 ] ;then
+					/tmp/trojan --config /tmp/trojan-ssr-reudp.json >/dev/null 2>&1 &
+					ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l 1080 >/dev/null 2>&1 &
+				fi
+			fi
+		fi   
+		icount=`ps -w  | grep ipt2socks |grep -v grep| wc -l`
+		if [ $icount -lt $trojan_process ]  #如果进程挂掉就重启它
+		then
+			logger -t "$NAME" "检测到trojan进程挂掉，重新启动!"
+			killall -q -9 trojan
+			killall -q -9 ipt2socks
+			if [ -f "/usr/bin/trojan" ] ; then
+				/usr/bin/trojan --config /tmp/tj-redir.json >/dev/null 2>&1 &
+				if [ $redir_udp_process -gt 0 ] ;then
+					/usr/bin/trojan --config /tmp/trojan-ssr-reudp.json >/dev/null 2>&1 &
+					ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l 1080 >/dev/null 2>&1 &
+				fi
+			else
+				/tmp/trojan --config /tmp/tj-redir.json >/dev/null 2>&1 &
+				if [ $redir_udp_process -gt 0 ] ;then
+					/tmp/trojan --config /tmp/trojan-ssr-reudp.json >/dev/null 2>&1 &
+					ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l 1080 >/dev/null 2>&1 &
+				fi
+			fi
 		fi   
 	fi
 	#local
@@ -82,7 +136,7 @@ do
 		if [ $icount -lt $pdnsd_process ]  #如果进程挂掉就重启它
 		then
 			logger -t "$NAME" "pdnsd tunnel error.restart!"
-			kill -9 pdnsd
+			killall -q -9 pdnsd
 			pdnsd -c /tmp/pdnsd.conf >/dev/null 2>&1 &
 		fi   
 	fi      
@@ -92,7 +146,7 @@ do
 		if [ $icount -eq $pdnsd_process ]  #如果进程挂掉就重启它
 		then
 			logger -t "$NAME" "dns2tcp tunnel error.restart!"
-			kill -9 dns2tcp
+			killall -q -9 dns2tcp
 			dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
 		fi 
 	fi
@@ -102,8 +156,8 @@ do
 		if [ $icount -lt $chinadnsng_process ]  #如果进程挂掉就重启它
 		then
 			logger -t "$NAME" "chinadns-ng tunnel error.restart!"
-			kill -9 chinadns-ng
-			kill -9 dns2tcp
+			killall -q -9 chinadns-ng
+			killall -q -9 dns2tcp
 			dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
 			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
 			sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
@@ -117,8 +171,8 @@ EOF
 		if [ $icount -lt $chinadnsng_process ]  #如果进程挂掉就重启它
 		then
 			logger -t "$NAME" "chinadns-ng tunnel error.restart!"
-			kill -9 chinadns-ng
-			kill -9 dns2tcp
+			killall -q -9 chinadns-ng
+			killall -q -9 dns2tcp
 			dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
 			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
 			sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
@@ -134,8 +188,8 @@ EOF
 		if [ $icount -lt $chinadnsng_process ]  #如果进程挂掉就重启它
 		then
 			logger -t "$NAME" "chinadns-ng tunnel error.restart!"
-			kill -9 chinadns-ng
-			kill -9 pdnsd
+			killall -q -9 chinadns-ng
+			killall -q -9 pdnsd
 			pdnsd -c /tmp/pdnsd.conf >/dev/null 2>&1 &
 			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
 			sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
@@ -149,8 +203,8 @@ EOF
 		if [ $icount -lt $chinadnsng_process ]  #如果进程挂掉就重启它
 		then
 			logger -t "$NAME" "chinadns-ng tunnel error.restart!"
-			kill -9 chinadns-ng
-			kill -9 pdnsd
+			killall -q -9 chinadns-ng
+			killall -q -9 pdnsd
 			pdnsd -c /tmp/pdnsd.conf >/dev/null 2>&1 &
 			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
 			sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
