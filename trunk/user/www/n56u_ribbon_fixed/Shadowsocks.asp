@@ -322,10 +322,10 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_ssp_dns_ip', 0);
 				showhide_div('row_ssp_dns_port', 0);
 			} else if (b == "1") {
-				showhide_div('row_china_dns', 0);
-				showhide_div('row_tunnel_forward', 0);
-				showhide_div('row_ssp_dns_ip', 1);
-				showhide_div('row_ssp_dns_port', 1);
+				showhide_div('row_china_dns', 1);
+				showhide_div('row_tunnel_forward', 1);
+				showhide_div('row_ssp_dns_ip', 0);
+				showhide_div('row_ssp_dns_port', 0);
 			} else if (b == "2") {
 				showhide_div('row_china_dns', 0);
 				showhide_div('row_tunnel_forward', 0);
