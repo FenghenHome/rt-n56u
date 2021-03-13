@@ -356,7 +356,7 @@ case "$run_mode" in
 				pdnsd_enable_flag=0	
 			fi
 			if [ $(nvram get pdnsd_enable) = 1 ]; then
-				/usr/bin/pdnsd-gfw.sh > /dev/null 2>&1 &
+				/usr/bin/pdnsd-gfw.sh start > /dev/null 2>&1 &
 				pdnsd_enable_flag=1
 			fi
 			logger -st "SS" "启动chinadns..."
@@ -386,7 +386,7 @@ EOF
 			#dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
 			ipset add gfwlist $dnsserver 2>/dev/null
 			logger -st "SS" "启动pdnsd：5353端口..."
-			/usr/bin/pdnsd-gfw.sh > /dev/null 2>&1 &
+			/usr/bin/pdnsd-gfw.sh start > /dev/null 2>&1 &
 			pdnsd_enable_flag=1	
 			logger -st "SS" "开始处理gfwlist..."
 		fi
