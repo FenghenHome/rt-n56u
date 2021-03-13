@@ -341,6 +341,7 @@ case "$run_mode" in
 		ipset -! flush china
 		ipset -! restore </tmp/china.ipset 2>/dev/null
 		rm -f /tmp/china.ipset
+		pdnsd_enable_flag=2	
 		if [ $(nvram get ss_chdns) = 1 ]; then
 			chinadnsng_enable_flag=1
 			logger -t "SS" "下载cdn域名文件..."
@@ -352,9 +353,11 @@ case "$run_mode" in
 			fi
 			if [ $(nvram get pdnsd_enable) = 0 ]; then
 				dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
+				pdnsd_enable_flag=0	
 			fi
 			if [ $(nvram get pdnsd_enable) = 1 ]; then
 				/usr/bin/pdnsd-gfw.sh > /dev/null 2>&1 &
+				pdnsd_enable_flag=1
 			fi
 			logger -st "SS" "启动chinadns..."
 			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
