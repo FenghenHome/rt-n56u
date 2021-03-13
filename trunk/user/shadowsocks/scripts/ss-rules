@@ -65,8 +65,6 @@ flush_r() {
 	}
 	sed -i '/dnsmasq.dom/d' /etc/storage/dnsmasq/dnsmasq.conf
 	rm -rf /tmp/dnsmasq.dom
-	sed -i '/dnsmasq.adblock/d' /etc/storage/dnsmasq/dnsmasq.conf
-	sed -i '/gfwlist/d' /etc/storage/dnsmasq/dnsmasq.conf
 	flush_iptables nat
 	flush_iptables mangle
 	ip rule del fwmark 100 lookup 100 2>/dev/null
@@ -115,15 +113,14 @@ EOF
 	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set smartdns dst -j SS_SPEC_WAN_FW
 	$ipt_n -I SS_SPEC_WAN_AC 1 -d $server -j RETURN
 	$ipt_n -I PREROUTING $SSNU -j SS_SPEC_WAN_AC
-	if [ ! -f "/etc/storage/gfwlist/gfwlist_list.conf" ] ; then
-	mkdir -p /etc/storage/gfwlist
-	cp -rf /etc_ro/gfwlist_list.conf /etc/storage/gfwlist/gfwlist_list.conf
-	fi
 
-	sed -i '/gfwlist/d' /etc/storage/dnsmasq/dnsmasq.conf
-cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
-conf-dir=/etc/storage/gfwlist
-EOF
+        if [ ! -f "/tmp/dnsmasq.dom/gfwlist_list.conf" ] ; then
+		if [ -f "/tmp/gfwlist_list.conf" ] ; then
+			cp -rf /tmp/gfwlist_list.conf /tmp/dnsmasq.dom/gfwlist_list.conf
+		else
+			cp -rf /etc_ro/gfwlist_list.conf /tmp/dnsmasq.dom/gfwlist_list.conf
+		fi
+        fi
 
 	elif [ "$RUNMODE" = "oversea" ] ;then
 	ipset -N oversea hash:net 2>/dev/null
@@ -158,15 +155,13 @@ cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
 conf-dir=/tmp/dnsmasq.dom/
 EOF
 
-	if [ ! -f "/etc/storage/dnsmasq.adblock/adblock_list.conf" ] ; then
-	mkdir -p /etc/storage/dnsmasq.adblock
-	cp -rf /etc_ro/adblock_list.conf /etc/storage/dnsmasq.adblock/adblock_list.conf
-	fi
-
-	sed -i '/dnsmasq.adblock/d' /etc/storage/dnsmasq/dnsmasq.conf
-cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
-conf-dir=/etc/storage/dnsmasq.adblock
-EOF
+        if [ ! -f "/tmp/dnsmasq.dom/adblock_list.conf" ] ; then
+		if [ -f "/tmp/adblock_list.conf" ] ; then
+			cp -rf /tmp/adblock_list.conf /tmp/dnsmasq.dom/adblock_list.conf
+		else
+			cp -rf /etc_ro/adblock_list.conf /tmp/dnsmasq.dom/adblock_list.conf
+		fi
+        fi
 
 	return $?
 }
