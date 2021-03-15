@@ -67,7 +67,7 @@ find_bin() {
 }
 
 gen_config_file() {
-
+	UDP_RELAY_SERVER=$(nvram get udp_relay_server)
 	fastopen="false"
 	case "$2" in
 	0) config_file=$CONFIG_FILE && local stype=$(nvram get d_type) ;;
@@ -148,7 +148,11 @@ fi
 		fi
 		v2ray_enable=1
 		if [ "$2" = "1" ]; then
-		lua /etc_ro/ss/genv2config.lua $1 udp 1080 >/tmp/v2-ssr-reudp.json
+			if [ "$UDP_RELAY_SERVER" != "same" ] && [ "$UDP_RELAY_SERVER" != "nil" ] ; then
+			lua /etc_ro/ss/genv2config.lua $1 udp 1080 >/tmp/v2-ssr-reudp.json
+			else
+			lua /etc_ro/ss/genv2config.lua $1 tcp,udp 1080 >/tmp/v2-ssr-reudp.json
+			fi
 		sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
 		else
 		lua /etc_ro/ss/genv2config.lua $1 tcp 1080 >$v2_json_file
@@ -248,6 +252,7 @@ start_rules() {
 }
 
 start_redir_tcp() {
+	UDP_RELAY_SERVER=$(nvram get udp_relay_server)
 	ARG_OTA=""
 	gen_config_file $GLOBAL_SERVER 0 1080
 	stype=$(nvram get d_type)
@@ -278,7 +283,9 @@ start_redir_tcp() {
 		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin --version 2>&1 | head -1) Started!" >>/tmp/ssrplus.log
 		;;
 	v2ray)
+		if [ "$UDP_RELAY_SERVER" != "same" ] && [ "$UDP_RELAY_SERVER" != "nil" ] ; then
 		$bin -config $v2_json_file >/dev/null 2>&1 &
+		fi
 		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin -version | head -1) 启动成功!" >>/tmp/ssrplus.log
 		;;
 	socks5)
