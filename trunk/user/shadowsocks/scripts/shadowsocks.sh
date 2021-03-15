@@ -148,7 +148,7 @@ fi
 		fi
 		v2ray_enable=1
 		if [ "$2" = "1" ]; then
-			if [ "$UDP_RELAY_SERVER" != "same" ] && [ "$UDP_RELAY_SERVER" != "nil" ] ; then
+			if [ "$UDP_RELAY_SERVER" != "same" ] ; then
 			lua /etc_ro/ss/genv2config.lua $1 udp 1080 >/tmp/v2-ssr-reudp.json
 			else
 			lua /etc_ro/ss/genv2config.lua $1 tcp,udp 1080 >/tmp/v2-ssr-reudp.json
@@ -283,7 +283,7 @@ start_redir_tcp() {
 		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin --version 2>&1 | head -1) Started!" >>/tmp/ssrplus.log
 		;;
 	v2ray)
-		if [ "$UDP_RELAY_SERVER" != "same" ] && [ "$UDP_RELAY_SERVER" != "nil" ] ; then
+		if [ "$UDP_RELAY_SERVER" != "same" ] ; then
 		$bin -config $v2_json_file >/dev/null 2>&1 &
 		fi
 		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin -version | head -1) 启动成功!" >>/tmp/ssrplus.log
