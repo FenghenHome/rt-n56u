@@ -48,10 +48,10 @@ find_bin() {
 	ssr-local) ret="/usr/bin/ssr-local" ;;
 	ssr-server) ret="/usr/bin/ssr-server" ;;
 	v2ray)
-	if [ -f "/usr/bin/v2ray" ] ; then
-       ret="/usr/bin/v2ray"
+	if [ -f "/usr/bin/xray" ] ; then
+       ret="/usr/bin/xray"
     else
-       ret="/tmp/v2ray"
+       ret="/tmp/xray"
     fi
     ;;
 	trojan)
@@ -121,29 +121,29 @@ local type=$stype
 		fi
 		;;
 	v2ray)
-		v2_bin="/usr/bin/v2ray"
+		v2_bin="/usr/bin/xray"
 		if [ ! -f "$v2_bin" ]; then
-		if [ ! -f "/tmp/v2ray" ];then
+		if [ ! -f "/tmp/xray" ];then
 			if [ $v2_local_enable == "1" ] && [ -s $v2_local ] ; then
-            logger -t "SS" "v2ray二进制文件复制成功"
-            cat $v2_local > /tmp/v2ray
-            chmod -R 777 /tmp/v2ray
-            v2_bin="/tmp/v2ray"
+            logger -t "SS" "xray二进制文件复制成功"
+            cat $v2_local > /tmp/xray
+            chmod -R 777 /tmp/xray
+            v2_bin="/tmp/xray"
 else
-    curl -k -s -o /tmp/v2ray --connect-timeout 10 --retry 3 $v2_link
-    if [ -s "/tmp/v2ray" ] && [ `grep -c "404 Not Found" /tmp/v2ray` == '0' ] ; then
-        logger -t "SS" "v2ray二进制文件下载成功"
-        chmod -R 777 /tmp/v2ray
-        v2_bin="/tmp/v2ray"
+    curl -k -s -o /tmp/xray --connect-timeout 10 --retry 3 $v2_link
+    if [ -s "/tmp/xray" ] && [ `grep -c "404 Not Found" /tmp/xray` == '0' ] ; then
+        logger -t "SS" "xray二进制文件下载成功"
+        chmod -R 777 /tmp/xray
+        v2_bin="/tmp/xray"
     else
-        logger -t "SS" "v2ray二进制文件下载失败，可能是地址失效或者网络异常！"
-        rm -f /tmp/v2ray
+        logger -t "SS" "xray二进制文件下载失败，可能是地址失效或者网络异常！"
+        rm -f /tmp/xray
         nvram set ss_enable=0
         ssp_close
     fi
 fi
 			else
-			v2_bin="/tmp/v2ray"
+			v2_bin="/tmp/xray"
 			fi
 		fi
 		v2ray_enable=1
@@ -576,10 +576,10 @@ clear_iptable()
 }
 
 kill_process() {
-	v2ray_process=$(pidof v2ray)
+	v2ray_process=$(pidof xray)
 	if [ -n "$v2ray_process" ]; then
-		logger -t "SS" "关闭V2Ray进程..."
-		killall v2ray >/dev/null 2>&1
+		logger -t "SS" "关闭XRay进程..."
+		killall xray >/dev/null 2>&1
 		kill -9 "$v2ray_process" >/dev/null 2>&1
 	fi
 	ssredir=$(pidof ss-redir)
