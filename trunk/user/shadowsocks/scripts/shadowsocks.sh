@@ -67,7 +67,6 @@ find_bin() {
 }
 
 gen_config_file() {
-	UDP_RELAY_SERVER=$(nvram get udp_relay_server)
 	fastopen="false"
 	case "$2" in
 	0) config_file=$CONFIG_FILE && local stype=$(nvram get d_type) ;;
@@ -252,7 +251,6 @@ start_rules() {
 }
 
 start_redir_tcp() {
-	UDP_RELAY_SERVER=$(nvram get udp_relay_server)
 	ARG_OTA=""
 	gen_config_file $GLOBAL_SERVER 0 1080
 	stype=$(nvram get d_type)
