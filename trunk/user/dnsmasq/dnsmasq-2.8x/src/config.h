@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2021 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2018 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -40,11 +40,9 @@
 #define DHCP_PACKET_MAX 16384 /* hard limit on DHCP packet size */
 #define SMALLDNAME 50 /* most domain names are smaller than this */
 #define CNAME_CHAIN 10 /* chains longer than this atr dropped for loop protection */
-#define DNSSEC_MIN_TTL 60 /* DNSKEY and DS records in cache last at least this long */
 #define HOSTSFILE "/etc/hosts"
 #define ETHERSFILE "/etc/ethers"
-#define DEFLEASE 3600 /* default DHCPv4 lease time, one hour */
-#define DEFLEASE6 (3600*24) /* default lease time for DHCPv6. One day. */
+#define DEFLEASE 3600 /* default lease time, 1 hour */
 #define CHUSER "nobody"
 #define CHGRP "dip"
 #define TFTP_MAX_CONNECTIONS 50 /* max simultaneous connections */
@@ -52,7 +50,6 @@
 #define RANDFILE "/dev/urandom"
 #define DNSMASQ_SERVICE "uk.org.thekelleys.dnsmasq" /* Default - may be overridden by config */
 #define DNSMASQ_PATH "/uk/org/thekelleys/dnsmasq"
-#define DNSMASQ_UBUS_NAME "dnsmasq" /* Default - may be overridden by config */
 #define AUTH_TTL 600 /* default TTL for auth DNS */
 #define SOA_REFRESH 1200 /* SOA refresh default */
 #define SOA_RETRY 180 /* SOA retry default */
@@ -120,8 +117,8 @@ HAVE_AUTH
    define this to include the facility to act as an authoritative DNS
    server for one or more zones.
 
-HAVE_CRYPTOHASH
-   include just hash function from crypto library, but no DNSSEC.
+HAVE_NETTLEHASH
+   include just hash function from nettle, but no DNSSEC.
 
 HAVE_DNSSEC
    include DNSSEC validator.
@@ -190,7 +187,7 @@ RESOLVFILE
 /* #define HAVE_IDN */
 /* #define HAVE_LIBIDN2 */
 /* #define HAVE_CONNTRACK */
-/* #define HAVE_CRYPTOHASH */
+/* #define HAVE_NETTLEHASH */
 /* #define HAVE_DNSSEC */
 
 
@@ -280,16 +277,11 @@ HAVE_SOCKADDR_SA_LEN
 #define HAVE_BSD_NETWORK
 #define HAVE_GETOPT_LONG
 #define HAVE_SOCKADDR_SA_LEN
-#define NO_IPSET
 /* Define before sys/socket.h is included so we get socklen_t */
 #define _BSD_SOCKLEN_T_
 /* Select the RFC_3542 version of the IPv6 socket API. 
    Define before netinet6/in6.h is included. */
-#define __APPLE_USE_RFC_3542
-/* Required for Mojave. */
-#ifndef SOL_TCP
-#  define SOL_TCP IPPROTO_TCP
-#endif
+#define __APPLE_USE_RFC_3542 
 #define NO_IPSET
 
 #elif defined(__NetBSD__)
@@ -374,10 +366,6 @@ static char *compile_opts =
 "no-"
 #endif
 "DBus "
-#ifndef HAVE_UBUS
-"no-"
-#endif
-"UBus "
 #ifndef LOCALEDIR
 "no-"
 #endif
@@ -424,10 +412,10 @@ static char *compile_opts =
 "no-"
 #endif
 "auth "
-#if !defined(HAVE_CRYPTOHASH) && !defined(HAVE_DNSSEC)
+#if !defined(HAVE_NETTLEHASH) && !defined(HAVE_DNSSEC)
 "no-"
 #endif
-"cryptohash "
+"nettlehash "
 #ifndef HAVE_DNSSEC
 "no-"
 #endif
