@@ -2178,7 +2178,7 @@ static int shadowsocks_status_hook(int eid, webs_t wp, int argc, char **argv)
 		ss_status_code = pids("ssr-redir");
 	}
 	if (ss_status_code == 0){
-		ss_status_code = pids("v2ray");
+		ss_status_code = pids("xray");
 	}
 
 	if (ss_status_code == 0){

@@ -125,18 +125,18 @@ local type=$stype
 		if [ ! -f "$v2_bin" ]; then
 		if [ ! -f "/tmp/xray" ];then
 			if [ $v2_local_enable == "1" ] && [ -s $v2_local ] ; then
-            logger -t "SS" "xray二进制文件复制成功"
+            logger -t "SS" "v2ray二进制文件复制成功"
             cat $v2_local > /tmp/xray
             chmod -R 777 /tmp/xray
             v2_bin="/tmp/xray"
 else
     curl -k -s -o /tmp/xray --connect-timeout 10 --retry 3 $v2_link
     if [ -s "/tmp/xray" ] && [ `grep -c "404 Not Found" /tmp/xray` == '0' ] ; then
-        logger -t "SS" "xray二进制文件下载成功"
+        logger -t "SS" "v2ray二进制文件下载成功"
         chmod -R 777 /tmp/xray
         v2_bin="/tmp/xray"
     else
-        logger -t "SS" "xray二进制文件下载失败，可能是地址失效或者网络异常！"
+        logger -t "SS" "v2ray二进制文件下载失败，可能是地址失效或者网络异常！"
         rm -f /tmp/xray
         nvram set ss_enable=0
         ssp_close
@@ -578,7 +578,7 @@ clear_iptable()
 kill_process() {
 	v2ray_process=$(pidof xray)
 	if [ -n "$v2ray_process" ]; then
-		logger -t "SS" "关闭XRay进程..."
+		logger -t "SS" "关闭V2Ray进程..."
 		killall xray >/dev/null 2>&1
 		kill -9 "$v2ray_process" >/dev/null 2>&1
 	fi

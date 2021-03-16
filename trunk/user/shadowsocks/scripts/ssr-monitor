@@ -63,7 +63,7 @@ do
 		icount=`ps -w  | grep xray |grep -v grep| wc -l`
 		if [ $icount -lt $v2ray_process ]  #如果进程挂掉就重启它
 		then
-			logger -t "$NAME" "检测到Xray进程挂掉，重新启动!"
+			logger -t "$NAME" "检测到V2ray进程挂掉，重新启动!"
 			killall -q -9 xray
 			if [ -f "/usr/bin/xray" ] ; then
 				if [ "$UDP_RELAY_SERVER" != "same" ] ; then
