@@ -1649,10 +1649,6 @@ void clear_cache_and_reload(time_t now)
     {
       if (option_bool(OPT_ETHERS))
 	dhcp_read_ethers();
-      if (option_bool(OPT_DHCP_TO_HOST)) {
-        void dhcp_to_host();
-        dhcp_to_host();
-      }
       reread_dhcp();
       dhcp_update_configs(daemon->dhcp_conf);
       lease_update_from_configs(); 

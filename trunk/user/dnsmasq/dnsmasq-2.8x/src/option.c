@@ -169,7 +169,6 @@ struct myoption {
 #define LOPT_SCRIPT_TIME   360
 #define LOPT_PXE_VENDOR    361
 #define LOPT_FILTER_AAAA   362
-#define LOPT_DHCP_TO_HOST  363
  
 #ifdef HAVE_GETOPT_LONG
 static const struct option opts[] =  
@@ -344,7 +343,6 @@ static const struct myoption opts[] =
     { "dumpmask", 1, 0, LOPT_DUMPMASK },
     { "dhcp-ignore-clid", 0, 0,  LOPT_IGNORE_CLID },
     { "filter-aaaa", 0, 0, LOPT_FILTER_AAAA },
-    { "dhcp-to-host", 0, 0, LOPT_DHCP_TO_HOST },
     { NULL, 0, 0, 0 }
   };
 
@@ -526,7 +524,6 @@ static struct {
   { LOPT_DUMPMASK, ARG_ONE, "<hex>", gettext_noop("Mask which packets to dump"), NULL },
   { LOPT_SCRIPT_TIME, OPT_LEASE_RENEW, NULL, gettext_noop("Call dhcp-script when lease expiry changes."), NULL },
   { LOPT_FILTER_AAAA, OPT_FILTER_AAAA, NULL, gettext_noop("Filter all AAAA requests."), NULL },
-  { LOPT_DHCP_TO_HOST, OPT_DHCP_TO_HOST, NULL, gettext_noop("Keep DHCP hostname valid at all times."), NULL },
   { 0, 0, NULL, NULL, NULL }
 }; 
 

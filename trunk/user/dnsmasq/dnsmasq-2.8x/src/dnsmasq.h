@@ -274,8 +274,7 @@ struct event_desc {
 #define OPT_SINGLE_PORT    60
 #define OPT_LEASE_RENEW    61
 #define OPT_FILTER_AAAA    62
-#define OPT_DHCP_TO_HOST   63
-#define OPT_LAST           64
+#define OPT_LAST           63
 
 #define OPTION_BITS (sizeof(unsigned int)*8)
 #define OPTION_SIZE ( (OPT_LAST/OPTION_BITS)+((OPT_LAST%OPTION_BITS)!=0) )
