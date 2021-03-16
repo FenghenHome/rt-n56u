@@ -103,15 +103,6 @@ log = {
 			enabled = (server.mux == "1") and true or false,
 			concurrency = tonumber(server.concurrency)
 		}
-	},
-
-	-- 额外传出连接
-	outboundDetour = {
-		{
-			protocol = "freedom",
-			tag = "direct",
-			settings = { keep = "" }
-		}
 	}
 }
 
