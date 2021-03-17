@@ -8,7 +8,8 @@ local servertmp = ssrindext:read("*all")
 local server = cjson.decode(servertmp)
 local v2ray = {
 log = {
-	-- error = "/var/ssrplus.log",
+	access = "/tmp/access.log",
+	error = "/tmp/error.log",
 	loglevel = "warning"
 },
 	-- 传入连接
