@@ -123,7 +123,8 @@ local v2ray = {
 			protocol = "dns",
 			tag = "dns-out",
 			proxySettings = {
-				tag = "dns-proxy-out"
+				tag = "dns-proxy-out",
+				transportLayer = true
 			}
 		}
 	],
