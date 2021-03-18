@@ -58,3 +58,4 @@ clean:
 	make -C mksquashfs_xz clean
 	rm -rf $(THISDIR)/go/go
 	rm -rf $(THISDIR)/upx
+	rm -rf /usr/bin/upx
