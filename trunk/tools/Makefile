@@ -45,7 +45,7 @@ upx_build:
 	fi )
 	( if [ ! -d $(THISDIR)/upx ]; then \
 	xz -d -c $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz | tar -x -C upx ; \
-	cp -rf $(THISDIR)/upx/upx-$(upx_version)-amd64_linux/upx /usr/bin/upx ; \
+	mv $(THISDIR)/upx/upx-$(upx_version)-amd64_linux/upx $(THISDIR)/upx ; \
 	fi )
 
 clean:
@@ -58,4 +58,3 @@ clean:
 	make -C mksquashfs_xz clean
 	rm -rf $(THISDIR)/go/go
 	rm -rf $(THISDIR)/upx
-	rm -rf /usr/bin/upx
