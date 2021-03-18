@@ -45,7 +45,7 @@ upx_build:
 	fi )
 	( if [ ! -d $(THISDIR)/upx ]; then \
 	xz -d -c $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz | tar -x -C upx ; \
-	mv $(THISDIR)/upx/upx-$(PKG_VERSION)-amd64_linux/upx /usr/bin ; \
+	cp -rf $(THISDIR)/upx/upx-$(upx_version)-amd64_linux/upx /usr/bin/upx ; \
 	fi )
 
 clean:
