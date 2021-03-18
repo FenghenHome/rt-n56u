@@ -152,10 +152,10 @@ fi
 			else
 			lua /etc_ro/ss/genv2config.lua $1 tcp,udp 1080 >/tmp/v2-ssr-reudp.json
 			fi
-		sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
+		#sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
 		else
 		lua /etc_ro/ss/genv2config.lua $1 tcp 1080 >$v2_json_file
-		sed -i 's/\\//g' $v2_json_file
+		#sed -i 's/\\//g' $v2_json_file
 		fi
 		;;
 	esac
@@ -357,12 +357,12 @@ case "$run_mode" in
 				logger -t "SS" "cdn域名文件下载成功"
 			fi
 			if [ $(nvram get pdnsd_enable) = 0 ]; then
-				dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
-				pdnsd_enable_flag=0	
+				#dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
+				pdnsd_enable_flag=2	
 			fi
 			if [ $(nvram get pdnsd_enable) = 1 ]; then
-				/usr/bin/pdnsd-gfw.sh start > /dev/null 2>&1 &
-				pdnsd_enable_flag=1
+				#/usr/bin/pdnsd-gfw.sh start > /dev/null 2>&1 &
+				pdnsd_enable_flag=2
 			fi
 			logger -st "SS" "启动chinadns..."
 			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
@@ -379,20 +379,20 @@ EOF
 			dnsstr="$(nvram get tunnel_forward)"
 			dnsserver=$(echo "$dnsstr" | awk -F '#' '{print $1}')
 			#dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
-			ipset add gfwlist $dnsserver 2>/dev/null
+			#ipset add gfwlist $dnsserver 2>/dev/null
 			logger -st "SS" "启动dns2tcp：5353端口..."
-			dns2tcp -L"127.0.0.1#5353" -R"$dnsstr" >/dev/null 2>&1 &
-			pdnsd_enable_flag=0	
+			#dns2tcp -L"127.0.0.1#5353" -R"$dnsstr" >/dev/null 2>&1 &
+			pdnsd_enable_flag=2	
 			logger -st "SS" "开始处理gfwlist..."
 		fi
 		if [ $(nvram get pdnsd_enable) = 1 ]; then
 			dnsstr="$(nvram get tunnel_forward)"
 			dnsserver=$(echo "$dnsstr" | awk -F '#' '{print $1}')
 			#dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
-			ipset add gfwlist $dnsserver 2>/dev/null
+			#ipset add gfwlist $dnsserver 2>/dev/null
 			logger -st "SS" "启动pdnsd：5353端口..."
-			/usr/bin/pdnsd-gfw.sh start > /dev/null 2>&1 &
-			pdnsd_enable_flag=1	
+			#/usr/bin/pdnsd-gfw.sh start > /dev/null 2>&1 &
+			pdnsd_enable_flag=2	
 			logger -st "SS" "开始处理gfwlist..."
 		fi
 		;;
@@ -454,7 +454,7 @@ start_local() {
 		;;
 	v2ray)
 		lua /etc_ro/ss/genv2config.lua $local_server tcp 0 $s5_port >/tmp/v2-ssr-local.json
-		sed -i 's/\\//g' /tmp/v2-ssr-local.json
+		#sed -i 's/\\//g' /tmp/v2-ssr-local.json
 		$bin -config /tmp/v2-ssr-local.json >/dev/null 2>&1 &
 		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$($bin -version | head -1) Started!" >>/tmp/ssrplus.log
 		;;
