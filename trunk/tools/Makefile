@@ -41,7 +41,7 @@ go_build:
 upx_build:
 	mkdir -p $(THISDIR)/upx
 	( if [ ! -f $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz ]; then \
-	curl --create-dirs -L https://github.com/upx/upx/releases/download/v$(PKG_VERSION)/upx-$(PKG_VERSION)-amd64_linux.tar.xz -o $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz ; \
+	curl --create-dirs -L https://github.com/upx/upx/releases/download/v$(upx_version)/upx-$(upx_version)-amd64_linux.tar.xz -o $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz ; \
 	fi )
 	( if [ ! -d $(THISDIR)/upx ]; then \
 	xz -d -c $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz | tar -x -C upx ; \
