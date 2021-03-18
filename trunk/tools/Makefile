@@ -43,8 +43,8 @@ upx_build:
 	( if [ ! -f $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz ]; then \
 	curl --create-dirs -L https://github.com/upx/upx/releases/download/v$(upx_version)/upx-$(upx_version)-amd64_linux.tar.xz -o $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz ; \
 	fi )
-	( if [ ! -d $(THISDIR)/upx ]; then \
-	xz -d -c $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz | tar -x -C $(THISDIR)/upx ; \
+	( if [ ! -d $(THISDIR)/upx/upx-$(upx_version)-amd64_linux ]; then \
+	xz -d -c $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz | tar -x -C upx ; \
 	mv $(THISDIR)/upx/upx-$(upx_version)-amd64_linux/upx $(THISDIR)/upx ; \
 	fi )
 
