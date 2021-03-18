@@ -13,7 +13,7 @@ local v2ray = {
 		loglevel = "info"
 	},
 	-- 传入连接
-	inbounds = [
+	inbounds = {
 		(local_port ~= "0") and {
 			port = local_port,
 			protocol = "dokodemo-door",
@@ -47,14 +47,14 @@ local v2ray = {
 				network = "tcp,udp"
 			}
 		}
-	],
+	},
 	-- 传出连接
-	outbounds = [
+	outbounds = {
 		{
 			tag = "dns-proxy-out",
 			protocol = "vmess",
 			settings = {
-				vnext = [
+				vnext = {
 					{
 						address = server.server,
 						port = tonumber(server.server_port),
@@ -66,7 +66,7 @@ local v2ray = {
 							}
 						}
 					}
-				]
+				}
 			},
 			-- 底层传输配置
 			streamSettings = {
@@ -127,17 +127,17 @@ local v2ray = {
 				transportLayer = true
 			}
 		}
-	],
+	},
 	routing = {
-    	rules = [
+    	rules = {
     		{
     			type = "field",
-    			inboundTag = [
+    			inboundTag = {
     				"dns-in"
-    			],
+    			},
     			outboundTag = "dns-out"
     		}
-    	]
+    	}
 	}
 }
 
