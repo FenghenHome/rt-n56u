@@ -1,5 +1,6 @@
 THISDIR = $(shell pwd)
 go_version = 1.16.2
+upx_version = 3.96
 # use host target
 CC        = gcc
 GCC       = gcc
@@ -19,7 +20,7 @@ LDFLAGS   =
 
 -include $(LINUX_CONFIG)
 
-all:go_build
+all:go_build upx_build
 	make -C mkimage
 	mkdir -p sstrip
 	make -C $(SSTRIP_NAME)
@@ -37,6 +38,16 @@ go_build:
 	tar zxfv $(THISDIR)/go/go$(go_version).linux-amd64.tar.gz -C go ; \
 	fi )
 
+upx_build:
+	mkdir -p $(THISDIR)/upx
+	( if [ ! -f $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz ]; then \
+	curl --create-dirs -L https://github.com/upx/upx/releases/download/v$(PKG_VERSION)/upx-$(PKG_VERSION)-amd64_linux.tar.xz -o $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz ; \
+	fi )
+	( if [ ! -d $(THISDIR)/upx ]; then \
+	xz -d -c $(THISDIR)/upx/upx$(upx_version).linux-amd64.tar.xz | tar -x -C upx ; \
+	mv $(THISDIR)/upx/upx-$(PKG_VERSION)-amd64_linux/upx /usr/bin ; \
+	fi )
+
 clean:
 	if [ -f $(SSTRIP_NAME)/Makefile ] ; then \
 		make -C $(SSTRIP_NAME) clean ; \
@@ -46,3 +57,4 @@ clean:
 	make -C lzma clean
 	make -C mksquashfs_xz clean
 	rm -rf $(THISDIR)/go/go
+	rm -rf $(THISDIR)/upx
