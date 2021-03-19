@@ -32,7 +32,6 @@ build_xray:
 			'$(XRAY_SED_ARGS)' \
 			distro/all/all.go ; \
 	GOOS=linux GOARCH=mipsle go build -ldflags "-w -s" -o $(THISDIR)/bin/xray; \
-	$(ROOTDIR)/tools/upx/upx --lzma --best $(THISDIR)/bin/xray -o $(THISDIR)/bin/xray-upx; \
 	)
 
 clean:
@@ -40,4 +39,4 @@ clean:
 	rm -rf $(THISDIR)/bin
 
 romfs:
-	$(ROMFSINST) -p +x $(THISDIR)/bin/xray-upx /usr/bin/xray
+	$(ROMFSINST) -p +x $(THISDIR)/bin/xray /usr/bin/xray
