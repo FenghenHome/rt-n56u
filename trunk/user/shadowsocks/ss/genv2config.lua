@@ -15,6 +15,7 @@ local v2ray = {
 	-- 传入连接
 	inbounds = {
 		(local_port ~= "0") and {
+			tag = "local-in",
 			port = local_port,
 			protocol = "dokodemo-door",
 			settings = {
@@ -29,6 +30,7 @@ local v2ray = {
 		-- 开启 socks 代理
 		(proto == "tcp" and socks_port ~= "0") and {
 			{
+			tag = "socks-in",
 			protocol = "socks",
 			port = socks_port,
 				settings = {
@@ -48,10 +50,43 @@ local v2ray = {
 			}
 		}
 	},
+	routing = {
+    	rules = {
+		(local_port ~= "0") and {
+    			type = "field",
+    			inboundTag = {
+    				"local-in"
+    			},
+    			outboundTag = "proxy-out"
+		} or nil,
+		(proto == "tcp" and socks_port ~= "0") and {
+    			type = "field",
+    			inboundTag = {
+    				"socks-in"
+    			},
+    			outboundTag = "proxy-out"
+		} or nil,
+    		{
+    			type = "field",
+    			inboundTag = {
+    				"dns-in"
+    			},
+    			outboundTag = "dns-out"
+    		}
+    	}
+	},
 	-- 传出连接
 	outbounds = {
 		{
-			tag = "dns-proxy-out",
+			protocol = "dns",
+			tag = "dns-out",
+			proxySettings = {
+				tag = "proxy-out",
+				transportLayer = true
+			}
+		},
+		{
+			tag = "proxy-out",
 			protocol = "vmess",
 			settings = {
 				vnext = {
@@ -118,26 +153,7 @@ local v2ray = {
 				enabled = (server.mux == "1") and true or false,
 				concurrency = tonumber(server.concurrency)
 			}
-		},
-		{
-			protocol = "dns",
-			tag = "dns-out",
-			proxySettings = {
-				tag = "dns-proxy-out",
-				transportLayer = true
-			}
 		}
-	},
-	routing = {
-    	rules = {
-    		{
-    			type = "field",
-    			inboundTag = {
-    				"dns-in"
-    			},
-    			outboundTag = "dns-out"
-    		}
-    	}
 	}
 }
 
