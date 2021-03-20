@@ -26,7 +26,7 @@ local v2ray = {
 				enabled = true,
 				destOverride = { "http", "tls" }
 			}
-		} or nil,
+		},
 		-- 开启 socks 代理
 		(proto == "tcp" and socks_port ~= "0") and {
 			{
@@ -38,7 +38,7 @@ local v2ray = {
 					udp = true
 				}
 			}
-		} or nil,
+		},
 		{
 			tag = "dns-in",
 			port = 5353,
@@ -58,14 +58,14 @@ local v2ray = {
     				"local-in"
     			},
     			outboundTag = "proxy-out"
-		} or nil,
+		},
 		(proto == "tcp" and socks_port ~= "0") and {
     			type = "field",
     			inboundTag = {
     				"socks-in"
     			},
     			outboundTag = "proxy-out"
-		} or nil,
+		},
     		{
     			type = "field",
     			inboundTag = {
