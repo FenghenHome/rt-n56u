@@ -120,7 +120,7 @@ local outbounds_settings = {}
 			tlsSettings = (server.tls == '1' and (server.insecure == "1" or server.tls_host)) and {
 				allowInsecure = (server.insecure == "1") and true or nil,
 				serverName = server.tls_host
-			} or nil
+			} or nil,
 			tcpSettings = (server.transport == "tcp" and server.tcp_guise == "http") and {
 				header = {
 					type = server.tcp_guise,
