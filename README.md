@@ -5,6 +5,7 @@
 * https://github.com/vb1980/rt-n56u
 * https://github.com/presisco/rt-n56u
 * https://github.com/silveryxx/rt-n56u
+* https://gitlab.com/dm38/padavan-ng
 
 
 ### 固件说明 ###
