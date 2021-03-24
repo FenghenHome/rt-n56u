@@ -169,6 +169,17 @@ logger -t "SmartDNS" "开始处理黑名单IP"
 awk '{printf("blacklist-ip %s\n", $1, $1 )}' /etc/storage/chinadns/chnroute.txt >> /tmp/blacklist.conf
 echo "conf-file /tmp/blacklist.conf" >> $SMARTDNS_CONF
 fi
+
+rm -f /tmp/gfwlist.conf
+logger -t "SmartDNS" "开始处理GFWLIST"
+cat /etc/storage/gfwlist/gfwlist_list.conf | sed 's/ipset=\///g; s/\/gfwlist//g; /^server/d; /#/d' | sed -e 's|\(.*\)|nameserver \/\1\/oversea\nipset \/\1\/gfwlist|' >> /tmp/gfwlist.conf
+echo "conf-file /tmp/gfwlist.conf" >> $SMARTDNS_CONF
+
+rm -f /tmp/adblocklist.conf
+logger -t "SmartDNS" "开始处理ADBOLCKLIST"
+cat /etc/storage/dnsmasq.adblock/adblock_list.conf | sed 's/address=\///g; s/\/0\.0\.0\.0//g' | grep -E -v '([^0-9]|\b)((1[0-9]{2}|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])\.){3}(1[0-9][0-9]|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])([^0-9]|\b)' | sed -e 's|\(.*\)|address /\1/#|' >> /tmp/adblocklist.conf
+echo "conf-file /tmp/adblocklist.conf" >> $SMARTDNS_CONF
+
 }
 
 gensdnssecond(){
@@ -338,6 +349,9 @@ echo $1|grep "^[0-9]\{1,3\}\.\([0-9]\{1,3\}\.\)\{2\}[0-9]\{1,3\}$" > /dev/null;
 stop_smartdns(){
 rm -f /tmp/whitelist.conf
 rm -f /tmp/blacklist.conf
+rm -f /tmp/gfwlist.conf
+rm -f /tmp/adblocklist.conf
+
 smartdns_process=`pidof smartdns`
 if [ -n "$smartdns_process" ];then 
 	logger -t "SmartDNS" "关闭smartdns进程..."
