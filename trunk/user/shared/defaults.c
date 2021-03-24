@@ -779,7 +779,7 @@ struct nvram_pair router_defaults[] = {
 	{ "sdnse_port", "7053" },
 	{ "sdnse_tcp", "0" },
 	{ "sdnse_speed", "0" },
-	{ "sdnse_name", "" },
+	{ "sdnse_name", "oversea" },
 	{ "sdnse_address", "0" },
 	{ "sdnse_ns", "0" },
 	{ "sdnse_ipset", "0" },
