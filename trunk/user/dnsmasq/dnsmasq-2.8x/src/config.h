@@ -131,7 +131,7 @@ HAVE_LOOP
 
 HAVE_INOTIFY
    use the Linux inotify facility to efficiently re-read configuration files.
-
+ 
 NO_ID
    Don't report *.bind CHAOS info to clients, forward such requests upstream instead.
 NO_TFTP
@@ -370,6 +370,15 @@ static char *compile_opts =
 "no-"
 #endif
 "i18n "
+#ifndef HAVE_REGEX
+"no-"
+#endif
+"regex"
+#if defined(HAVE_IPSET) && defined(HAVE_REGEX) && defined(HAVE_REGEX_IPSET)
+"(+ipset) "
+#else
+" "
+#endif
 #if defined(HAVE_LIBIDN2)
 "IDN2 "
 #else
