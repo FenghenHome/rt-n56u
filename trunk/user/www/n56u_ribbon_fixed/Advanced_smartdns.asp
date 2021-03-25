@@ -33,6 +33,8 @@ $j(document).ready(function(){
 	init_itoggle('sdns_www');
 	init_itoggle('sdns_ipv6');
 	init_itoggle('sdns_exp');
+	init_itoggle('sdns_gfw');
+	init_itoggle('sdns_adblock');
 	init_itoggle('sdnse_enable');
 	init_itoggle('sdnse_address');
 	init_itoggle('sdnse_tcp');
@@ -427,6 +429,34 @@ function showMRULESList(){
                                                     <input type="radio" value="0" name="ss_black" id="ss_black_0" <% nvram_match_x("", "ss_black", "0", "checked"); %>><#checkbox_No#>
                                                 </div>
 												<div><span style="color:#888;">此项可配合科学上网来实现大陆IP禁止走国外DNS</span></div>
+                                            </td>
+                                        </tr>
+										<tr> <th>gfwlist分流解析</th>
+                                            <td>
+                                                <div class="main_itoggle">
+                                                <div id="sdns_gfw_on_of">
+                                                    <input type="checkbox" id="sdns_gfw_fake" <% nvram_match_x("", "sdns_gfw", "1", "value=1 checked"); %><% nvram_match_x("", "sdns_gfw", "0", "value=0"); %>>
+                                                </div>
+                                                </div>
+                                                <div style="position: absolute; margin-left: -10000px;">
+                                                    <input type="radio" value="1" name="sdns_gfw" id="sdns_gfw_1" <% nvram_match_x("", "sdns_gfw", "1", "checked"); %>><#checkbox_Yes#>
+                                                    <input type="radio" value="0" name="sdns_gfw" id="sdns_gfw_0" <% nvram_match_x("", "sdns_gfw", "0", "checked"); %>><#checkbox_No#>
+                                                </div>
+												<div><span style="color:#888;">此项需要更新科学上网中gfwlist且添加海外dns的oversea服务器组来实现分流解析</span></div>
+                                            </td>
+                                        </tr>
+										<tr> <th>拦截广告</th>
+                                            <td>
+                                                <div class="main_itoggle">
+                                                <div id="sdns_adblock_on_of">
+                                                    <input type="checkbox" id="sdns_adblock_fake" <% nvram_match_x("", "sdns_adblock", "1", "value=1 checked"); %><% nvram_match_x("", "sdns_adblock", "0", "value=0"); %>>
+                                                </div>
+                                                </div>
+                                                <div style="position: absolute; margin-left: -10000px;">
+                                                    <input type="radio" value="1" name="sdns_adblock" id="sdns_adblock_1" <% nvram_match_x("", "sdns_adblock", "1", "checked"); %>><#checkbox_Yes#>
+                                                    <input type="radio" value="0" name="sdns_adblock" id="sdns_adblock_0" <% nvram_match_x("", "sdns_adblock", "0", "checked"); %>><#checkbox_No#>
+                                                </div>
+												<div><span style="color:#888;">此项需要更新科学上网中Adblock来实现拦截广告</span></div>
                                             </td>
                                         </tr>
 <tr>

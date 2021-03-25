@@ -1161,6 +1161,8 @@
 			{"snds_ip_change_time", "", NULL, EVM_RESTART_SMARTDNS},
 			{"sdns_www", "", NULL, EVM_RESTART_SMARTDNS},
 			{"sdns_exp", "", NULL, EVM_RESTART_SMARTDNS},
+			{"sdns_gfw", "", NULL, EVM_RESTART_SMARTDNS},
+			{"sdns_adblock", "", NULL, EVM_RESTART_SMARTDNS},
 			{"snds_redirect", "", NULL, EVM_RESTART_SMARTDNS},
 			{"snds_cache", "", NULL, EVM_RESTART_SMARTDNS},
 			{"sdns_ttl", "", NULL, EVM_RESTART_SMARTDNS},

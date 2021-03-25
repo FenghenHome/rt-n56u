@@ -768,6 +768,8 @@ struct nvram_pair router_defaults[] = {
 	{ "sdns_www", "0" },
 	{ "sdns_www", "0" },
 	{ "sdns_exp", "0" },
+	{ "sdns_gfw", "0" },
+	{ "sdns_adblock", "0" },
 	{ "snds_redirect", "0" },
 	{ "snds_cache", "512" },
 	{ "sdns_ttl", "300" },

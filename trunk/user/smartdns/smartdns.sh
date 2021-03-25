@@ -17,6 +17,8 @@ snds_ip_change=`nvram get snds_ip_change`
 sdns_ipv6=`nvram get sdns_ipv6`
 sdns_www=`nvram get sdns_www`
 sdns_exp=`nvram get sdns_exp`
+sdns_gfw=`nvram get sdns_gfw`
+sdns_adblock=`nvram get sdns_adblock`
 snds_redirect=`nvram get snds_redirect`
 snds_cache=`nvram get snds_cache`
 sdns_ttl=`nvram get sdns_ttl`
@@ -170,15 +172,19 @@ awk '{printf("blacklist-ip %s\n", $1, $1 )}' /etc/storage/chinadns/chnroute.txt 
 echo "conf-file /tmp/blacklist.conf" >> $SMARTDNS_CONF
 fi
 
+if [ $sdns_gfw -eq 1 ];then
 rm -f /tmp/gfwlist.conf
 logger -t "SmartDNS" "开始处理GFWLIST"
 cat /etc/storage/gfwlist/gfwlist_list.conf | sed 's/ipset=\///g; s/\/gfwlist//g; /^server/d; /#/d' | sed -e 's|\(.*\)|nameserver \/\1\/oversea\nipset \/\1\/gfwlist|' >> /tmp/gfwlist.conf
 echo "conf-file /tmp/gfwlist.conf" >> $SMARTDNS_CONF
+fi
 
+if [ $sdns_adblock -eq 1 ];then
 rm -f /tmp/adblocklist.conf
 logger -t "SmartDNS" "开始处理ADBOLCKLIST"
 cat /etc/storage/dnsmasq.adblock/adblock_list.conf | sed 's/address=\///g; s/\/0\.0\.0\.0//g' | grep -E -v '([^0-9]|\b)((1[0-9]{2}|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])\.){3}(1[0-9][0-9]|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])([^0-9]|\b)' | sed -e 's|\(.*\)|address /\1/#|' >> /tmp/adblocklist.conf
 echo "conf-file /tmp/adblocklist.conf" >> $SMARTDNS_CONF
+fi
 
 }
 
