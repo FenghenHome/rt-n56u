@@ -383,6 +383,11 @@ start)
 stop)
 	stop_smartdns
 	;;
+restart)
+	check_ss
+	start_smartdns
+	stop_smartdns
+	;;
 *)
 	echo "check"
 	;;
