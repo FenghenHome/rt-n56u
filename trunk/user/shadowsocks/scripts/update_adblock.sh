@@ -16,6 +16,11 @@ logger -st "SS" "重启ShadowSocksR Plus+..."
 /usr/bin/shadowsocks.sh stop
 /usr/bin/shadowsocks.sh start
 fi
+if [ $(nvram get sdns_enable) = 1 ]; then
+logger -st "SS" "重启smartdns..."
+/usr/bin/smartdns.sh stop
+/usr/bin/smartdns.sh start
+fi
 else
 logger -st "adblock" "列表下载失败,请重试！"
 fi
