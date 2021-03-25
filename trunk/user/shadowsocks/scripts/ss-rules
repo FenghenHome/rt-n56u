@@ -15,6 +15,8 @@ ipt_m="iptables -t mangle"  # alias of iptables
 FWI=/tmp/shadowsocks_iptables.save  # firewall include file
 ADNU=$(iptables -t nat -L  PREROUTING -n --line-number | grep "ADBYBY" |cut -c1-1)
 SSNU=$(($ADNU+1))
+sdns_gfw=`nvram get sdns_gfw`
+sdns_adblock=`nvram get sdns_adblock`
 
 usage() {
 	cat <<-EOF
@@ -119,9 +121,11 @@ EOF
 	fi
 
 	sed -i '/gfwlist/d' /etc/storage/dnsmasq/dnsmasq.conf
-#cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
-#conf-dir=/etc/storage/gfwlist
-#EOF
+	if [ $sdns_gfw -eq 0 ];then
+cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
+conf-dir=/etc/storage/gfwlist
+EOF
+	fi
 
 	elif [ "$RUNMODE" = "oversea" ] ;then
 	ipset -N oversea hash:net 2>/dev/null
@@ -158,9 +162,11 @@ EOF
 	fi
 
 	sed -i '/dnsmasq.adblock/d' /etc/storage/dnsmasq/dnsmasq.conf
-#cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
-#conf-dir=/etc/storage/dnsmasq.adblock
-#EOF
+	if [ $sdns_adblock -eq 0 ];then
+cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
+conf-dir=/etc/storage/dnsmasq.adblock
+EOF
+	fi
 
 	return $?
 }
