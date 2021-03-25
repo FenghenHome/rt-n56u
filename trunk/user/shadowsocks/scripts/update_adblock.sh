@@ -16,7 +16,7 @@ logger -st "SS" "重启ShadowSocksR Plus+..."
 /usr/bin/shadowsocks.sh stop
 /usr/bin/shadowsocks.sh start
 fi
-if [ $(nvram get sdns_enable) = 1 ]; then
+if [ $(nvram get sdns_enable) = 1 ] && [ $(nvram get sdns_adblock) = 1 ]; then
 logger -st "SS" "重启smartdns..."
 /usr/bin/smartdns.sh stop
 /usr/bin/smartdns.sh start

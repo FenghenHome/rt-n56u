@@ -15,6 +15,7 @@ ipt_m="iptables -t mangle"  # alias of iptables
 FWI=/tmp/shadowsocks_iptables.save  # firewall include file
 ADNU=$(iptables -t nat -L  PREROUTING -n --line-number | grep "ADBYBY" |cut -c1-1)
 SSNU=$(($ADNU+1))
+sdns_enable=`nvram get sdns_enable`
 sdns_gfw=`nvram get sdns_gfw`
 sdns_adblock=`nvram get sdns_adblock`
 
@@ -121,7 +122,7 @@ EOF
 	fi
 
 	sed -i '/gfwlist/d' /etc/storage/dnsmasq/dnsmasq.conf
-	if [ $sdns_gfw -eq 0 ];then
+	if [ $sdns_gfw -eq 0 ] || [ $sdns_enable -eq 0 ];then
 cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
 conf-dir=/etc/storage/gfwlist
 EOF
@@ -162,7 +163,7 @@ EOF
 	fi
 
 	sed -i '/dnsmasq.adblock/d' /etc/storage/dnsmasq/dnsmasq.conf
-	if [ $sdns_adblock -eq 0 ];then
+	if [ $sdns_adblock -eq 0 ] || [ $sdns_enable -eq 0 ];then
 cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
 conf-dir=/etc/storage/dnsmasq.adblock
 EOF
