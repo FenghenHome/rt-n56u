@@ -99,7 +99,7 @@ flush_r() {
 ipset_r() {
     mkdir -p /tmp/dnsmasq.dom
 	$ipt_n -N SS_SPEC_WAN_AC
-	$ipt_n -I SS_SPEC_WAN_AC -p tcp ! --dport 53 -d $server -j RETURN
+	$ipt_n -I SS_SPEC_WAN_AC 1 -d $server -j RETURN
 	if [ "$RUNMODE" = "router" ] ;then
 	ipset -! -R <<-EOF || return 1
 		create ss_spec_wan_ac hash:net
@@ -232,9 +232,9 @@ tp_rule() {
 	$ipt_m -A SS_SPEC_TPROXY -p udp -d 192.168.0.0/16 -j RETURN
 	$ipt_m -A SS_SPEC_TPROXY -p udp -d 224.0.0.0/4 -j RETURN
 	$ipt_m -A SS_SPEC_TPROXY -p udp -d 240.0.0.0/4 -j RETURN
-	$ipt_m -A SS_SPEC_TPROXY -p udp ! --dport 53 -d $SERVER -j RETURN
+	$ipt_m -A SS_SPEC_TPROXY -p udp -d $SERVER -j RETURN
 	if [ "$TPROXY" -ne 1 ]; then
-	$ipt_n -I SS_SPEC_WAN_AC -p tcp ! --dport 53 -d $server -j RETURN
+	$ipt_n -I SS_SPEC_WAN_AC 1 -d $server -j RETURN
 	fi
 
 	#$ipt -A SS_SPEC_TPROXY -p udp $PROXY_PORTS $lanbip \
