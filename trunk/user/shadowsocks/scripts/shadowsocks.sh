@@ -238,7 +238,7 @@ start_rules() {
 	-S "$udp_server" \
 	-L "$udp_local_port" \
 	-a "$ac_ips" \
-	-i "" \
+	-i "/etc/storage/chinadns/chnroute.txt" \
 	-b "$wan_bp_ips" \
 	-w "$wan_fw_ips" \
 	-p "$lan_fp_ips" \
@@ -339,11 +339,6 @@ start_redir_udp() {
 
 
 start_dns() {
-echo "create china hash:net family inet hashsize 1024 maxelem 65536" >/tmp/china.ipset
-awk '!/^$/&&!/^#/{printf("add china %s'" "'\n",$0)}' /etc/storage/chinadns/chnroute.txt >>/tmp/china.ipset
-ipset -! flush china
-ipset -! restore </tmp/china.ipset 2>/dev/null
-rm -f /tmp/china.ipset
 case "$run_mode" in
 	router)
 		pdnsd_enable_flag=2	

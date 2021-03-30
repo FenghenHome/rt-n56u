@@ -98,6 +98,7 @@ flush_r() {
 }
 
 ipset_r() {
+	[ -f "$IGNORE_LIST" ] && /etc_ro/ss/chinaipset.sh $IGNORE_LIST
 	mkdir -p /tmp/dnsmasq.dom
 	$ipt_n -N SS_SPEC_WAN_AC
 	$ipt_n -I SS_SPEC_WAN_AC 1 -d $server -j RETURN
