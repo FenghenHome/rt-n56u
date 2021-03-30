@@ -70,6 +70,7 @@ flush_r() {
 	rm -rf /tmp/dnsmasq.dom
 	sed -i '/dnsmasq.adblock/d' /etc/storage/dnsmasq/dnsmasq.conf
 	sed -i '/gfwlist/d' /etc/storage/dnsmasq/dnsmasq.conf
+	sed -i '/dnsmasq.oversea/d' /etc/storage/dnsmasq/dnsmasq.conf
 	flush_iptables nat
 	flush_iptables mangle
 	ip rule del fwmark 100 lookup 100 2>/dev/null
@@ -97,7 +98,7 @@ flush_r() {
 }
 
 ipset_r() {
-    mkdir -p /tmp/dnsmasq.dom
+	mkdir -p /tmp/dnsmasq.dom
 	$ipt_n -N SS_SPEC_WAN_AC
 	$ipt_n -I SS_SPEC_WAN_AC 1 -d $server -j RETURN
 	if [ "$RUNMODE" = "router" ] ;then
@@ -132,6 +133,12 @@ EOF
 	ipset -N oversea hash:net 2>/dev/null
 	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set oversea dst -j SS_SPEC_WAN_FW
 	$ipt_n -I PREROUTING $SSNU -j SS_SPEC_WAN_AC
+
+	mkdir -p /etc/storage/dnsmasq.oversea
+	sed -i '/dnsmasq.oversea/d' /etc/storage/dnsmasq/dnsmasq.conf
+cat >>/etc/storage/dnsmasq/dnsmasq.conf <<EOF
+conf-dir=/etc/storage/dnsmasq.oversea
+EOF
 
 	elif [ "$RUNMODE" = "all" ] ;then
 	$ipt_n -A SS_SPEC_WAN_AC -j SS_SPEC_WAN_FW
