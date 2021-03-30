@@ -231,6 +231,7 @@ tp_rule() {
 
 	$ipt_m -N SS_SPEC_TPROXY
 	$ipt_m -A SS_SPEC_TPROXY -p udp --dport 443 -j RETURN
+	$ipt_m -A SS_SPEC_TPROXY -p udp --dport 80 -j RETURN
 	$ipt_m -A SS_SPEC_TPROXY -p udp --dport 53 -j RETURN
 	$ipt_m -A SS_SPEC_TPROXY -p udp -d 0.0.0.0/8 -j RETURN
 	$ipt_m -A SS_SPEC_TPROXY -p udp -d 10.0.0.0/8 -j RETURN
@@ -260,6 +261,7 @@ tp_rule() {
 
 	elif [ "$RUNMODE" = "gfw" ] ;then
 	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set gfwlist dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
+	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set smartdns dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -I SS_SPEC_TPROXY -p udp --dport 5353 -j RETURN
 	$ipt_m -A PREROUTING -p udp -j SS_SPEC_TPROXY
 
