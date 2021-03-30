@@ -339,13 +339,13 @@ start_redir_udp() {
 
 
 start_dns() {
+echo "create china hash:net family inet hashsize 1024 maxelem 65536" >/tmp/china.ipset
+awk '!/^$/&&!/^#/{printf("add china %s'" "'\n",$0)}' /etc/storage/chinadns/chnroute.txt >>/tmp/china.ipset
+ipset -! flush china
+ipset -! restore </tmp/china.ipset 2>/dev/null
+rm -f /tmp/china.ipset
 case "$run_mode" in
 	router)
-		echo "create china hash:net family inet hashsize 1024 maxelem 65536" >/tmp/china.ipset
-		awk '!/^$/&&!/^#/{printf("add china %s'" "'\n",$0)}' /etc/storage/chinadns/chnroute.txt >>/tmp/china.ipset
-		ipset -! flush china
-		ipset -! restore </tmp/china.ipset 2>/dev/null
-		rm -f /tmp/china.ipset
 		pdnsd_enable_flag=2	
 		if [ $(nvram get ss_chdns) = 1 ]; then
 			chinadnsng_enable_flag=1
