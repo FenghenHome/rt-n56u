@@ -114,6 +114,7 @@ EOF
 
 	elif [ "$RUNMODE" = "gfw" ] ;then
 	ipset -N gfwlist hash:net 2>/dev/null
+	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set china dst -j RETURN
 	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set gfwlist dst -j SS_SPEC_WAN_FW
 	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set smartdns dst -j SS_SPEC_WAN_FW
 	$ipt_n -I PREROUTING $SSNU -j SS_SPEC_WAN_AC
@@ -132,6 +133,7 @@ EOF
 	elif [ "$RUNMODE" = "oversea" ] ;then
 	ipset -N oversea hash:net 2>/dev/null
 	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set oversea dst -j SS_SPEC_WAN_FW
+	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set china dst -j SS_SPEC_WAN_FW
 	$ipt_n -I PREROUTING $SSNU -j SS_SPEC_WAN_AC
 
 	mkdir -p /etc/storage/dnsmasq.oversea
@@ -260,6 +262,7 @@ tp_rule() {
 	$ipt_m -A PREROUTING -p udp -j SS_SPEC_TPROXY
 
 	elif [ "$RUNMODE" = "gfw" ] ;then
+	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set ! --match-set china dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set gfwlist dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set smartdns dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -I SS_SPEC_TPROXY -p udp --dport 5353 -j RETURN
@@ -267,6 +270,8 @@ tp_rule() {
 
 	elif [ "$RUNMODE" = "oversea" ] ;then
 	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set oversea dst \
+		-j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
+	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set china dst \
 		-j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -A PREROUTING -p udp -j SS_SPEC_TPROXY
 
