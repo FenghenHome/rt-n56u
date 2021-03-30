@@ -398,12 +398,6 @@ EOF
 		;;
 	oversea)
 		ipset add gfwlist $dnsserver 2>/dev/null
-		mkdir -p /etc/storage/dnsmasq.oversea
-		sed -i '/dnsmasq-ss/d' /etc/storage/dnsmasq/dnsmasq.conf
-		sed -i '/dnsmasq.oversea/d' /etc/storage/dnsmasq/dnsmasq.conf
-		cat >>/etc/storage/dnsmasq/dnsmasq.conf <<EOF
-conf-dir=/etc/storage/dnsmasq.oversea
-EOF
 ;;
 	*)
 		ipset -N ss_spec_wan_ac hash:net 2>/dev/null
@@ -553,11 +547,6 @@ ssp_close() {
 	kill_process
 	sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
 	sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
-	sed -i '/cdn/d' /etc/storage/dnsmasq/dnsmasq.conf
-	sed -i '/dnsmasq.oversea/d' /etc/storage/dnsmasq/dnsmasq.conf
-	if [ -f "/etc/storage/dnsmasq-ss.d" ]; then
-		rm -f /etc/storage/dnsmasq-ss.d
-	fi
 	clear_iptable
 	/sbin/restart_dhcpd
 }
