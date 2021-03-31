@@ -67,6 +67,7 @@ if [ -f /etc_ro/ca-certificates.crt ]; then
 	ln -sf /etc_ro/ca-certificates.crt /etc/ssl/cert.pem
 	ln -sf /etc_ro/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 fi
+
 # create symlinks
 ln -sf /home/root /home/admin
 ln -sf /proc/mounts /etc/mtab
