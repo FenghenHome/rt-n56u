@@ -262,7 +262,7 @@ tp_rule() {
 	$ipt_m -A PREROUTING -p udp -j SS_SPEC_TPROXY
 
 	elif [ "$RUNMODE" = "oversea" ] ;then
-	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set overseasrc -m dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
+	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set oversea src -m dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set china dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -A PREROUTING -p udp -j SS_SPEC_TPROXY
 
