@@ -92,12 +92,7 @@ local outbounds_settings = {}
 		proxySettings = {
 			tag = "proxy-out",
 			transportLayer = true
-		},
-		streamSettings = {
-			sockopt = {
-				mark = 255
-			}
-		} 
+		}
 	}
 
 	local outbounds_proxyout = {
@@ -159,10 +154,7 @@ local outbounds_settings = {}
 				security = server.quic_security,
 				key = server.quic_key,
 				header = {type = server.quic_guise}
-			} or nil,
-			sockopt = {
-				mark = 255
-			} 
+			} or nil
 		},
 		mux = (server.mux == "1") and {
 			enabled = true,
