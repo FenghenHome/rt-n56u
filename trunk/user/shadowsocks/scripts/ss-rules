@@ -101,7 +101,8 @@ ipset_r() {
 	mkdir -p /tmp/dnsmasq.dom
 	$ipt_n -N SS_SPEC_WAN_AC
 	$ipt_n -I SS_SPEC_WAN_AC 1 -d $server -j RETURN
-	if [ "$RUNMODE" = "router" ] ;then
+	case "$RUNMODE" in
+	router)
 	ipset -! -R <<-EOF || return 1
 		create ss_spec_wan_ac hash:net
 		$(gen_spec_iplist | sed -e "s/^/add ss_spec_wan_ac /")
@@ -110,8 +111,8 @@ EOF
 	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set china dst -j RETURN
 	$ipt_n -A SS_SPEC_WAN_AC -j SS_SPEC_WAN_FW
 	$ipt_n -I PREROUTING $SSNU -j SS_SPEC_WAN_AC
-
-	elif [ "$RUNMODE" = "gfw" ] ;then
+		;;
+	gfw)
 	ipset -N gfwlist hash:net 2>/dev/null
 	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set china dst -j RETURN
 	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set gfwlist dst -j SS_SPEC_WAN_FW
@@ -128,8 +129,8 @@ cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
 conf-dir=/etc/storage/gfwlist
 EOF
 	fi
-
-	elif [ "$RUNMODE" = "oversea" ] ;then
+		;;
+	oversea)
 	ipset -N oversea hash:net 2>/dev/null
 	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set oversea dst -j SS_SPEC_WAN_FW
 	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set china dst -j SS_SPEC_WAN_FW
@@ -140,19 +141,20 @@ EOF
 cat >>/etc/storage/dnsmasq/dnsmasq.conf <<EOF
 conf-dir=/etc/storage/dnsmasq.oversea
 EOF
-
-	elif [ "$RUNMODE" = "all" ] ;then
+		;;
+	all)
 	$ipt_n -A SS_SPEC_WAN_AC -j SS_SPEC_WAN_FW
 	$ipt_n -I PREROUTING $SSNU -j SS_SPEC_WAN_AC
 
-	fi
+		;;
+	esac
 	ipset -N whitelist hash:net 2>/dev/null
 	ipset -N blacklist hash:net 2>/dev/null
 	cat /etc/storage/ss_dom.sh | grep -v '^!' | grep -v "^$" > /tmp/ss_dom.txt
 	awk '{printf("ipset=/%s/blacklist\n", $1, $1 )}' /tmp/ss_dom.txt > /tmp/dnsmasq.dom/ss_dom.conf
 	cat /etc/storage/uss_dom.sh | grep -v '^!' | grep -v "^$" > /tmp/uss_dom.txt
 	awk '{printf("ipset=/%s/whitelist\n", $1, $1 )}' /tmp/uss_dom.txt > /tmp/dnsmasq.dom/uss_dom.conf
-    rm -f /tmp/ss_dom.txt
+	rm -f /tmp/ss_dom.txt
 	rm -f /tmp/uss_dom.txt
 	$ipt_n -I SS_SPEC_WAN_AC 2 -m set --match-set blacklist dst -j SS_SPEC_WAN_FW
 	$ipt_n -I SS_SPEC_WAN_AC 2 -m set --match-set whitelist dst -j RETURN
@@ -249,27 +251,29 @@ tp_rule() {
 	#$ipt -A SS_SPEC_TPROXY -p udp $PROXY_PORTS $lanbip \
 		#-j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 100
 
-	if [ "$RUNMODE" = "router" ] ;then
+	case "$RUNMODE" in
+	router)
 	$ipt_m -A SS_SPEC_TPROXY -p udp -m set --match-set ss_spec_wan_ac dst -j RETURN
 	$ipt_m -A SS_SPEC_TPROXY -p udp -m set --match-set china dst -j RETURN
 	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set ! --match-set ss_spec_wan_ac dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -A PREROUTING -p udp -j SS_SPEC_TPROXY
-
-	elif [ "$RUNMODE" = "gfw" ] ;then
+		;;
+	gfw)
 	$ipt_m -A SS_SPEC_TPROXY -p udp -m set --match-set china dst -j RETURN
 	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set gfwlist dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set smartdns dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -A PREROUTING -p udp -j SS_SPEC_TPROXY
-
-	elif [ "$RUNMODE" = "oversea" ] ;then
+		;;
+	oversea)
 	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set oversea src -m dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set china dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -A PREROUTING -p udp -j SS_SPEC_TPROXY
-
-	elif [ "$RUNMODE" = "all" ] ;then
+		;;
+	all)
 	$ipt_m -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -A PREROUTING -p udp -j SS_SPEC_TPROXY
-	fi
+		;;
+	esac
     $ipt_m -I SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set blacklist dst \
     -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -I SS_SPEC_TPROXY -p udp -m set --match-set whitelist dst -j RETURN
