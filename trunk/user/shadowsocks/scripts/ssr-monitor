@@ -14,8 +14,7 @@ tunnel_process=$4
 v2ray_process=$5
 local_process=$6
 pdnsd_process=$7
-chinadnsng_process=$8
-trojan_process=$9
+trojan_process=$8
 i=0
 sock5_port=$(nvram get socks5_proxy_port)
 UDP_RELAY_SERVER=$(nvram get udp_relay_server)
@@ -154,70 +153,5 @@ do
 			killall -q -9 dns2tcp
 			dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
 		fi 
-	fi
-	#chinadns-ng
-	if [ $chinadnsng_process -gt 0 ] && [ $pdnsd_process -eq 0 ] ;then
-		icount=`ps -w  | grep chinadns-ng |grep -v grep| wc -l`
-		if [ $icount -lt $chinadnsng_process ]  #如果进程挂掉就重启它
-		then
-			logger -t "$NAME" "chinadns-ng tunnel error.restart!"
-			killall -q -9 chinadns-ng
-			killall -q -9 dns2tcp
-			dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
-			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
-			sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
-			sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
-			cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
-no-resolv
-server=127.0.0.1#65353
-EOF
-		fi   
-		icount=`ps -w  | grep dns2tcp |grep -v grep| wc -l`
-		if [ $icount -lt $chinadnsng_process ]  #如果进程挂掉就重启它
-		then
-			logger -t "$NAME" "chinadns-ng tunnel error.restart!"
-			killall -q -9 chinadns-ng
-			killall -q -9 dns2tcp
-			dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
-			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
-			sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
-			sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
-			cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
-no-resolv
-server=127.0.0.1#65353
-EOF
-		fi   
-	fi
-	if [ $chinadnsng_process -gt 0 ] && [ $pdnsd_process -eq 1 ] ;then
-		icount=`ps -w  | grep chinadns-ng |grep -v grep| wc -l`
-		if [ $icount -lt $chinadnsng_process ]  #如果进程挂掉就重启它
-		then
-			logger -t "$NAME" "chinadns-ng tunnel error.restart!"
-			killall -q -9 chinadns-ng
-			killall -q -9 pdnsd
-			pdnsd -c /tmp/pdnsd.conf >/dev/null 2>&1 &
-			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
-			sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
-			sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
-			cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
-no-resolv
-server=127.0.0.1#65353
-EOF
-		fi   
-		icount=`ps -w  | grep pdnsd |grep -v grep| wc -l`
-		if [ $icount -lt $chinadnsng_process ]  #如果进程挂掉就重启它
-		then
-			logger -t "$NAME" "chinadns-ng tunnel error.restart!"
-			killall -q -9 chinadns-ng
-			killall -q -9 pdnsd
-			pdnsd -c /tmp/pdnsd.conf >/dev/null 2>&1 &
-			chinadns-ng -b 0.0.0.0 -l 65353 -c $(nvram get china_dns) -t 127.0.0.1#5353 -4 china -M -m /tmp/cdn.txt >/dev/null 2>&1 &
-			sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
-			sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
-			cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
-no-resolv
-server=127.0.0.1#65353
-EOF
-		fi   
 	fi
 done
