@@ -42,7 +42,7 @@
 			init_itoggle('v2_local');
 			init_itoggle('v2_link');
 			init_itoggle('switch_enable_x_0');
-			init_itoggle('ss_chdns');
+			init_itoggle('ss_adblock');
 			init_itoggle('ss_router_proxy', change_ss_watchcat_display);
 			init_itoggle('ss_watchcat');
 			init_itoggle('ss_update_chnroute');
@@ -1606,27 +1606,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															</select>
 														</td>
 													</tr>
-													<tr>
-														<th>加载chinadns-ng(仅绕过模式生效)</th>
-														<td>
-															<div class="main_itoggle">
-																<div id="ss_chdns_on_of">
-																	<input type="checkbox" id="ss_chdns_fake"
-																		<% nvram_match_x("", "ss_chdns", "1", "value=1 checked"); %><% nvram_match_x("", "ss_chdns", "0", "value=0"); %>>
-																</div>
-															</div>
-															<div style="position: absolute; margin-left: -10000px;">
-																<input type="radio" value="1" name="ss_chdns"
-																	id="ss_chdns_1"
-																	<% nvram_match_x("", "ss_chdns", "1", "checked"); %>>
-																<#checkbox_Yes#>
-																	<input type="radio" value="0" name="ss_chdns"
-																		id="ss_chdns_0"
-																		<% nvram_match_x("", "ss_chdns", "0", "checked"); %>>
-																	<#checkbox_No#>
-															</div>
-														</td>
-													</tr>
 													<!--<tr id="row_china_dns" style="display:none;">
 														<th width="50%">国内DNS(仅chinadns-ng生效)</th>
 														<td>
@@ -1679,6 +1658,27 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																<option value="114.114.115.115#53">Oversea Mode DNS-1
 																	(114.114.115.115)</option>
 															</select>
+														</td>
+													</tr>
+													<tr>
+														<th>拦截广告</th>
+														<td>
+															<div class="main_itoggle">
+																<div id="ss_adblock_on_of">
+																	<input type="checkbox" id="ss_adblock_fake"
+																		<% nvram_match_x("", "ss_adblock", "1", "value=1 checked"); %><% nvram_match_x("", "ss_adblock", "0", "value=0"); %>>
+																</div>
+															</div>
+															<div style="position: absolute; margin-left: -10000px;">
+																<input type="radio" value="1" name="ss_adblock"
+																	id="ss_adblock_1"
+																	<% nvram_match_x("", "ss_adblock", "1", "checked"); %>>
+																<#checkbox_Yes#>
+																	<input type="radio" value="0" name="ss_adblock"
+																		id="ss_adblock_0"
+																		<% nvram_match_x("", "ss_adblock", "0", "checked"); %>>
+																	<#checkbox_No#>
+															</div>
 														</td>
 													</tr>
 													<!--
