@@ -2612,15 +2612,15 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 												<table width="100%" cellpadding="4" cellspacing="0" class="table">
 													<tr>
 														<th colspan="2" style="background-color: #E3E3E3;">
-															chinadns-ng说明:</th>
+															拦截广告说明:</th>
 													</tr>
 													<tr>
 														<th width="100%">
-															绕过大陆模式启用chinadns会加载CDN域名规则来分流常用网站跑国内DNS,加载gfwlist列表来分流到国外DNS
+															通过广告规则列表来拦截广告
 														</th>
 													</tr>
 													<tr>
-														<th width="100%">此模式会占用一部分内存资源,内存少的机器请谨慎开启。</th>
+														<th width="100%">此模式会导致部分网页或者应用无法使用，请谨慎开启。</th>
 													</tr>
 												</table>
 											</div>
