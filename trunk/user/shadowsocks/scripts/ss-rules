@@ -198,7 +198,7 @@ fw_rule() {
 
 ac_rule() {
 	#$ipt_n -I PREROUTING 1 -p tcp $EXT_ARGS -m comment --comment "$TAG" -j SS_SPEC_WAN_AC
-	$ipt_n -I PREROUTING 1 br-lan -p tcp $EXT_ARGS -m comment --comment "$TAG" -j SS_SPEC_WAN_AC
+	$ipt_n -I PREROUTING 1 br0 -p tcp $EXT_ARGS -m comment --comment "$TAG" -j SS_SPEC_WAN_AC
 
 	$ipt_n -A PREROUTING -p tcp --dport 53 -j REDIRECT --to-ports 53
 
@@ -272,7 +272,7 @@ tp_rule() {
 	$ipt_m -I SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set blacklist dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
 	$ipt_m -I SS_SPEC_TPROXY -p udp -m set --match-set whitelist dst -j RETURN
 	#$ipt_m -I PREROUTING 1 -p udp $EXT_ARGS -m comment --comment "$TAG" -j SS_SPEC_TPROXY
-	$ipt_m -I PREROUTING 1 br-lan -p udp $EXT_ARGS -m comment --comment "$TAG" -j SS_SPEC_TPROXY
+	$ipt_m -I PREROUTING 1 br0 -p udp $EXT_ARGS -m comment --comment "$TAG" -j SS_SPEC_TPROXY
 	$ipt_m -A PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 53
 	return $?
 }
