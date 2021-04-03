@@ -173,9 +173,9 @@ EOF
 	sed -i '/dnsmasq.adblock/d' /etc/storage/dnsmasq/dnsmasq.conf
 	if [ $sdns_adblock -eq 0 ] || [ $sdns_enable -eq 0 ];then
 		if [ $ss_adblock -eq 1 ];then
-	cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
-	conf-dir=/etc/storage/dnsmasq.adblock
-	EOF
+cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
+conf-dir=/etc/storage/dnsmasq.adblock
+EOF
 		fi
 	fi
 
