@@ -6,6 +6,7 @@
 * https://github.com/presisco/rt-n56u
 * https://github.com/silveryxx/rt-n56u
 * https://gitlab.com/dm38/padavan-ng
+* https://gitlab.com/Developer_MZRIP/rt-n56u
 
 
 ### 固件说明 ###
