@@ -579,19 +579,13 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 							width: '150px'
 						}, {
 							field: 'ping',
-							title: 'ping',
+							title: '延迟',
 							align: 'center',
 							valign: 'middle',
 							width: '50px',
 							cellStyle: cellStylesales,
 							formatter: actionFormatter2,
 							sortable: true
-						}, {
-							field: 'lost',
-							title: '丢包',
-							align: 'center',
-							valign: 'middle',
-							width: '50px'
 						}, {
 							field: 'operate',
 							title: '操作',
