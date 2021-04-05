@@ -22,12 +22,17 @@ OPENSSL_CIPHERS = no-capieng no-cms no-rfc3779 no-seed \
   no-devcryptoeng no-ssl3-method no-tests no-sm2 \
   no-sm3 no-sm4 no-afalgeng no-comp
 
+OPENSSL_CIPHERS += no-chacha no-poly1305 no-psk no-cms no-srp no-tls1_3 no-deprecated no-asm
+ifneq ($(CONFIG_FIRMWARE_INCLUDE_TOR),y)
+OPENSSL_CIPHERS += no-engine
+endif
+
 ifneq ($(CONFIG_FIRMWARE_INCLUDE_SSWAN),y)
-OPENSSL_OPTIONS += no-rc2
+OPENSSL_CIPHERS += no-rc2
 endif
 
 ifeq (,$(filter y,$(CONFIG_FIRMWARE_INCLUDE_OPENSSL_EC) $(CONFIG_FIRMWARE_INCLUDE_TOR)))
-OPENSSL_OPTIONS += no-ec
+OPENSSL_CIPHERS += no-ec
 endif
 
 all: download_test extract_test config_test
