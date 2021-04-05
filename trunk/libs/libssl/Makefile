@@ -22,7 +22,7 @@ OPENSSL_CIPHERS = no-capieng no-cms no-rfc3779 no-seed \
   no-devcryptoeng no-ssl3-method no-tests no-sm2 \
   no-sm3 no-sm4 no-afalgeng no-comp
 
-OPENSSL_CIPHERS += no-chacha no-poly1305 no-psk no-cms no-srp no-tls1_3 no-deprecated no-asm
+OPENSSL_CIPHERS += no-chacha no-poly1305
 ifneq ($(CONFIG_FIRMWARE_INCLUDE_TOR),y)
 OPENSSL_CIPHERS += no-engine
 endif
