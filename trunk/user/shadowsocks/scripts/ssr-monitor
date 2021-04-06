@@ -137,24 +137,4 @@ do
 			( /usr/bin/ssr-local -c /tmp/shadowsocksr_s.json -u -l $sock5_port -f /tmp/ssr-local.pid &)
 		fi   
 	fi
-	#pdnsd
-	if [ $pdnsd_process -eq 1 ] ;then
-		icount=`ps -w  | grep pdnsd |grep -v grep| wc -l`
-		if [ $icount -lt $pdnsd_process ]  #如果进程挂掉就重启它
-		then
-			logger -t "$NAME" "pdnsd tunnel error.restart!"
-			killall -q -9 pdnsd
-			pdnsd -c /tmp/pdnsd.conf >/dev/null 2>&1 &
-		fi   
-	fi      
-	#dns2tcp
-	if [ $pdnsd_process -eq 0 ] ;then
-		icount=`ps -w  | grep dns2tcp |grep -v grep| wc -l`
-		if [ $icount -eq $pdnsd_process ]  #如果进程挂掉就重启它
-		then
-			logger -t "$NAME" "dns2tcp tunnel error.restart!"
-			killall -q -9 dns2tcp
-			dns2tcp -L"127.0.0.1#5353" -R"$(nvram get tunnel_forward)" >/dev/null 2>&1 &
-		fi 
-	fi
 done
