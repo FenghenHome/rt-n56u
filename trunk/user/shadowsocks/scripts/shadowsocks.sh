@@ -11,6 +11,8 @@
 NAME=shadowsocksr
 LOCK_FILE=/tmp/ssrplus.lock
 LOG_FILE=/tmp/ssrplus.log
+TMP_PATH=/tmp/ssrplus
+TMP_BIN_PATH=$TMP_PATH/bin
 trojan_local_enable=`nvram get trojan_local_enable`
 trojan_link=`nvram get trojan_link`
 trojan_local=`nvram get trojan_local`
@@ -351,16 +353,6 @@ EOF
 	fi
 }
 
-clear_iptable()
-{
-	s5_port=$(nvram get socks5_port)
-	iptables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
-	iptables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
-	ip6tables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
-	ip6tables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
-	
-}
-
 start_watchcat() {
 	if [ $(nvram get ss_watchcat) = 1 ]; then
 		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+v2ray_enable+local_enable+trojan_enable
@@ -474,12 +466,23 @@ ssp_close() {
 	/usr/bin/ss-rules -f
 	ps -w | grep -v "grep" | grep ssr-monitor | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
 	ps -w | grep -v "grep" | grep "sleep 0000" | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
+	ps -w | grep -v "grep" | grep "$TMP_PATH" | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
 	kill_process
 	rm -f /tmp/ssr-monitor.lock
 	sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
 	sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
 	clear_iptable
 	/sbin/restart_dhcpd
+}
+
+clear_iptable()
+{
+	s5_port=$(nvram get socks5_port)
+	iptables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
+	iptables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
+	ip6tables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
+	ip6tables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
+	
 }
 
 kill_process() {
