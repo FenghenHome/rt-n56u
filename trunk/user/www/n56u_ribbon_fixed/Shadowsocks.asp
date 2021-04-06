@@ -1590,7 +1590,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															</select>
 														</td>
 													</tr>
-													<tr id="row_pdnsd_enable">
+													<!--<tr id="row_pdnsd_enable">
 														<th width="50%">DNS解析方式(仅GFW模式生效)</th>
 														<td>
 															<select name="pdnsd_enable" id="pdnsd_enable" class="input"
@@ -1600,7 +1600,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															</select>
 														</td>
 													</tr>
-													<!--<tr id="row_china_dns" style="display:none;">
+													<tr id="row_china_dns" style="display:none;">
 														<th width="50%">国内DNS(仅chinadns-ng生效)</th>
 														<td>
 															<select name="china_dns" class="input"
@@ -1617,7 +1617,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																<option value="1.2.4.8#53">cnnic DNS (1.2.4.8)</option>
 															</select>
 														</td>
-													</tr>-->
+													</tr>
 													<tr id="row_tunnel_forward" style="display:none;">
 														<th width="50%">国外DNS</th>
 														<td>
@@ -1653,7 +1653,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	(114.114.115.115)</option>
 															</select>
 														</td>
-													</tr>
+													</tr>-->
 													<tr>
 														<th>拦截广告</th>
 														<td>
