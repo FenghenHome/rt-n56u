@@ -31,7 +31,6 @@ trojan_enable=0
 redir_udp=0
 tunnel_enable=0
 local_enable=0
-pdnsd_enable_flag=0
 wan_bp_ips="/tmp/whiteip.txt"
 wan_fw_ips="/tmp/blackip.txt"
 lan_fp_ips="/tmp/lan_ip.txt"
@@ -364,9 +363,9 @@ clear_iptable()
 
 start_watchcat() {
 	if [ $(nvram get ss_watchcat) = 1 ]; then
-		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+v2ray_enable+local_enable+pdnsd_enable_flag+trojan_enable
+		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+v2ray_enable+local_enable+trojan_enable
 		if [ $total_count -gt 0 ]; then
-			/usr/bin/ssr-monitor $server_count $redir_tcp $redir_udp $tunnel_enable $v2ray_enable $local_enable $pdnsd_enable_flag $trojan_enable >/dev/null 2>&1 &
+			/usr/bin/ssr-monitor $server_count $redir_tcp $redir_udp $tunnel_enable $v2ray_enable $local_enable $trojan_enable >/dev/null 2>&1 &
 		fi
 	fi
 }
@@ -553,20 +552,7 @@ kill_process() {
 		kill -9 "$cnd_process" >/dev/null 2>&1
 	fi
 
-	dns2tcp_process=$(pidof dns2tcp)
-	if [ -n "$dns2tcp_process" ]; then
-		logger -t "SS" "关闭dns2tcp进程..."
-		killall dns2tcp >/dev/null 2>&1
-		kill -9 "$dns2tcp_process" >/dev/null 2>&1
-	fi
-	
-	pdnsd_process=$(pidof pdnsd)
-	if [ -n "$pdnsd_process" ]; then
-		logger -t "SS" "关闭pdnsd进程..."
-		killall pdnsd >/dev/null 2>&1
-		kill -9 "$pdnsd_process" >/dev/null 2>&1
-	fi
-	
+
 	microsocks_process=$(pidof microsocks)
 	if [ -n "$microsocks_process" ]; then
 		logger -t "SS" "关闭socks5服务端进程..."
