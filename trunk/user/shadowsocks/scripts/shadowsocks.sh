@@ -76,49 +76,6 @@ unlock() {
 	done
 }
 
-_exit() {
-	local rc=$1
-	unset_lock
-	exit ${rc}
-}
-
-start_dns() {
-case "$run_mode" in
-	router)
-		pdnsd_enable_flag=2	
-	;;
-	gfw)
-		if [ $(nvram get pdnsd_enable) = 0 ]; then
-			dnsstr="$(nvram get tunnel_forward)"
-			dnsserver=$(echo "$dnsstr" | awk -F '#' '{print $1}')
-			#dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
-			#ipset add gfwlist $dnsserver 2>/dev/null
-			logger -st "SS" "启动dns2tcp：5353端口..."
-			#dns2tcp -L"127.0.0.1#5353" -R"$dnsstr" >/dev/null 2>&1 &
-			pdnsd_enable_flag=2
-			logger -st "SS" "开始处理gfwlist..."
-		fi
-		if [ $(nvram get pdnsd_enable) = 1 ]; then
-			dnsstr="$(nvram get tunnel_forward)"
-			dnsserver=$(echo "$dnsstr" | awk -F '#' '{print $1}')
-			#dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
-			#ipset add gfwlist $dnsserver 2>/dev/null
-			logger -st "SS" "启动pdnsd：5353端口..."
-			#/usr/bin/pdnsd-gfw.sh start > /dev/null 2>&1 &
-			pdnsd_enable_flag=2
-			logger -st "SS" "开始处理gfwlist..."
-		fi
-		;;
-	oversea)
-		ipset add gfwlist $dnsserver 2>/dev/null
-;;
-	*)
-		ipset -N ss_spec_wan_ac hash:net 2>/dev/null
-		ipset add ss_spec_wan_ac $dnsserver 2>/dev/null
-	;;
-	esac
-	/sbin/restart_dhcpd
-}
 
 find_bin() {
 	case "$1" in
@@ -499,7 +456,6 @@ if rules; then
 		start_redir_udp
         #start_rules
 		#start_AD
-        start_dns
 		fi
 		fi
         start_local
@@ -625,7 +581,6 @@ ressp() {
 	BACKUP_SERVER=$(nvram get backup_server)
 	start_redir $BACKUP_SERVER
 	start_rules $BACKUP_SERVER
-	start_dns
 	start_local
 	start_watchcat
 	auto_update
