@@ -9,6 +9,8 @@
 # See /LICENSE for more information.
 #
 NAME=shadowsocksr
+LOCK_FILE=/var/lock/ssrplus.lock
+LOG_FILE=/tmp/ssrplus.log
 trojan_local_enable=`nvram get trojan_local_enable`
 trojan_link=`nvram get trojan_link`
 trojan_local=`nvram get trojan_local`
@@ -38,6 +40,41 @@ ss_turn=`nvram get ss_turn`
 lan_con=`nvram get lan_con`
 GLOBAL_SERVER=`nvram get global_server`
 socks=""
+
+clean_log() {
+	local logsnum=$(cat $LOG_FILE 2>/dev/null | wc -l)
+	[ "$logsnum" -gt 1000 ] && {
+		echo "$(date "+%Y-%m-%d %H:%M:%S") 日志文件过长，清空处理！" >$LOG_FILE
+	}
+}
+
+echolog() {
+	local d="$(date "+%Y-%m-%d %H:%M:%S")"
+	echo -e "$d: $*" >>$LOG_FILE
+}
+
+set_lock() {
+	exec 1000>"$LOCK_FILE"
+	flock -xn 1000
+}
+
+unset_lock() {
+	flock -u 1000
+	rm -rf "$LOCK_FILE"
+}
+
+unlock() {
+	failcount=1
+	while [ "$failcount" -le 10 ]; do
+		if [ -f "$LOCK_FILE" ]; then
+			let "failcount++"
+			sleep 1s
+			[ "$failcount" -ge 10 ] && unset_lock
+		else
+			break
+		fi
+	done
+}
 
 find_bin() {
 	case "$1" in
@@ -160,101 +197,12 @@ fi
 	esac
 }
 
-get_arg_out() {
-	router_proxy="1"
-	case "$router_proxy" in
-	1) echo "-o" ;;
-	2) echo "-O" ;;
-	esac
-}
-
-start_rules() {
-    logger -t "SS" "正在添加防火墙规则..."
-	lua /etc_ro/ss/getconfig.lua $GLOBAL_SERVER > /tmp/server.txt
-	server=`cat /tmp/server.txt` 
-	cat /etc/storage/ss_ip.sh | grep -v '^!' | grep -v "^$" >$wan_fw_ips
-	cat /etc/storage/ss_wan_ip.sh | grep -v '^!' | grep -v "^$" >$wan_bp_ips
-	#resolve name
-	if echo $server | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$" >/dev/null; then
-		server=${server}
-	elif [ "$server" != "${server#*:[0-9a-fA-F]}" ]; then
-		server=${server}
-	else
-		server=$(ping ${server} -s 1 -c 1 | grep PING | cut -d'(' -f 2 | cut -d')' -f1)
-		if echo $server | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$" >/dev/null; then
-			echo $server >/etc/storage/ssr_ip
-		else
-			server=$(cat /etc/storage/ssr_ip)
-		fi
-	fi
-	local_port="1080"
-	lan_ac_ips=$lan_ac_ips
-	lan_ac_mode="b"
-	#if [ "$GLOBAL_SERVER" == "$UDP_RELAY_SERVER" ]; then
-	#	ARG_UDP="-u"
-	if [ "$UDP_RELAY_SERVER" != "nil" ]; then
-		ARG_UDP="-U"
-		lua /etc_ro/ss/getconfig.lua $UDP_RELAY_SERVER > /tmp/userver.txt
-	    udp_server=`cat /tmp/userver.txt` 
-		udp_local_port="1080"
-	fi
-	if [ -n "$lan_ac_ips" ]; then
-		case "$lan_ac_mode" in
-		w | W | b | B) ac_ips="$lan_ac_mode$lan_ac_ips" ;;
-		esac
-	fi
-	#ac_ips="b"
-	gfwmode=""
-	if [ "$run_mode" = "gfw" ]; then
-		gfwmode="-g"
-	elif [ "$run_mode" = "router" ]; then
-		gfwmode="-r"
-	elif [ "$run_mode" = "oversea" ]; then
-		gfwmode="-c"
-	elif [ "$run_mode" = "all" ]; then
-		gfwmode="-z"
-	fi
-	if [ "$lan_con" = "0" ]; then
-		rm -f $lan_fp_ips
-		lancon="all"
-		lancons="全部IP走代理"
-		cat /etc/storage/ss_lan_ip.sh | grep -v '^!' | grep -v "^$" >$lan_fp_ips
-	elif [ "$lan_con" = "1" ]; then
-		rm -f $lan_fp_ips
-		lancon="bip"
-		lancons="指定IP走代理,请到规则管理页面添加需要走代理的IP。"
-		cat /etc/storage/ss_lan_bip.sh | grep -v '^!' | grep -v "^$" >$lan_fp_ips
-	fi
-	dports=$(nvram get s_dports)
-	if [ $dports = "0" ]; then
-		proxyport=" "
-	else
-		proxyport="-m multiport --dports 22,53,587,465,995,993,143,80,443,853,9418"
-	fi
-	/usr/bin/ss-rules \
-	-s "$server" \
-	-l "$local_port" \
-	-S "$udp_server" \
-	-L "$udp_local_port" \
-	-a "$ac_ips" \
-	-i "/etc/storage/chinadns/chnroute.txt" \
-	-b "$wan_bp_ips" \
-	-w "$wan_fw_ips" \
-	-p "$lan_fp_ips" \
-	-G "$lan_gm_ips" \
-	-G "$lan_gm_ips" \
-	-D "$proxyport" \
-	-k "$lancon" \
-	$(get_arg_out) $gfwmode $ARG_UDP
-	return $?
-}
-
 start_redir_tcp() {
 	ARG_OTA=""
 	gen_config_file $GLOBAL_SERVER 0 1080
 	stype=$(nvram get d_type)
 	local bin=$(find_bin $stype)
-	[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Main node:Can't find $bin program, can't start!" >>/tmp/ssrplus.log && return 1
+	[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Main node:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
 	if [ "$(nvram get ss_threads)" = "0" ]; then
 		threads=$(cat /proc/cpuinfo | grep 'processor' | wc -l)
 	else
@@ -270,20 +218,20 @@ start_redir_tcp() {
 			usleep 500000
 		done
 		redir_tcp=1
-		echo "$(date "+%Y-%m-%d %H:%M:%S") Shadowsocks/ShadowsocksR $threads 线程启动成功!" >>/tmp/ssrplus.log
+		echo "$(date "+%Y-%m-%d %H:%M:%S") Shadowsocks/ShadowsocksR $threads 线程启动成功!" >>$LOG_FILE
 		;;
 	trojan)
 		for i in $(seq 1 $threads); do
-			$bin --config $trojan_json_file >>/tmp/ssrplus.log 2>&1 &
+			$bin --config $trojan_json_file >>$LOG_FILE 2>&1 &
 			usleep 500000
 		done
-		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin --version 2>&1 | head -1) Started!" >>/tmp/ssrplus.log
+		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin --version 2>&1 | head -1) Started!" >>$LOG_FILE
 		;;
 	v2ray)
 		if [ "$UDP_RELAY_SERVER" != "same" ] ; then
 		$bin -config $v2_json_file >/dev/null 2>&1 &
 		fi
-		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin -version | head -1) 启动成功!" >>/tmp/ssrplus.log
+		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin -version | head -1) 启动成功!" >>$LOG_FILE
 		;;
 	socks5)
 		for i in $(seq 1 $threads); do
@@ -301,7 +249,7 @@ start_redir_udp() {
 		logger -t "SS" "启动$utype游戏UDP中继服务器"
 		utype=$(nvram get ud_type)
 		local bin=$(find_bin $utype)
-		[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") UDP TPROXY Relay:Can't find $bin program, can't start!" >>/tmp/ssrplus.log && return 1
+		[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") UDP TPROXY Relay:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
 		case "$utype" in
 		ss | ssr)
 			ARG_OTA=""
@@ -375,25 +323,6 @@ case "$run_mode" in
 	/sbin/restart_dhcpd
 }
 
-start_AD() {
-	mkdir -p /tmp/dnsmasq.dom
-	curl -k -s -o /tmp/adnew.conf --connect-timeout 10 --retry 3 $(nvram get ss_adblock_url)
-	if [ ! -f "/tmp/adnew.conf" ]; then
-		logger -t "SS" "AD文件下载失败，可能是地址失效或者网络异常！"
-	else
-		logger -t "SS" "AD文件下载成功"
-		if [ -f "/tmp/adnew.conf" ]; then
-			check = `grep -wq "address=" /tmp/adnew.conf`
-	  		if [ ! -n "$check" ] ; then
-	    			cp /tmp/adnew.conf /tmp/dnsmasq.dom/ad.conf
-	  		else
-			    cat /tmp/adnew.conf | grep ^\|\|[^\*]*\^$ | sed -e 's:||:address\=\/:' -e 's:\^:/0\.0\.0\.0:' > /tmp/dnsmasq.dom/ad.conf
-			fi
-		fi
-	fi
-	rm -f /tmp/adnew.conf
-}
-
 
 # ================================= 启动 Socks5代理 ===============================
 start_local() {
@@ -403,33 +332,33 @@ start_local() {
 	[ "$local_server" == "same" ] && local_server=$GLOBAL_SERVER
 	local type=$(nvram get s5_type)
 	local bin=$(find_bin $type)
-	[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:Can't find $bin program, can't start!" >>/tmp/ssrplus.log && return 1
+	[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
 	case "$type" in
 	ss | ssr)
 		local name="Shadowsocks"
 		local bin=$(find_bin ss-local)
-		[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:Can't find $bin program, can't start!" >>/tmp/ssrplus.log && return 1
+		[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
 		[ "$type" == "ssr" ] && name="ShadowsocksR"
 		gen_config_file $local_server 3 $s5_port
 		$bin -c $CONFIG_SOCK5_FILE -u -f /var/run/ssr-local.pid >/dev/null 2>&1
-		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$name Started!" >>/tmp/ssrplus.log
+		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$name Started!" >>$LOG_FILE
 		;;
 	v2ray)
 		lua /etc_ro/ss/genv2config.lua $local_server tcp 0 $s5_port >/tmp/v2-ssr-local.json
 		sed -i 's/\\//g' /tmp/v2-ssr-local.json
 		$bin -config /tmp/v2-ssr-local.json >/dev/null 2>&1 &
-		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$($bin -version | head -1) Started!" >>/tmp/ssrplus.log
+		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$($bin -version | head -1) Started!" >>$LOG_FILE
 		;;
 	trojan)
 		lua /etc_ro/ss/gentrojanconfig.lua $local_server client $s5_port >/tmp/trojan-ssr-local.json
 		sed -i 's/\\//g' /tmp/trojan-ssr-local.json
 		$bin --config /tmp/trojan-ssr-local.json >/dev/null 2>&1 &
-		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$($bin --version 2>&1 | head -1) Started!" >>/tmp/ssrplus.log
+		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$($bin --version 2>&1 | head -1) Started!" >>$LOG_FILE
 		;;
 	*)
 		[ -e /proc/sys/net/ipv6 ] && local listenip='-i ::'
 		microsocks $listenip -p $s5_port ssr-local >/dev/null 2>&1 &
-		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$type Started!" >>/tmp/ssrplus.log
+		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$type Started!" >>$LOG_FILE
 		;;
 	esac
 	local_enable=1
@@ -446,16 +375,6 @@ rules() {
 		return 0
 	else
 		return 1
-	fi
-}
-
-start_watchcat() {
-	if [ $(nvram get ss_watchcat) = 1 ]; then
-		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+v2ray_enable+local_enable+pdnsd_enable_flag+trojan_enable
-		if [ $total_count -gt 0 ]; then
-			#param:server(count) redir_tcp(0:no,1:yes)  redir_udp tunnel kcp local gfw
-			/usr/bin/ssr-monitor $server_count $redir_tcp $redir_udp $tunnel_enable $v2ray_enable $local_enable $pdnsd_enable_flag $trojan_enable >/dev/null 2>&1 &
-		fi
 	fi
 }
 
@@ -481,10 +400,104 @@ EOF
 	fi
 }
 
+clear_iptable()
+{
+	s5_port=$(nvram get socks5_port)
+	iptables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
+	iptables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
+	ip6tables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
+	ip6tables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
+	
+}
+
+start_watchcat() {
+	if [ $(nvram get ss_watchcat) = 1 ]; then
+		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+v2ray_enable+local_enable+pdnsd_enable_flag+trojan_enable
+		if [ $total_count -gt 0 ]; then
+			/usr/bin/ssr-monitor $server_count $redir_tcp $redir_udp $tunnel_enable $v2ray_enable $local_enable $pdnsd_enable_flag $trojan_enable >/dev/null 2>&1 &
+		fi
+	fi
+}
+
+start_rules() {
+    logger -t "SS" "正在添加防火墙规则..."
+	lua /etc_ro/ss/getconfig.lua $GLOBAL_SERVER > /tmp/server.txt
+	server=`cat /tmp/server.txt` 
+	cat /etc/storage/ss_ip.sh | grep -v '^!' | grep -v "^$" >$wan_fw_ips
+	cat /etc/storage/ss_wan_ip.sh | grep -v '^!' | grep -v "^$" >$wan_bp_ips
+	#resolve name
+	if echo $server | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$" >/dev/null; then
+		server=${server}
+	elif [ "$server" != "${server#*:[0-9a-fA-F]}" ]; then
+		server=${server}
+	else
+		server=$(ping ${server} -s 1 -c 1 | grep PING | cut -d'(' -f 2 | cut -d')' -f1)
+		if echo $server | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$" >/dev/null; then
+			echo $server >/etc/storage/ssr_ip
+		else
+			server=$(cat /etc/storage/ssr_ip)
+		fi
+	fi
+	local_port="1080"
+	if [ "$UDP_RELAY_SERVER" != "nil" ]; then
+		ARG_UDP="-U"
+		lua /etc_ro/ss/getconfig.lua $UDP_RELAY_SERVER > /tmp/userver.txt
+		udp_server=`cat /tmp/userver.txt` 
+		udp_local_port="1080"
+	fi
+	gfwmode() {
+		case "$run_mode" in
+		gfw) echo "-g" ;;
+		router) echo "-r" ;;
+		oversea) echo "-c" ;;
+		all) echo "-z" ;;
+		esac
+	}
+	if [ "$lan_con" = "0" ]; then
+		rm -f $lan_fp_ips
+		lancon="all"
+		lancons="全部IP走代理"
+		cat /etc/storage/ss_lan_ip.sh | grep -v '^!' | grep -v "^$" >$lan_fp_ips
+	elif [ "$lan_con" = "1" ]; then
+		rm -f $lan_fp_ips
+		lancon="bip"
+		lancons="指定IP走代理,请到规则管理页面添加需要走代理的IP。"
+		cat /etc/storage/ss_lan_bip.sh | grep -v '^!' | grep -v "^$" >$lan_fp_ips
+	fi
+	dports=$(nvram get s_dports)
+	if [ $dports = "0" ]; then
+		proxyport=" "
+	else
+		proxyport="-m multiport --dports 22,53,587,465,995,993,143,80,443,853,9418"
+	fi
+	get_arg_out() {
+		router_proxy="1"
+		case "$router_proxy" in
+		1) echo "-o" ;;
+		2) echo "-O" ;;
+		esac
+	}
+	/usr/bin/ss-rules \
+	-s "$server" \
+	-l "$local_port" \
+	-S "$udp_server" \
+	-L "$udp_local_port" \
+	-a "$ac_ips" \
+	-i "/etc/storage/chinadns/chnroute.txt" \
+	-b "$wan_bp_ips" \
+	-w "$wan_fw_ips" \
+	-p "$lan_fp_ips" \
+	-G "$lan_gm_ips" \
+	-D "$proxyport" \
+	-k "$lancon" \
+	$(get_arg_out) $(gfwmode) $ARG_UDP
+	return $?
+}
+
 # ================================= 启动 SS ===============================
 ssp_start() { 
-    rm -rf /tmp/ssrplus.log
-	ulimit -n 65536
+	echolog "----------start------------"
+	ulimit -n 65535
     ss_enable=`nvram get ss_enable`
 if rules; then
 		if start_redir_tcp; then
@@ -508,26 +521,14 @@ if rules; then
 # ================================= 关闭SS ===============================
 
 ssp_close() {
-	rm -rf /tmp/cdn
 	/usr/bin/ss-rules -f
-	#kill -9 $(ps | grep ssr-switch | grep -v grep | awk '{print $1}') >/dev/null 2>&1
-	kill -9 $(ps | grep ssr-monitor | grep -v grep | awk '{print $1}') >/dev/null 2>&1
+	ps -w | grep -v "grep" | grep ssr-monitor | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
+	ps -w | grep -v "grep" | grep "sleep 0000" | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
 	kill_process
 	sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
 	sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
 	clear_iptable
 	/sbin/restart_dhcpd
-}
-
-
-clear_iptable()
-{
-	s5_port=$(nvram get socks5_port)
-	iptables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
-	iptables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
-	ip6tables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
-	ip6tables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
-	
 }
 
 kill_process() {
