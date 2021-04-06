@@ -9,7 +9,7 @@
 # See /LICENSE for more information.
 #
 NAME=shadowsocksr
-LOCK_FILE=/var/lock/ssrplus.lock
+LOCK_FILE=/tmp/ssrplus.lock
 LOG_FILE=/tmp/ssrplus.log
 trojan_local_enable=`nvram get trojan_local_enable`
 trojan_link=`nvram get trojan_link`
@@ -74,6 +74,50 @@ unlock() {
 			break
 		fi
 	done
+}
+
+_exit() {
+	local rc=$1
+	unset_lock
+	exit ${rc}
+}
+
+start_dns() {
+case "$run_mode" in
+	router)
+		pdnsd_enable_flag=2	
+	;;
+	gfw)
+		if [ $(nvram get pdnsd_enable) = 0 ]; then
+			dnsstr="$(nvram get tunnel_forward)"
+			dnsserver=$(echo "$dnsstr" | awk -F '#' '{print $1}')
+			#dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
+			#ipset add gfwlist $dnsserver 2>/dev/null
+			logger -st "SS" "启动dns2tcp：5353端口..."
+			#dns2tcp -L"127.0.0.1#5353" -R"$dnsstr" >/dev/null 2>&1 &
+			pdnsd_enable_flag=2
+			logger -st "SS" "开始处理gfwlist..."
+		fi
+		if [ $(nvram get pdnsd_enable) = 1 ]; then
+			dnsstr="$(nvram get tunnel_forward)"
+			dnsserver=$(echo "$dnsstr" | awk -F '#' '{print $1}')
+			#dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
+			#ipset add gfwlist $dnsserver 2>/dev/null
+			logger -st "SS" "启动pdnsd：5353端口..."
+			#/usr/bin/pdnsd-gfw.sh start > /dev/null 2>&1 &
+			pdnsd_enable_flag=2
+			logger -st "SS" "开始处理gfwlist..."
+		fi
+		;;
+	oversea)
+		ipset add gfwlist $dnsserver 2>/dev/null
+;;
+	*)
+		ipset -N ss_spec_wan_ac hash:net 2>/dev/null
+		ipset add ss_spec_wan_ac $dnsserver 2>/dev/null
+	;;
+	esac
+	/sbin/restart_dhcpd
 }
 
 find_bin() {
@@ -241,7 +285,7 @@ start_redir_tcp() {
 	    ;;
 	esac
 	return 0
-	}
+}
 	
 start_redir_udp() {
 	if [ "$UDP_RELAY_SERVER" != "nil" ]; then
@@ -273,56 +317,7 @@ start_redir_udp() {
 		esac
 	fi
 	return 0
-	}
-	ss_switch=$(nvram get backup_server)
-	if [ $ss_switch != "nil" ]; then
-		switch_time=$(nvram get ss_turn_s)
-		switch_timeout=$(nvram get ss_turn_ss)
-		#/usr/bin/ssr-switch start $switch_time $switch_timeout &
-		socks="-o"
-	fi
-	#return $?
-
-
-
-start_dns() {
-case "$run_mode" in
-	router)
-		pdnsd_enable_flag=2	
-	;;
-	gfw)
-		if [ $(nvram get pdnsd_enable) = 0 ]; then
-			dnsstr="$(nvram get tunnel_forward)"
-			dnsserver=$(echo "$dnsstr" | awk -F '#' '{print $1}')
-			#dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
-			#ipset add gfwlist $dnsserver 2>/dev/null
-			logger -st "SS" "启动dns2tcp：5353端口..."
-			#dns2tcp -L"127.0.0.1#5353" -R"$dnsstr" >/dev/null 2>&1 &
-			pdnsd_enable_flag=2
-			logger -st "SS" "开始处理gfwlist..."
-		fi
-		if [ $(nvram get pdnsd_enable) = 1 ]; then
-			dnsstr="$(nvram get tunnel_forward)"
-			dnsserver=$(echo "$dnsstr" | awk -F '#' '{print $1}')
-			#dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
-			#ipset add gfwlist $dnsserver 2>/dev/null
-			logger -st "SS" "启动pdnsd：5353端口..."
-			#/usr/bin/pdnsd-gfw.sh start > /dev/null 2>&1 &
-			pdnsd_enable_flag=2
-			logger -st "SS" "开始处理gfwlist..."
-		fi
-		;;
-	oversea)
-		ipset add gfwlist $dnsserver 2>/dev/null
-;;
-	*)
-		ipset -N ss_spec_wan_ac hash:net 2>/dev/null
-		ipset add ss_spec_wan_ac $dnsserver 2>/dev/null
-	;;
-	esac
-	/sbin/restart_dhcpd
 }
-
 
 # ================================= 启动 Socks5代理 ===============================
 start_local() {
@@ -525,6 +520,7 @@ ssp_close() {
 	ps -w | grep -v "grep" | grep ssr-monitor | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
 	ps -w | grep -v "grep" | grep "sleep 0000" | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
 	kill_process
+	rm -f /tmp/ssr-monitor.lock
 	sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
 	sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
 	clear_iptable
