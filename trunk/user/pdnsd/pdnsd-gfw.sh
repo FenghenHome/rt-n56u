@@ -3,10 +3,10 @@ dnsstr="$(nvram get tunnel_forward)"
 dnsserver=$(echo "$dnsstr" | awk -F '#' '{print $1}')
 dnsport=$(echo "$dnsstr" | awk -F '#' '{print $2}')
 pdnsd_genconfig() {	
-if [ ! -f /tmp/pdnsd/pdnsd.cache ]; then
+if [ ! -f "/tmp/pdnsd/pdnsd.cache" ]; then
     mkdir -p /tmp/pdnsd
     touch /tmp/pdnsd/pdnsd.cache
-    chown -R nobody.nogroup /tmp/pdnsd
+    chown -R nobody:nogroup /tmp/pdnsd
 fi
 
 cat <<-EOF >/tmp/pdnsd.conf
