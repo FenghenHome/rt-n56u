@@ -14,7 +14,7 @@ global {
     pid_file ="/tmp/dnscache.pid";
     run_as="nobody";
     server_ip = 0.0.0.0;        # pdnsd监听的网卡，0.0.0.0是全部网卡
-    server_port=65335;           # pdnsd监听的端口，不要和别的服务冲突即可
+    server_port=65353;           # pdnsd监听的端口，不要和别的服务冲突即可
     status_ctl = on;
     paranoid=on;                  # 二次请求模式，如果请求主DNS服务器返回的是垃圾地址，就向备用服务器请求
     query_method=udp_only;      
@@ -131,7 +131,7 @@ sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
 sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
 cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
 no-resolv
-server=127.0.0.1#65335
+server=127.0.0.1#65353
 EOF
 }
 
