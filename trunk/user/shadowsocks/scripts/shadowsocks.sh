@@ -79,6 +79,35 @@ unlock() {
 	done
 }
 
+_exit() {
+	local rc=$1
+	unset_lock
+	exit ${rc}
+}
+
+first_type() {
+	type -t -p "/bin/${1}" -p "/tmp/${1}" -p "${TMP_BIN_PATH}/${1}" -p "${1}" "$@" | head -n1
+}
+
+ln_start_bin() {
+	local file_func=${1}
+	local ln_name=${2}
+	shift 2
+	if [ "${file_func%%/*}" != "${file_func}" ]; then
+		[ ! -L "${file_func}" ] && {
+			ln -s "${file_func}" "${TMP_BIN_PATH}/${ln_name}" >/dev/null 2>&1
+			file_func="${TMP_BIN_PATH}/${ln_name}"
+		}
+		[ -x "${file_func}" ] || echolog "$(readlink ${file_func}) 没有执行权限，无法启动：${file_func} $*"
+	fi
+	[ -x "${file_func}" ] || {
+		echolog "找不到 ${file_func}，无法启动..."
+		echolog "-----------end------------"
+		_exit 2
+	}
+	${file_func:-echolog "  - ${ln_name}"} "$@" >/dev/null 2>&1 &
+}
+
 
 gen_config_file() {
 	fastopen="false"
@@ -177,12 +206,12 @@ fi
 
 start_udp() {
 	if [ "$UDP_RELAY_SERVER" != "nil" ]; then
+		local type=$(nvram get ud_type)
 		redir_udp=1
-		logger -t "SS" "启动$utype游戏UDP中继服务器"
-		utype=$(nvram get ud_type)
-		local bin=$(find_bin $utype)
+		logger -t "SS" "启动$type游戏UDP中继服务器"
+		local bin=$(find_bin $type)
 		[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") UDP TPROXY Relay:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
-		case "$utype" in
+		case "$type" in
 		ss | ssr)
 			ARG_OTA=""
 			gen_config_file $UDP_RELAY_SERVER 1 1080
@@ -365,9 +394,9 @@ start_rules() {
 	fi
 	dports=$(nvram get s_dports)
 	if [ $dports = "0" ]; then
-		proxyport=" "
+		local proxyport=" "
 	else
-		proxyport="-m multiport --dports 22,53,587,465,995,993,143,80,443,853,9418"
+		local proxyport="-m multiport --dports 22,53,587,465,995,993,143,80,443,853,9418"
 	fi
 	get_arg_out() {
 		router_proxy="1"
