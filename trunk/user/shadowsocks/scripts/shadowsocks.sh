@@ -3,6 +3,7 @@
 # Copyright (C) 2017 openwrt-ssr
 # Copyright (C) 2017 yushi studio <ywb94@qq.com>
 # Copyright (C) 2018 lean <coolsnowwolf@gmail.com>
+# Copyright (C) 2020 Mattraks <mattraks@gmail.com>
 # Copyright (C) 2019 chongshengB <bkye@vip.qq.com>
 #
 # This is free software, licensed under the GNU General Public License v3.
@@ -112,7 +113,7 @@ gen_config_file() {
 	1) config_file=$CONFIG_UDP_FILE && local stype=$(nvram get ud_type) ;;
 	*) config_file=$CONFIG_SOCK5_FILE && local stype=$(nvram get s5_type) ;;
 	esac
-local type=$stype
+	local type=$stype
 	case "$type" in
 	ss)
 		lua /etc_ro/ss/genssconfig.lua $1 $3 >$config_file
@@ -200,53 +201,7 @@ fi
 	esac
 }
 
-start_redir_tcp() {
-	ARG_OTA=""
-	gen_config_file $GLOBAL_SERVER 0 1080
-	stype=$(nvram get d_type)
-	local bin=$(find_bin $stype)
-	[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Main node:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
-	if [ "$(nvram get ss_threads)" = "0" ]; then
-		threads=$(cat /proc/cpuinfo | grep 'processor' | wc -l)
-	else
-		threads=$(nvram get ss_threads)
-	fi
-	logger -t "SS" "启动$stype主服务器..."
-	case "$stype" in
-	ss | ssr)
-		last_config_file=$CONFIG_FILE
-		pid_file="/tmp/ssr-retcp.pid"
-		for i in $(seq 1 $threads); do
-			$bin -c $CONFIG_FILE $ARG_OTA -f /tmp/ssr-retcp_$i.pid >/dev/null 2>&1
-			usleep 500000
-		done
-		redir_tcp=1
-		echo "$(date "+%Y-%m-%d %H:%M:%S") Shadowsocks/ShadowsocksR $threads 线程启动成功!" >>$LOG_FILE
-		;;
-	trojan)
-		for i in $(seq 1 $threads); do
-			$bin --config $trojan_json_file >>$LOG_FILE 2>&1 &
-			usleep 500000
-		done
-		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin --version 2>&1 | head -1) Started!" >>$LOG_FILE
-		;;
-	v2ray)
-		if [ "$UDP_RELAY_SERVER" != "same" ] ; then
-		$bin -config $v2_json_file >/dev/null 2>&1 &
-		fi
-		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin -version | head -1) 启动成功!" >>$LOG_FILE
-		;;
-	socks5)
-		for i in $(seq 1 $threads); do
-		lua /etc_ro/ss/gensocks.lua $GLOBAL_SERVER 1080 >/dev/null 2>&1 &
-		usleep 500000
-		done
-	    ;;
-	esac
-	return 0
-}
-	
-start_redir_udp() {
+start_udp() {
 	if [ "$UDP_RELAY_SERVER" != "nil" ]; then
 		redir_udp=1
 		logger -t "SS" "启动$utype游戏UDP中继服务器"
@@ -319,7 +274,53 @@ start_local() {
 	return 0
 }
 
-rules() {
+Start_Run() {
+	ARG_OTA=""
+	gen_config_file $GLOBAL_SERVER 0 1080
+	stype=$(nvram get d_type)
+	local bin=$(find_bin $stype)
+	[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Main node:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
+	if [ "$(nvram get ss_threads)" = "0" ]; then
+		threads=$(cat /proc/cpuinfo | grep 'processor' | wc -l)
+	else
+		threads=$(nvram get ss_threads)
+	fi
+	logger -t "SS" "启动$stype主服务器..."
+	case "$stype" in
+	ss | ssr)
+		last_config_file=$CONFIG_FILE
+		pid_file="/tmp/ssr-retcp.pid"
+		for i in $(seq 1 $threads); do
+			$bin -c $CONFIG_FILE $ARG_OTA -f /tmp/ssr-retcp_$i.pid >/dev/null 2>&1
+			usleep 500000
+		done
+		redir_tcp=1
+		echo "$(date "+%Y-%m-%d %H:%M:%S") Shadowsocks/ShadowsocksR $threads 线程启动成功!" >>$LOG_FILE
+		;;
+	trojan)
+		for i in $(seq 1 $threads); do
+			$bin --config $trojan_json_file >>$LOG_FILE 2>&1 &
+			usleep 500000
+		done
+		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin --version 2>&1 | head -1) Started!" >>$LOG_FILE
+		;;
+	v2ray)
+		if [ "$UDP_RELAY_SERVER" != "same" ] ; then
+		$bin -config $v2_json_file >/dev/null 2>&1 &
+		fi
+		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin -version | head -1) 启动成功!" >>$LOG_FILE
+		;;
+	socks5)
+		for i in $(seq 1 $threads); do
+		lua /etc_ro/ss/gensocks.lua $GLOBAL_SERVER 1080 >/dev/null 2>&1 &
+		usleep 500000
+		done
+	    ;;
+	esac
+	return 0
+}
+
+load_config() {
 	[ "$GLOBAL_SERVER" = "nil" ] && return 1
 	UDP_RELAY_SERVER=$(nvram get udp_relay_server)
 	if [ "$UDP_RELAY_SERVER" = "same" ]; then
@@ -329,28 +330,6 @@ rules() {
 		return 0
 	else
 		return 1
-	fi
-}
-
-auto_update() {
-	sed -i '/update_chnroute/d' /etc/storage/cron/crontabs/$http_username
-	sed -i '/update_gfwlist/d' /etc/storage/cron/crontabs/$http_username
-	sed -i '/update_adblock/d' /etc/storage/cron/crontabs/$http_username
-	sed -i '/ss-watchcat/d' /etc/storage/cron/crontabs/$http_username
-	if [ $(nvram get ss_update_chnroute) = "1" ]; then
-		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
-40 1 * * * /usr/bin/update_chnroute.sh > /dev/null 2>&1
-EOF
-	fi
-	if [ $(nvram get ss_update_gfwlist) = "1" ]; then
-		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
-45 1 * * * /usr/bin/update_gfwlist.sh > /dev/null 2>&1
-EOF
-	fi
-	if [ $(nvram get ss_update_adblock) = "1" ]; then
-		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
-50 1 * * * /usr/bin/update_adblock.sh > /dev/null 2>&1
-EOF
 	fi
 }
 
@@ -443,9 +422,9 @@ ssp_start() {
 	echolog "----------start------------"
 	ulimit -n 65535
     ss_enable=`nvram get ss_enable`
-if rules; then
-		if start_redir_tcp; then
-		start_redir_udp
+if load_config; then
+		if Start_Run; then
+		start_udp
         #start_rules
 		#start_AD
 		fi
@@ -484,6 +463,28 @@ clear_iptable()
 	ip6tables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
 	ip6tables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
 	
+}
+
+auto_update() {
+	sed -i '/update_chnroute/d' /etc/storage/cron/crontabs/$http_username
+	sed -i '/update_gfwlist/d' /etc/storage/cron/crontabs/$http_username
+	sed -i '/update_adblock/d' /etc/storage/cron/crontabs/$http_username
+	sed -i '/ss-watchcat/d' /etc/storage/cron/crontabs/$http_username
+	if [ $(nvram get ss_update_chnroute) = "1" ]; then
+		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
+40 1 * * * /usr/bin/update_chnroute.sh > /dev/null 2>&1
+EOF
+	fi
+	if [ $(nvram get ss_update_gfwlist) = "1" ]; then
+		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
+45 1 * * * /usr/bin/update_gfwlist.sh > /dev/null 2>&1
+EOF
+	fi
+	if [ $(nvram get ss_update_adblock) = "1" ]; then
+		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
+50 1 * * * /usr/bin/update_adblock.sh > /dev/null 2>&1
+EOF
+	fi
 }
 
 kill_process() {
@@ -556,6 +557,12 @@ kill_process() {
 		kill -9 "$cnd_process" >/dev/null 2>&1
 	fi
 
+	pdnsd_process=$(pidof pdnsd)
+	if [ -n "$pdnsd_process" ]; then
+		logger -t "SS" "关闭pdnsd进程..."
+		killall pdnsd >/dev/null 2>&1
+		kill -9 "$pdnsd_process" >/dev/null 2>&1
+	fi
 
 	microsocks_process=$(pidof microsocks)
 	if [ -n "$microsocks_process" ]; then
