@@ -33,6 +33,7 @@ trojan_enable=0
 redir_udp=0
 tunnel_enable=0
 local_enable=0
+pdnsd_enable_flag=0
 wan_bp_ips="/tmp/whiteip.txt"
 wan_fw_ips="/tmp/blackip.txt"
 lan_fp_ips="/tmp/lan_ip.txt"
@@ -355,9 +356,9 @@ EOF
 
 start_watchcat() {
 	if [ $(nvram get ss_watchcat) = 1 ]; then
-		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+v2ray_enable+local_enable+trojan_enable
+		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+v2ray_enable+local_enable+pdnsd_enable_flag+trojan_enable
 		if [ $total_count -gt 0 ]; then
-			/usr/bin/ssr-monitor $server_count $redir_tcp $redir_udp $tunnel_enable $v2ray_enable $local_enable $trojan_enable >/dev/null 2>&1 &
+			/usr/bin/ssr-monitor $server_count $redir_tcp $redir_udp $tunnel_enable $v2ray_enable $local_enable $pdnsd_enable_flag $trojan_enable >/dev/null 2>&1 &
 		fi
 	fi
 }
