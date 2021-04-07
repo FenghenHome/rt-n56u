@@ -16,7 +16,7 @@ global{
 	pid_file="/tmp/pdnsd.pid";
 	run_as="nobody";
 	server_ip=127.0.0.1;
-	server_port=5353;
+	server_port=5335;
 	status_ctl=on;
 	query_method=tcp_only;
 	min_ttl=1h;
