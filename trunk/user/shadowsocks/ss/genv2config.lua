@@ -34,7 +34,7 @@ local inbounds_settings = {}
 
 	local inbounds_dnsin = {
 			tag = "dns-in",
-			port = 5335,
+			port = 5353,
 			protocol = "dokodemo-door",
 			settings = {
 				address = "8.8.8.8",
