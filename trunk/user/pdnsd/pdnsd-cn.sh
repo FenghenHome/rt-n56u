@@ -1,10 +1,10 @@
 #!/bin/sh
 china_dns_server=`nvram get china_dns`
 pdnsd_genconfig() {	
-if [ ! -f /tmp/dnscache/pdnsd.cache ]; then
+if [ ! -f "/tmp/dnscache/pdnsd.cache" ]; then
     mkdir -p /tmp/dnscache
     echo -ne "pd13\000\000\000\000" > /tmp/dnscache/pdnsd.cache
-    chown -R nobody.nogroup /tmp/dnscache
+    chown -R nobody:nogroup /tmp/dnscache
 fi
 
 cat <<-EOF >/tmp/dnscache.conf
