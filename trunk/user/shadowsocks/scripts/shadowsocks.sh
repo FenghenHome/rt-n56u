@@ -80,32 +80,6 @@ unlock() {
 }
 
 
-find_bin() {
-	case "$1" in
-	ss) ret="/usr/bin/ss-redir" ;;
-	ss-local) ret="/usr/bin/ss-local" ;;
-	ssr) ret="/usr/bin/ssr-redir" ;;
-	ssr-local) ret="/usr/bin/ssr-local" ;;
-	ssr-server) ret="/usr/bin/ssr-server" ;;
-	v2ray)
-	if [ -f "/usr/bin/xray" ] ; then
-       ret="/usr/bin/xray"
-    else
-       ret="/tmp/xray"
-    fi
-    ;;
-	trojan)
-	if [ -f "/usr/bin/trojan" ] ; then
-       ret="/usr/bin/trojan"
-    else
-       ret="/tmp/trojan"
-    fi
-    ;;
-	socks5) ret="/usr/bin/ipt2socks" ;;
-	esac
-	echo $ret
-}
-
 gen_config_file() {
 	fastopen="false"
 	case "$2" in
@@ -235,7 +209,7 @@ start_udp() {
 
 # ================================= 启动 Socks5代理 ===============================
 start_local() {
-	local s5_port=$(nvram get socks5_port)
+	local local_port=$(nvram get socks5_port)
 	local local_server=$(nvram get socks5_enable)
 	[ "$local_server" == "nil" ] && return 1
 	[ "$local_server" == "same" ] && local_server=$GLOBAL_SERVER
@@ -248,26 +222,26 @@ start_local() {
 		local bin=$(find_bin ss-local)
 		[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
 		[ "$type" == "ssr" ] && name="ShadowsocksR"
-		gen_config_file $local_server 3 $s5_port
+		gen_config_file $local_server 3 $local_port
 		$bin -c $CONFIG_SOCK5_FILE -u -f /var/run/ssr-local.pid >/dev/null 2>&1
 		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$name Started!" >>$LOG_FILE
 		;;
 	v2ray)
-		lua /etc_ro/ss/genv2config.lua $local_server tcp 0 $s5_port >/tmp/v2-ssr-local.json
+		lua /etc_ro/ss/genv2config.lua $local_server tcp 0 $local_port >/tmp/v2-ssr-local.json
 		sed -i 's/\\//g' /tmp/v2-ssr-local.json
 		$bin -config /tmp/v2-ssr-local.json >/dev/null 2>&1 &
 		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$($bin -version | head -1) Started!" >>$LOG_FILE
 		;;
 	trojan)
-		lua /etc_ro/ss/gentrojanconfig.lua $local_server client $s5_port >/tmp/trojan-ssr-local.json
+		lua /etc_ro/ss/gentrojanconfig.lua $local_server client $local_port >/tmp/trojan-ssr-local.json
 		sed -i 's/\\//g' /tmp/trojan-ssr-local.json
 		$bin --config /tmp/trojan-ssr-local.json >/dev/null 2>&1 &
-		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$($bin --version 2>&1 | head -1) Started!" >>$LOG_FILE
+		echolog "Global_Socks5:$($bin --version 2>&1 | head -1) Started!"
 		;;
 	*)
 		[ -e /proc/sys/net/ipv6 ] && local listenip='-i ::'
-		microsocks $listenip -p $s5_port ssr-local >/dev/null 2>&1 &
-		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$type Started!" >>$LOG_FILE
+		microsocks $listenip -p $local_port tcp-udp-ssr-local
+		echolog "Global_Socks5:$type Started!"
 		;;
 	esac
 	local_enable=1
@@ -297,18 +271,18 @@ Start_Run() {
 		redir_tcp=1
 		echo "$(date "+%Y-%m-%d %H:%M:%S") Shadowsocks/ShadowsocksR $threads 线程启动成功!" >>$LOG_FILE
 		;;
+	v2ray)
+		if [ "$UDP_RELAY_SERVER" != "same" ] ; then
+		$bin -config $v2_json_file >/dev/null 2>&1 &
+		fi
+		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin -version | head -1) 启动成功!" >>$LOG_FILE
+		;;
 	trojan)
 		for i in $(seq 1 $threads); do
 			$bin --config $trojan_json_file >>$LOG_FILE 2>&1 &
 			usleep 500000
 		done
 		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin --version 2>&1 | head -1) Started!" >>$LOG_FILE
-		;;
-	v2ray)
-		if [ "$UDP_RELAY_SERVER" != "same" ] ; then
-		$bin -config $v2_json_file >/dev/null 2>&1 &
-		fi
-		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin -version | head -1) 启动成功!" >>$LOG_FILE
 		;;
 	socks5)
 		for i in $(seq 1 $threads); do
@@ -321,7 +295,9 @@ Start_Run() {
 }
 
 load_config() {
-	[ "$GLOBAL_SERVER" = "nil" ] && return 1
+	if [ "$GLOBAL_SERVER" == "nil" ]; then
+		return 1
+	fi
 	UDP_RELAY_SERVER=$(nvram get udp_relay_server)
 	if [ "$UDP_RELAY_SERVER" = "same" ]; then
 	UDP_RELAY_SERVER=$GLOBAL_SERVER
@@ -333,7 +309,7 @@ load_config() {
 	fi
 }
 
-start_watchcat() {
+start_monitor() {
 	if [ $(nvram get ss_watchcat) = 1 ]; then
 		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+v2ray_enable+local_enable+pdnsd_enable_flag+trojan_enable
 		if [ $total_count -gt 0 ]; then
@@ -430,14 +406,15 @@ if load_config; then
 		fi
 		fi
         start_local
-        start_watchcat
+	start_monitor
         auto_update
         ENABLE_SERVER=$(nvram get global_server)
         [ "$ENABLE_SERVER" = "-1" ] && return 1
 
         logger -t "SS" "启动成功。"
         logger -t "SS" "内网IP控制为:$lancons"
-        nvram set check_mode=0
+	clean_log
+	echolog "-----------end------------"
 }
 
 # ================================= 关闭SS ===============================
@@ -485,6 +462,32 @@ EOF
 50 1 * * * /usr/bin/update_adblock.sh > /dev/null 2>&1
 EOF
 	fi
+}
+
+find_bin() {
+	case "$1" in
+	ss) ret="/usr/bin/ss-redir" ;;
+	ss-local) ret="/usr/bin/ss-local" ;;
+	ssr) ret="/usr/bin/ssr-redir" ;;
+	ssr-local) ret="/usr/bin/ssr-local" ;;
+	ssr-server) ret="/usr/bin/ssr-server" ;;
+	v2ray)
+	if [ -f "/usr/bin/xray" ] ; then
+       ret="/usr/bin/xray"
+    else
+       ret="/tmp/xray"
+    fi
+    ;;
+	trojan)
+	if [ -f "/usr/bin/trojan" ] ; then
+       ret="/usr/bin/trojan"
+    else
+       ret="/tmp/trojan"
+    fi
+    ;;
+	socks5) ret="/usr/bin/ipt2socks" ;;
+	esac
+	echo $ret
 }
 
 kill_process() {
