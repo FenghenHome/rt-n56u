@@ -190,11 +190,7 @@ fi
 		fi
 		v2ray_enable=1
 		if [ "$2" = "1" ]; then
-			if [ "$UDP_RELAY_SERVER" != "same" ] ; then
 			lua /etc_ro/ss/genv2config.lua $1 udp 1080 >/tmp/v2-ssr-reudp.json
-			else
-			lua /etc_ro/ss/genv2config.lua $1 tcp,udp 1080 >/tmp/v2-ssr-reudp.json
-			fi
 		sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
 		else
 		lua /etc_ro/ss/genv2config.lua $1 tcp 1080 >$v2_json_file
@@ -280,16 +276,16 @@ start_local() {
 Start_Run() {
 	ARG_OTA=""
 	gen_config_file $GLOBAL_SERVER 0 1080
-	stype=$(nvram get d_type)
-	local bin=$(find_bin $stype)
+	local type=$(nvram get d_type)
+	local bin=$(find_bin $type)
 	[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Main node:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
 	if [ "$(nvram get ss_threads)" = "0" ]; then
 		threads=$(cat /proc/cpuinfo | grep 'processor' | wc -l)
 	else
 		threads=$(nvram get ss_threads)
 	fi
-	logger -t "SS" "启动$stype主服务器..."
-	case "$stype" in
+	logger -t "SS" "启动$type主服务器..."
+	case "$type" in
 	ss | ssr)
 		last_config_file=$CONFIG_FILE
 		pid_file="/tmp/ssr-retcp.pid"
@@ -301,10 +297,8 @@ Start_Run() {
 		echo "$(date "+%Y-%m-%d %H:%M:%S") Shadowsocks/ShadowsocksR $threads 线程启动成功!" >>$LOG_FILE
 		;;
 	v2ray)
-		if [ "$UDP_RELAY_SERVER" != "same" ] ; then
-		$bin -config $v2_json_file >/dev/null 2>&1 &
-		fi
-		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin -version | head -1) 启动成功!" >>$LOG_FILE
+		ln_start_bin $(first_type xray v2ray) v2ray -config $v2_json_file >/dev/null 2>&1 &
+		echolog "Main node:$($(first_type xray v2ray) -version | head -1) Started!"
 		;;
 	trojan)
 		for i in $(seq 1 $threads); do
