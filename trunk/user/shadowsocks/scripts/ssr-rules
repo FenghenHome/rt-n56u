@@ -363,13 +363,13 @@ while getopts ":m:s:l:S:L:i:e:a:B:b:w:p:G:D:F:N:M:I:oOuUfgrczh" arg; do
 		LAN_BP_IP=$OPTARG
 		;;
 	b)
-		WAN_BP_IP=$(for ip in $OPTARG; do echo $ip; done)
+		WAN_BP_IP=$(while read ip; do echo $ip; done < $OPTARG)
 		;;
 	w)
-		WAN_FW_IP=$OPTARG
+		WAN_FW_IP=$(while read ip; do echo $ip; done < $OPTARG)
 		;;
 	p)
-		LAN_FP_IP=$OPTARG
+		LAN_FP_IP=$(while read ip; do echo $ip; done < $OPTARG)
 		;;
 	G)
 		LAN_GM_IP=$OPTARG
