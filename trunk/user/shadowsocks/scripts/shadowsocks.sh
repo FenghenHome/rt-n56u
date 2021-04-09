@@ -111,6 +111,7 @@ ln_start_bin() {
 start_dns() {
 	local ssr_dns=`nvram get ssr_dns`
 	local sdns_enable=`nvram get sdns_enable`
+	local china_dns=`nvram get china_dns`
 	start_pdnsd() {
 		if [ ! -f "$TMP_PATH/pdnsd/pdnsd.cache" ]; then
 			mkdir -p $TMP_PATH/pdnsd
@@ -136,7 +137,7 @@ start_dns() {
 			}
 			server{
 			label="routine";
-			ip=119.29.29.29,223.5.5.5;
+			ip=$china_dns;
 			timeout=5;
 			reject = 74.125.127.102,
 			74.125.155.102,  
