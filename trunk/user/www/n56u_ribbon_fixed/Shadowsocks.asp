@@ -43,6 +43,7 @@
 			init_itoggle('v2_link');
 			init_itoggle('switch_enable_x_0');
 			init_itoggle('ss_adblock');
+			init_itoggle('ss_dns');
 			init_itoggle('ss_router_proxy', change_ss_watchcat_display);
 			init_itoggle('ss_watchcat');
 			init_itoggle('ss_update_chnroute');
@@ -1600,8 +1601,29 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															</select>
 														</td>
 													</tr>
+													<tr>
+														<th>DNS加速</th>
+														<td>
+															<div class="main_itoggle">
+																<div id="ss_dns_on_of">
+																	<input type="checkbox" id="ss_dns_fake"
+																		<% nvram_match_x("", "ss_dns", "1", "value=1 checked"); %><% nvram_match_x("", "ss_dns", "0", "value=0"); %>>
+																</div>
+															</div>
+															<div style="position: absolute; margin-left: -10000px;">
+																<input type="radio" value="1" name="ss_dns"
+																	id="ss_dns_1"
+																	<% nvram_match_x("", "ss_dns", "1", "checked"); %>>
+																<#checkbox_Yes#>
+																	<input type="radio" value="0" name="ss_dns"
+																		id="ss_dns_0"
+																		<% nvram_match_x("", "ss_dns", "0", "checked"); %>>
+																	<#checkbox_No#>
+															</div>
+														</td>
+													</tr>
 													<tr id="row_china_dns" style="display:none;">
-														<th width="50%">国内DNS(仅chinadns-ng生效)</th>
+														<th width="50%">国内DNS</th>
 														<td>
 															<select name="china_dns" class="input"
 																style="width: 200px;">
