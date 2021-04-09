@@ -81,8 +81,8 @@ flush_r() {
 	ipset -X fplan 2>/dev/null
 	ipset -X gmlan 2>/dev/null
 	ipset -X oversea 2>/dev/null
-	ipset -X blacklist 2>/dev/null
 	ipset -X whitelist 2>/dev/null
+	ipset -X blacklist 2>/dev/null
 	[ -n "$FWI" ] && echo '#!/bin/sh' >$FWI
 	return 0
 }
@@ -117,9 +117,10 @@ EOF
 
 	sed -i '/gfwlist/d' /etc/storage/dnsmasq/dnsmasq.conf
 	if [ $sdns_gfw -eq 0 ] || [ $sdns_enable -eq 0 ];then
-cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
-conf-dir=/etc/storage/gfwlist
-EOF
+		if [ ! -f "/tmp/dnsmasq.dom/gfwlist_list.conf" ] ; then
+			mkdir -p /tmp/dnsmasq.dom
+			cp -rf /etc/storage/gfwlist/gfwlist_list.conf /tmp/dnsmasq.dom/gfwlist_list.conf
+		fi
 	fi
 
 		;;
@@ -166,7 +167,7 @@ EOF
 
 	sed -i '/dnsmasq.dom/d' /etc/storage/dnsmasq/dnsmasq.conf
 cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
-conf-dir=/tmp/dnsmasq.dom/
+conf-dir=/tmp/dnsmasq.dom
 EOF
 
 	if [ ! -f "/etc/storage/dnsmasq.adblock/adblock_list.conf" ] ; then
@@ -177,9 +178,10 @@ EOF
 	sed -i '/dnsmasq.adblock/d' /etc/storage/dnsmasq/dnsmasq.conf
 	if [ $sdns_adblock -eq 0 ] || [ $sdns_enable -eq 0 ];then
 		if [ $ss_adblock -eq 1 ];then
-cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
-conf-dir=/etc/storage/dnsmasq.adblock
-EOF
+			if [ ! -f "/tmp/dnsmasq.dom/adblock_list.conf" ] ; then
+				mkdir -p /tmp/dnsmasq.dom
+				cp -rf /etc/storage/dnsmasq.adblock/adblock_list.conf /tmp/dnsmasq.dom/adblock_list.conf
+			fi
 		fi
 	fi
 
