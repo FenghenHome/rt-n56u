@@ -7,7 +7,7 @@
 # See /LICENSE for more information.
 #
 NAME=shadowsocksr
-LOCK_FILE="/tmp/ssr-monitor.lock"
+LOCK_FILE="/var/lock/ssr-monitor.lock"
 [ -f "$LOCK_FILE" ] && exit 2
 touch "$LOCK_FILE"
 server_process_count=$1
