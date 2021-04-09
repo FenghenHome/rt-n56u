@@ -129,11 +129,16 @@ EOF
 	$ipt_n -I SS_SPEC_WAN_AC -m set --match-set oversea dst -j SS_SPEC_WAN_FW
 	$ipt_n -A SS_SPEC_WAN_AC -m set --match-set china dst -j SS_SPEC_WAN_FW
 
+	if [ ! -f "/etc/storage/dnsmasq.oversea/oversea_list.conf" ] ; then
 	mkdir -p /etc/storage/dnsmasq.oversea
+	cp -rf /etc_ro/oversea_list.conf /etc/storage/dnsmasq.oversea/oversea_list.conf
+	fi
+
 	sed -i '/dnsmasq.oversea/d' /etc/storage/dnsmasq/dnsmasq.conf
-cat >>/etc/storage/dnsmasq/dnsmasq.conf <<EOF
-conf-dir=/etc/storage/dnsmasq.oversea
-EOF
+	if [ ! -f "/tmp/dnsmasq.dom/oversea_list.conf" ] ; then
+		mkdir -p /tmp/dnsmasq.dom
+		cp -rf /etc/storage/dnsmasq.oversea/oversea_list.conf /tmp/dnsmasq.dom/oversea_list.conf
+	fi
 
 		;;
 	all)
