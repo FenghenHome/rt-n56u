@@ -109,7 +109,7 @@ ln_start_bin() {
 }
 
 start_dns() {
-	local ssr_dns=`nvram get ssr_dns`
+	local ss_dns=`nvram get ss_dns`
 	local sdns_enable=`nvram get sdns_enable`
 	local china_dns=`nvram get china_dns`
 	start_pdnsd() {
@@ -221,7 +221,7 @@ start_dns() {
 		EOF
 		ln_start_bin $(first_type pdnsd) pdnsd -c $TMP_PATH/pdnsd.conf
 	}
-	if [ $ssr_dns -gt 0 ] && [ $sdns_enable -eq 0 ]; then
+	if [ $ss_dns -gt 0 ] && [ $sdns_enable -eq 0 ]; then
 		start_pdnsd
 		pdnsd_enable_flag=1
 		sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
