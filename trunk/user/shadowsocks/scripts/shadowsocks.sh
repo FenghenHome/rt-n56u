@@ -108,6 +108,129 @@ ln_start_bin() {
 	${file_func:-echolog "  - ${ln_name}"} "$@" >/dev/null 2>&1 &
 }
 
+start_dns() {
+	local ssr_dns=`nvram get ssr_dns`
+	local sdns_enable=`nvram get sdns_enable`
+	start_pdnsd() {
+		if [ ! -f "$TMP_PATH/pdnsd/pdnsd.cache" ]; then
+			mkdir -p $TMP_PATH/pdnsd
+			touch $TMP_PATH/pdnsd/pdnsd.cache
+			chown -R nobody:nogroup $TMP_PATH/pdnsd
+		fi
+		cat <<-EOF >$TMP_PATH/pdnsd.conf
+			global{
+			perm_cache=1024;
+			cache_dir="$TMP_PATH/pdnsd";
+			pid_file="/var/run/pdnsd.pid";
+			run_as="nobody";
+			server_ip=0.0.0.0;
+			server_port=65353;
+			status_ctl=on;
+			paranoid=on;
+			query_method=udp_only;
+			neg_domain_pol=off;
+			par_queries = 400;
+			min_ttl = 1h;
+			max_ttl = 1w;
+			timeout = 10;
+			}
+			server{
+			label="routine";
+			ip=119.29.29.29,223.5.5.5;
+			timeout=5;
+			reject = 74.125.127.102,
+			74.125.155.102,  
+			74.125.39.102,  
+			74.125.39.113,  
+			209.85.229.138,  
+			128.121.126.139,  
+			159.106.121.75,  
+			169.132.13.103,  
+			192.67.198.6,  
+			202.106.1.2,  
+			202.181.7.85,  
+			203.161.230.171,  
+			203.98.7.65,  
+			207.12.88.98,  
+			208.56.31.43,  
+			209.145.54.50,  
+			209.220.30.174,  
+			209.36.73.33,  
+			211.94.66.147,  
+			213.169.251.35,  
+			216.221.188.182,  
+			216.234.179.13,  
+			243.185.187.39,  
+			37.61.54.158,  
+			4.36.66.178,  
+			46.82.174.68,  
+			59.24.3.173,  
+			64.33.88.161,  
+			64.33.99.47,  
+			64.66.163.251,  
+			65.104.202.252,  
+			65.160.219.113,  
+			66.45.252.237,  
+			69.55.52.253,  
+			72.14.205.104,  
+			72.14.205.99,  
+			78.16.49.15,  
+			8.7.198.45,  
+			93.46.8.89,  
+			37.61.54.158,  
+			243.185.187.39,  
+			190.93.247.4,  
+			190.93.246.4,  
+			190.93.245.4,  
+			190.93.244.4,  
+			65.49.2.178,  
+			189.163.17.5,  
+			23.89.5.60,  
+			49.2.123.56,  
+			54.76.135.1,  
+			77.4.7.92,  
+			118.5.49.6,  
+			159.24.3.173,  
+			188.5.4.96,  
+			197.4.4.12,  
+			220.250.64.24,  
+			243.185.187.30,  
+			249.129.46.48,  
+			253.157.14.165;  
+			reject_policy = fail;  
+			}
+			server {
+			label = "special";
+			ip = 208.67.222.222,208.67.220.220;
+			port = 5353;
+			proxy_only = on;
+			timeout = 5;
+			}
+			source {
+			owner=localhost;
+			file="/etc/hosts";
+			}
+			rr {
+			name=localhost;
+			reverse=on;
+			a=127.0.0.1;
+			owner=localhost;
+			soa=localhost,root.localhost,42,86400,900,86400,86400;
+			}
+		EOF
+		ln_start_bin $(first_type pdnsd) pdnsd -c $TMP_PATH/pdnsd.conf
+	}
+	if [ $ssr_dns -gt 0 ] && [ $sdns_enable -eq 0 ]; then
+		start_pdnsd
+		pdnsd_enable_flag=1
+		sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
+		sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
+cat >> /etc/storage/dnsmasq/dnsmasq.conf << EOF
+no-resolv
+server=127.0.0.1#65353
+EOF
+	fi
+}
 
 gen_config_file() {
 	fastopen="false"
@@ -428,7 +551,7 @@ if load_config; then
 		if Start_Run; then
 		start_udp
         #start_rules
-		#start_AD
+		start_dns
 		fi
 		fi
         start_local
