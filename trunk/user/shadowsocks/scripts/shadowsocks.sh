@@ -401,7 +401,7 @@ start_rules() {
 		2) echo "-O" ;;
 		esac
 	}
-	/usr/bin/ss-rules \
+	/usr/bin/ssr-rules \
 	-s "$server" \
 	-l "$local_port" \
 	-S "$udp_server" \
@@ -446,7 +446,7 @@ if load_config; then
 # ================================= 关闭SS ===============================
 
 ssp_close() {
-	/usr/bin/ss-rules -f
+	/usr/bin/ssr-rules -f
 	ps -w | grep -v "grep" | grep ssr-monitor | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
 	ps -w | grep -v "grep" | grep "sleep 0000" | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
 	ps -w | grep -v "grep" | grep "$TMP_PATH" | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
