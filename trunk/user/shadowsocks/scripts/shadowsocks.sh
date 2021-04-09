@@ -10,7 +10,7 @@
 # See /LICENSE for more information.
 #
 NAME=shadowsocksr
-LOCK_FILE=/tmp/ssrplus.lock
+LOCK_FILE=/var/lock/ssrplus.lock
 LOG_FILE=/tmp/ssrplus.log
 TMP_PATH=/tmp/ssrplus
 TMP_BIN_PATH=$TMP_PATH/bin
@@ -419,6 +419,7 @@ start_rules() {
 # ================================= 启动 SS ===============================
 ssp_start() { 
 	echolog "----------start------------"
+	mkdir -p $TMP_BIN_PATH
 	ulimit -n 65535
     ss_enable=`nvram get ss_enable`
 if load_config; then
