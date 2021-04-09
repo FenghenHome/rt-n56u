@@ -672,6 +672,7 @@ struct nvram_pair router_defaults[] = {
 	{ "ss_key", "Secret" },
 	{ "ss_method", "rc4-md5" },
 	{ "ss_adblock", "0" },
+	{ "ss_dns", "0" },
 	{ "ss_own", "1" },
 	{ "ss_local_port", "1080" },
 	{ "ss_mtu", "1492" },
