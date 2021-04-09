@@ -217,12 +217,14 @@ start_udp() {
 			;;
 		v2ray)
 			gen_config_file $UDP_RELAY_SERVER 1
-			$bin -config /tmp/v2-ssr-reudp.json >/dev/null 2>&1 &
+			ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-reudp.json
+			echolog "UDP TPROXY Relay:$($(first_type "xray" "v2ray") -version | head -1) Started!"
 			;;
 		trojan)
 			gen_config_file $UDP_RELAY_SERVER 1
-			$bin --config /tmp/trojan-ssr-reudp.json >/dev/null 2>&1 &
-			ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l 1080 >/dev/null 2>&1 &
+			ln_start_bin $(first_type trojan) $type --config /tmp/trojan-ssr-reudp.json
+			ln_start_bin $(first_type ipt2socks) ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l 1080
+			echolog "UDP TPROXY Relay:$($(first_type trojan) --version 2>&1 | head -1) Started!"
 			;;
 		socks5)
 		echo "1"
@@ -254,18 +256,18 @@ start_local() {
 	v2ray)
 		lua /etc_ro/ss/genv2config.lua $local_server tcp 0 $local_port >/tmp/v2-ssr-local.json
 		sed -i 's/\\//g' /tmp/v2-ssr-local.json
-		$bin -config /tmp/v2-ssr-local.json >/dev/null 2>&1 &
-		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$($bin -version | head -1) Started!" >>$LOG_FILE
+		ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-local.json
+		echolog "Global_Socks5:$($(first_type "xray" "v2ray") -version | head -1) Started!"
 		;;
 	trojan)
 		lua /etc_ro/ss/gentrojanconfig.lua $local_server client $local_port >/tmp/trojan-ssr-local.json
 		sed -i 's/\\//g' /tmp/trojan-ssr-local.json
-		$bin --config /tmp/trojan-ssr-local.json >/dev/null 2>&1 &
-		echolog "Global_Socks5:$($bin --version 2>&1 | head -1) Started!"
+		ln_start_bin $(first_type trojan) $type --config /tmp/trojan-ssr-local.json
+		echolog "Global_Socks5:$($(first_type trojan) --version 2>&1 | head -1) Started!"
 		;;
 	*)
 		[ -e /proc/sys/net/ipv6 ] && local listenip='-i ::'
-		microsocks $listenip -p $local_port tcp-udp-ssr-local
+		ln_start_bin $(first_type microsocks) microsocks $listenip -p $local_port tcp-udp-ssr-local
 		echolog "Global_Socks5:$type Started!"
 		;;
 	esac
@@ -297,15 +299,15 @@ Start_Run() {
 		echo "$(date "+%Y-%m-%d %H:%M:%S") Shadowsocks/ShadowsocksR $threads 线程启动成功!" >>$LOG_FILE
 		;;
 	v2ray)
-		ln_start_bin $(first_type xray v2ray) v2ray -config $v2_json_file >/dev/null 2>&1 &
+		ln_start_bin $(first_type xray v2ray) v2ray -config $v2_json_file
 		echolog "Main node:$($(first_type xray v2ray) -version | head -1) Started!"
 		;;
 	trojan)
 		for i in $(seq 1 $threads); do
-			$bin --config $trojan_json_file >>$LOG_FILE 2>&1 &
+			ln_start_bin $(first_type $type) $type --config $trojan_json_file
 			usleep 500000
 		done
-		echo "$(date "+%Y-%m-%d %H:%M:%S") $($bin --version 2>&1 | head -1) Started!" >>$LOG_FILE
+		echolog "Main node:$($(first_type $type) --version 2>&1 | head -1) , $threads Threads Started!"
 		;;
 	socks5)
 		for i in $(seq 1 $threads); do
