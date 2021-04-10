@@ -564,6 +564,7 @@ if load_config; then
         logger -t "SS" "启动成功。"
         logger -t "SS" "内网IP控制为:$lancons"
 	clean_log
+	/sbin/restart_dhcpd
 	echolog "-----------end------------"
 }
 
