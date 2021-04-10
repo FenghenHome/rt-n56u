@@ -1600,7 +1600,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																<option value="1">使用pdnsd查询</option>
 															</select>
 														</td>
-													</tr>
+													</tr>-->
 													<tr>
 														<th>DNS加速</th>
 														<td>
@@ -1675,7 +1675,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	(114.114.115.115)</option>
 															</select>
 														</td>
-													</tr>-->
+													</tr>
 													<tr>
 														<th>拦截广告</th>
 														<td>
