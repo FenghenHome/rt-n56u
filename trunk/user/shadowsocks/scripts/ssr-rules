@@ -12,7 +12,7 @@ modprobe xt_comment
 modprobe xt_set
 TAG="_SS_SPEC_RULE_"                                  # comment tag
 IPT="iptables -t nat"                                 # alias of iptables
-FWI="/tmp/shadowsocks_iptables.save"                  # firewall include file
+FWI=/tmp/shadowsocks_iptables.save  # firewall include file
 sdns_enable=`nvram get sdns_enable`
 sdns_gfw=`nvram get sdns_gfw`
 sdns_adblock=`nvram get sdns_adblock`
@@ -33,15 +33,9 @@ usage() {
 		                            define access control mode
 		    -b <wan_ips>            wan ip of will be bypassed
 		    -w <wan_ips>            wan ip of will be forwarded
-		    -B <bp_lan_ips>         lan ip of will be bypassed proxy
 		    -p <fp_lan_ips>         lan ip of will be global proxy
 		    -G <gm_lan_ips>         lan ip of will be game mode proxy
 		    -D <proxy_ports>        proxy ports
-		    -F                      shunt mode
-		    -N                      shunt server IP
-		    -M                      shunt proxy mode
-		    -m <Interface>          Interface name
-		    -I <ip_list_file>       a file content is bypassed shunt ip list
 		    -e <extra_options>      extra options for iptables
 		    -o                      apply the rules to the OUTPUT chain
 		    -O                      apply the global rules to the OUTPUT chain
@@ -53,9 +47,9 @@ usage() {
 		    -r                      router mode
 		    -c                      oversea mode
 		    -z                      all mode
-		    -h                      show this help message and exit
 		    -k
-	EOF
+		    -h                      show this help message and exit
+EOF
 	exit $1
 }
 
@@ -104,7 +98,7 @@ ipset_r() {
 		ipset -! -R <<-EOF || return 1
 			create ss_spec_wan_ac hash:net
 			$(gen_spec_iplist | sed -e "s/^/add ss_spec_wan_ac /")
-		EOF
+EOF
 		$IPT -A SS_SPEC_WAN_AC -m set --match-set ss_spec_wan_ac dst -j RETURN
 		$IPT -A SS_SPEC_WAN_AC -m set --match-set china dst -j RETURN
 		$IPT -A SS_SPEC_WAN_AC -j SS_SPEC_WAN_FW
@@ -223,7 +217,7 @@ ac_rule() {
 		ipset -! -R <<-EOF || return 1
 			create ssr_gen_router hash:net
 			$(gen_spec_iplist | sed -e "s/^/add ssr_gen_router /")
-		EOF
+EOF
 		$IPT -N SS_SPEC_ROUTER && \
 		$IPT -A SS_SPEC_ROUTER -m set --match-set ssr_gen_router dst -j RETURN && \
 		$IPT -A SS_SPEC_ROUTER -j SS_SPEC_WAN_FW
@@ -291,7 +285,7 @@ get_wan_ip() {
 		$server
 		$SERVER
 		$WAN_BP_IP
-	EOF
+EOF
 }
 
 gen_spec_iplist() {
@@ -313,7 +307,7 @@ gen_spec_iplist() {
 		240.0.0.0/4
 		255.255.255.255
 		$(get_wan_ip)
-	EOF
+EOF
 }
 
 gen_include() {
@@ -324,20 +318,17 @@ gen_include() {
 		echo 'COMMIT'
 	}
 	cat <<-EOF >>$FWI
-		iptables-save -c | grep -v "SS_SPEC" | iptables-restore -c
-		iptables-restore -n <<-EOT
-		$(extract_rules nat)
-		$(extract_rules mangle)
-		EOT
-	EOF
+	iptables-save -c | grep -v "SS_SPEC" | iptables-restore -c
+	iptables-restore -n <<-EOT
+	$(extract_rules nat)
+	$(extract_rules mangle)
+	EOT
+EOF
 	return 0
 }
 
-while getopts ":m:s:l:S:L:i:e:a:B:b:w:p:G:D:F:N:M:I:oOuUfgrczh" arg; do
+while getopts ":s:l:S:L:i:e:a:b:w:p:G:D:k:oOuUfgrczh" arg; do
 	case "$arg" in
-	m)
-		Interface=$OPTARG
-		;;
 	s)
 		server=$OPTARG
 		;;
@@ -359,9 +350,6 @@ while getopts ":m:s:l:S:L:i:e:a:B:b:w:p:G:D:F:N:M:I:oOuUfgrczh" arg; do
 	a)
 		LAN_AC_IP=$OPTARG
 		;;
-	B)
-		LAN_BP_IP=$OPTARG
-		;;
 	b)
 		WAN_BP_IP=$(while read ip; do echo $ip; done < $OPTARG)
 		;;
@@ -376,18 +364,6 @@ while getopts ":m:s:l:S:L:i:e:a:B:b:w:p:G:D:F:N:M:I:oOuUfgrczh" arg; do
 		;;
 	D)
 		PROXY_PORTS=$OPTARG
-		;;
-	F)
-		SHUNT_PORT=$OPTARG
-		;;
-	N)
-		SHUNT_IP=$OPTARG
-		;;
-	M)
-		SHUNT_PROXY=$OPTARG
-		;;
-	I)
-		SHUNT_LIST=$OPTARG
 		;;
 	o)
 		OUTPUT=1
