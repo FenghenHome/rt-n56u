@@ -12,7 +12,7 @@ modprobe xt_comment
 modprobe xt_set
 TAG="_SS_SPEC_RULE_"                                  # comment tag
 IPT="iptables -t nat"                                 # alias of iptables
-FWI=/tmp/shadowsocks_iptables.save  # firewall include file
+FWI="/tmp/shadowsocks_iptables.save"                  # firewall include file
 sdns_enable=`nvram get sdns_enable`
 sdns_gfw=`nvram get sdns_gfw`
 sdns_adblock=`nvram get sdns_adblock`
@@ -318,11 +318,11 @@ gen_include() {
 		echo 'COMMIT'
 	}
 	cat <<-EOF >>$FWI
-	iptables-save -c | grep -v "SS_SPEC" | iptables-restore -c
-	iptables-restore -n <<-EOT
-	$(extract_rules nat)
-	$(extract_rules mangle)
-	EOT
+		iptables-save -c | grep -v "SS_SPEC" | iptables-restore -c
+		iptables-restore -n <<-EOT
+		$(extract_rules nat)
+		$(extract_rules mangle)
+EOT
 EOF
 	return 0
 }
