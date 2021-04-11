@@ -49,7 +49,7 @@ usage() {
 		    -z                      all mode
 		    -k
 		    -h                      show this help message and exit
-EOF
+	EOF
 	exit $1
 }
 
@@ -98,7 +98,7 @@ ipset_r() {
 		ipset -! -R <<-EOF || return 1
 			create ss_spec_wan_ac hash:net
 			$(gen_spec_iplist | sed -e "s/^/add ss_spec_wan_ac /")
-EOF
+		EOF
 		$IPT -A SS_SPEC_WAN_AC -m set --match-set ss_spec_wan_ac dst -j RETURN
 		$IPT -A SS_SPEC_WAN_AC -m set --match-set china dst -j RETURN
 		$IPT -A SS_SPEC_WAN_AC -j SS_SPEC_WAN_FW
@@ -217,7 +217,7 @@ ac_rule() {
 		ipset -! -R <<-EOF || return 1
 			create ssr_gen_router hash:net
 			$(gen_spec_iplist | sed -e "s/^/add ssr_gen_router /")
-EOF
+		EOF
 		$IPT -N SS_SPEC_ROUTER && \
 		$IPT -A SS_SPEC_ROUTER -m set --match-set ssr_gen_router dst -j RETURN && \
 		$IPT -A SS_SPEC_ROUTER -j SS_SPEC_WAN_FW
@@ -285,7 +285,7 @@ get_wan_ip() {
 		$server
 		$SERVER
 		$WAN_BP_IP
-EOF
+	EOF
 }
 
 gen_spec_iplist() {
@@ -307,7 +307,7 @@ gen_spec_iplist() {
 		240.0.0.0/4
 		255.255.255.255
 		$(get_wan_ip)
-EOF
+	EOF
 }
 
 gen_include() {
@@ -322,8 +322,8 @@ gen_include() {
 		iptables-restore -n <<-EOT
 		$(extract_rules nat)
 		$(extract_rules mangle)
-EOT
-EOF
+		EOT
+	EOF
 	return 0
 }
 
