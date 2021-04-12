@@ -14,6 +14,7 @@ LOCK_FILE=/var/lock/ssrplus.lock
 LOG_FILE=/tmp/ssrplus.log
 TMP_PATH=/tmp/ssrplus
 TMP_BIN_PATH=$TMP_PATH/bin
+ARG_OTA=
 trojan_local_enable=`nvram get trojan_local_enable`
 trojan_link=`nvram get trojan_link`
 trojan_local=`nvram get trojan_local`
@@ -233,6 +234,13 @@ EOF
 	fi
 }
 
+get_name() {
+	case "$1" in
+	ss) echo "Shadowsocks" ;;
+	ssr) echo "ShadowsocksR" ;;
+	esac
+}
+
 gen_config_file() {
 	fastopen="false"
 	case "$2" in
@@ -269,7 +277,7 @@ gen_config_file() {
                     logger -t "SS" "trojan二进制文件下载失败，可能是地址失效或者网络异常！"
                     rm -f /tmp/trojan
                     nvram set ss_enable=0
-                    ssp_close
+                    stop
                 fi
             fi
 		else
@@ -305,7 +313,7 @@ else
         logger -t "SS" "v2ray二进制文件下载失败，可能是地址失效或者网络异常！"
         rm -f /tmp/xray
         nvram set ss_enable=0
-        ssp_close
+        stop
     fi
 fi
 			else
@@ -333,11 +341,13 @@ start_udp() {
 		[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") UDP TPROXY Relay:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
 		case "$type" in
 		ss | ssr)
-			ARG_OTA=""
 			gen_config_file $UDP_RELAY_SERVER 1 1080
 			last_config_file=$CONFIG_UDP_FILE
 			pid_file="/var/run/ssr-reudp.pid"
-			$bin -c $last_config_file $ARG_OTA -U -f /var/run/ssr-reudp.pid >/dev/null 2>&1
+			ss_program="$(first_type ${type}local ${type}-redir)"
+			[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
+				local ss_extra_arg="--protocol redir -u" || local ss_extra_arg="-U"
+			ln_start_bin $ss_program ${type}-redir -c $last_config_file $ss_extra_arg -f /var/run/ssr-reudp.pid >/dev/null 2>&1
 			;;
 		v2ray)
 			gen_config_file $UDP_RELAY_SERVER 1
@@ -365,17 +375,14 @@ start_local() {
 	[ "$local_server" == "nil" ] && return 1
 	[ "$local_server" == "same" ] && local_server=$GLOBAL_SERVER
 	local type=$(nvram get s5_type)
-	local bin=$(find_bin $type)
-	[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
 	case "$type" in
 	ss | ssr)
-		local name="Shadowsocks"
-		local bin=$(find_bin ss-local)
-		[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
-		[ "$type" == "ssr" ] && name="ShadowsocksR"
 		gen_config_file $local_server 3 $local_port
-		$bin -c $CONFIG_SOCK5_FILE -u -f /var/run/ssr-local.pid >/dev/null 2>&1
-		echo "$(date "+%Y-%m-%d %H:%M:%S") Global_Socks5:$name Started!" >>$LOG_FILE
+		ss_program="$(first_type ${type}local ${type}-local)"
+		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
+			local ss_extra_arg="-U" || local ss_extra_arg="-u"
+		ln_start_bin $ss_program ${type}-local -c $CONFIG_SOCK5_FILE $ss_extra_arg -f /var/run/ssr-local.pid >/dev/null 2>&1
+		echolog "Global_Socks5:$(get_name $type) Started!"
 		;;
 	v2ray)
 		lua /etc_ro/ss/genv2config.lua $local_server tcp 0 $local_port >/tmp/v2-ssr-local.json
@@ -400,27 +407,29 @@ start_local() {
 }
 
 Start_Run() {
-	ARG_OTA=""
 	gen_config_file $GLOBAL_SERVER 0 1080
-	local type=$(nvram get d_type)
-	local bin=$(find_bin $type)
-	[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") Main node:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
 	if [ "$(nvram get ss_threads)" = "0" ]; then
 		threads=$(cat /proc/cpuinfo | grep 'processor' | wc -l)
 	else
 		threads=$(nvram get ss_threads)
 	fi
 	logger -t "SS" "启动$type主服务器..."
+	local type=$(nvram get d_type)
 	case "$type" in
 	ss | ssr)
 		last_config_file=$CONFIG_FILE
-		pid_file="/tmp/ssr-retcp.pid"
+		ss_program="$(first_type ${type}local ${type}-redir)"
+		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
+			{
+				local ss_extra_arg="--protocol redir"
+				case ${ARG_OTA} in '-u') ARG_OTA='-U' ;; esac
+			}
 		for i in $(seq 1 $threads); do
-			$bin -c $CONFIG_FILE $ARG_OTA -f /tmp/ssr-retcp_$i.pid >/dev/null 2>&1
+			ln_start_bin "$ss_program" ${type}-redir -c $CONFIG_FILE $ARG_OTA $ss_extra_arg -f /tmp/ssr-retcp_$i.pid >/dev/null 2>&1
 			usleep 500000
 		done
 		redir_tcp=1
-		echo "$(date "+%Y-%m-%d %H:%M:%S") Shadowsocks/ShadowsocksR $threads 线程启动成功!" >>$LOG_FILE
+		echolog "Main node:$(get_name $type) $threads Threads Started!"
 		;;
 	v2ray)
 		ln_start_bin $(first_type xray v2ray) v2ray -config $v2_json_file
@@ -526,32 +535,31 @@ start_rules() {
 		esac
 	}
 	/usr/bin/ssr-rules \
-	-s "$server" \
-	-l "$local_port" \
-	-S "$udp_server" \
-	-L "$udp_local_port" \
-	-a "$ac_ips" \
-	-i "/etc/storage/chinadns/chnroute.txt" \
-	-b "$wan_bp_ips" \
-	-w "$wan_fw_ips" \
-	-p "$lan_fp_ips" \
-	-G "$lan_gm_ips" \
-	-D "$proxyport" \
-	-k "$lancon" \
-	$(get_arg_out) $(gfwmode) $ARG_UDP
+		-s "$server" \
+		-l "$local_port" \
+		-S "$udp_server" \
+		-L "$udp_local_port" \
+		-a "$ac_ips" \
+		-i "/etc/storage/chinadns/chnroute.txt" \
+		-b "$wan_bp_ips" \
+		-w "$wan_fw_ips" \
+		-p "$lan_fp_ips" \
+		-G "$lan_gm_ips" \
+		-D "$proxyport" \
+		-k "$lancon" \
+		$(get_arg_out) $(gfwmode) $ARG_UDP
 	return $?
 }
 
-# ================================= 启动 SS ===============================
-ssp_start() { 
+start() {
+	set_lock
 	echolog "----------start------------"
-	mkdir -p $TMP_BIN_PATH
+	mkdir -p /var/run /var/lock /var/log $TMP_BIN_PATH
 	ulimit -n 65535
     ss_enable=`nvram get ss_enable`
 if load_config; then
 		if Start_Run; then
 		start_udp
-        #start_rules
 		start_dns
 		fi
 		fi
@@ -566,21 +574,23 @@ if load_config; then
 	clean_log
 	/sbin/restart_dhcpd
 	echolog "-----------end------------"
+	unset_lock
 }
 
-# ================================= 关闭SS ===============================
-
-ssp_close() {
+stop() {
+	unlock
+	set_lock
 	/usr/bin/ssr-rules -f
 	ps -w | grep -v "grep" | grep ssr-monitor | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
 	ps -w | grep -v "grep" | grep "sleep 0000" | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
 	ps -w | grep -v "grep" | grep "$TMP_PATH" | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
 	kill_process
-	rm -f /tmp/ssr-monitor.lock
+	rm -f /var/lock/ssr-monitor.lock
 	sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
 	sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
 	clear_iptable
 	/sbin/restart_dhcpd
+	unset_lock
 }
 
 clear_iptable()
@@ -742,18 +752,18 @@ ressp() {
 
 case $1 in
 start)
-	ssp_start
+	start
 	;;
 stop)
 	#killall -q -9 ssr-switch
-	ssp_close
+	stop
 	;;
 restart)
-	ssp_close
-	ssp_start
+	stop
+	start
 	;;
 reserver)
-	ssp_close
+	stop
 	ressp
 	;;
 *)
