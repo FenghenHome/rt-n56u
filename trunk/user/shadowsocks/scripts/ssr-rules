@@ -107,7 +107,9 @@ ipset_r() {
 		ipset -N gfwlist hash:net 2>/dev/null
 		$IPT -A SS_SPEC_WAN_AC -m set --match-set china dst -j RETURN
 		$IPT -A SS_SPEC_WAN_AC -m set --match-set gfwlist dst -j SS_SPEC_WAN_FW
-		$IPT -A SS_SPEC_WAN_AC -m set --match-set smartdns dst -j SS_SPEC_WAN_FW
+		if [ $(ipset list smartdns -name -quiet | grep smartdns) ]; then
+			$IPT -A SS_SPEC_WAN_AC -m set --match-set smartdns dst -j SS_SPEC_WAN_FW
+		fi
 
 		if [ ! -f "/etc/storage/gfwlist/gfwlist_list.conf" ] ; then
 			mkdir -p /etc/storage/gfwlist
@@ -162,6 +164,9 @@ ipset_r() {
 	rm -f /tmp/uss_dom.txt
 	$IPT -I SS_SPEC_WAN_AC -m set --match-set blacklist dst -j SS_SPEC_WAN_FW
 	$IPT -I SS_SPEC_WAN_AC -m set --match-set whitelist dst -j RETURN
+	if [ $(ipset list music -name -quiet | grep music) ]; then
+		$IPT -I SS_SPEC_WAN_AC -m set --match-set music dst -j RETURN 2>/dev/null
+	fi
 	for ip in $WAN_BP_IP; do ipset -! add whitelist $ip; done
 	for ip in $WAN_FW_IP; do ipset -! add blacklist $ip; done
 
@@ -263,7 +268,9 @@ tp_rule() {
 	gfw)
 		$ipt -A SS_SPEC_TPROXY -p udp -m set --match-set china dst -j RETURN
 		$ipt -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set gfwlist dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
-		$ipt -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set smartdns dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
+		if [ $(ipset list smartdns -name -quiet | grep smartdns) ]; then
+			$ipt -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set smartdns dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
+		fi
 		;;
 	oversea)
 		$ipt -A SS_SPEC_TPROXY -p udp $PROXY_PORTS -m set --match-set oversea src -m dst -j TPROXY --on-port "$LOCAL_PORT" --tproxy-mark 0x01/0x01
