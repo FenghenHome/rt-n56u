@@ -318,18 +318,18 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 		function switch_dns() {
 			var b = document.form.pdnsd_enable.value;
 			if (b == "0") {
-				showhide_div('row_china_dns', 1);
-				showhide_div('row_tunnel_forward', 1);
+				//showhide_div('row_china_dns', 1);
+				//showhide_div('row_tunnel_forward', 1);
 				showhide_div('row_ssp_dns_ip', 0);
 				showhide_div('row_ssp_dns_port', 0);
 			} else if (b == "1") {
-				showhide_div('row_china_dns', 1);
-				showhide_div('row_tunnel_forward', 1);
+				//showhide_div('row_china_dns', 1);
+				//showhide_div('row_tunnel_forward', 1);
 				showhide_div('row_ssp_dns_ip', 0);
 				showhide_div('row_ssp_dns_port', 0);
 			} else if (b == "2") {
-				showhide_div('row_china_dns', 0);
-				showhide_div('row_tunnel_forward', 0);
+				//showhide_div('row_china_dns', 0);
+				//showhide_div('row_tunnel_forward', 0);
 				showhide_div('row_ssp_dns_ip', 0);
 				showhide_div('row_ssp_dns_port', 0);
 			}
@@ -1622,7 +1622,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															</div>
 														</td>
 													</tr>
-													<tr id="row_china_dns" style="display:none;">
+													<tr>
 														<th width="50%">国内DNS</th>
 														<td>
 															<select name="china_dns" class="input"
@@ -1640,7 +1640,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															</select>
 														</td>
 													</tr>
-													<tr id="row_tunnel_forward" style="display:none;">
+													<tr>
 														<th width="50%">国外DNS</th>
 														<td>
 															<select name="tunnel_forward" class="input"
