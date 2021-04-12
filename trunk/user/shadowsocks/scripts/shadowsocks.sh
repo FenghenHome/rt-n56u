@@ -220,6 +220,7 @@ start_dns() {
 			soa=localhost,root.localhost,42,86400,900,86400,86400;
 			}
 		EOF
+		chmod -R 744 $TMP_PATH/pdnsd.conf
 		ln_start_bin $(first_type pdnsd) pdnsd -c $TMP_PATH/pdnsd.conf
 	}
 	if [ $ss_dns -gt 0 ] && [ $sdns_enable -eq 0 ]; then
