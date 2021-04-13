@@ -412,10 +412,10 @@ start_local() {
 
 Start_Run() {
 	gen_config_file $GLOBAL_SERVER 0 1080
-	if [ "$(nvram get ss_threads)" = "0" ]; then
-		threads=$(cat /proc/cpuinfo | grep 'processor' | wc -l)
+	if [ "$(nvram get ss_threads)" == "0" ]; then
+		local threads=$(cat /proc/cpuinfo | grep 'processor' | wc -l)
 	else
-		threads=$(nvram get ss_threads)
+		local threads=$(nvram get ss_threads)
 	fi
 	logger -t "SS" "启动$type主服务器..."
 	local type=$(nvram get d_type)
@@ -432,7 +432,6 @@ Start_Run() {
 			ln_start_bin "$ss_program" ${type}-redir -c $CONFIG_FILE $ARG_OTA $ss_extra_arg -f /tmp/ssr-retcp_$i.pid >/dev/null 2>&1
 			usleep 500000
 		done
-		redir_tcp=1
 		echolog "Main node:$(get_name $type) $threads Threads Started!"
 		;;
 	v2ray)
@@ -453,6 +452,7 @@ Start_Run() {
 		done
 	    ;;
 	esac
+	redir_tcp=1
 	return 0
 }
 
@@ -472,7 +472,7 @@ load_config() {
 }
 
 start_monitor() {
-	if [ $(nvram get ss_watchcat) = 1 ]; then
+	if [ $(nvram get ss_watchcat) == "1" ]; then
 		let total_count=server_count+redir_tcp+redir_udp+tunnel_enable+v2ray_enable+local_enable+pdnsd_enable_flag+trojan_enable
 		if [ $total_count -gt 0 ]; then
 			/usr/bin/ssr-monitor $server_count $redir_tcp $redir_udp $tunnel_enable $v2ray_enable $local_enable $pdnsd_enable_flag $trojan_enable >/dev/null 2>&1 &
@@ -500,7 +500,7 @@ start_rules() {
 		fi
 	fi
 	local_port="1080"
-	if [ "$UDP_RELAY_SERVER" != "nil" ]; then
+	if [ "$redir_udp" == "1" ]; then
 		ARG_UDP="-U"
 		lua /etc_ro/ss/getconfig.lua $UDP_RELAY_SERVER > /tmp/userver.txt
 		udp_server=`cat /tmp/userver.txt` 
@@ -525,10 +525,7 @@ start_rules() {
 		lancons="指定IP走代理,请到规则管理页面添加需要走代理的IP。"
 		cat /etc/storage/ss_lan_bip.sh | grep -v '^!' | grep -v "^$" >$lan_fp_ips
 	fi
-	dports=$(nvram get s_dports)
-	if [ $dports = "0" ]; then
-		local proxyport=" "
-	else
+	if [ "$(nvram get s_dports)" == "1" ]; then
 		local proxyport="-m multiport --dports 22,53,587,465,995,993,143,80,443,853,9418"
 	fi
 	get_arg_out() {
