@@ -141,6 +141,7 @@ start_dns() {
 			server{
 			label="routine";
 			ip=$china_dns_server;
+			port =$china_dns_port;
 			timeout=5;
 			reject = 74.125.127.102,
 			74.125.155.102,  
