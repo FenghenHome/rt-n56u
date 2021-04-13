@@ -417,7 +417,6 @@ Start_Run() {
 	else
 		local threads=$(nvram get ss_threads)
 	fi
-	logger -t "SS" "启动$type主服务器..."
 	local type=$(nvram get d_type)
 	case "$type" in
 	ss | ssr)
@@ -573,7 +572,7 @@ if load_config; then
         logger -t "SS" "启动成功。"
         logger -t "SS" "内网IP控制为:$lancons"
 	clean_log
-	/sbin/restart_dhcpd
+	/sbin/restart_dhcpd >/dev/null 2>&1
 	echolog "-----------end------------"
 	unset_lock
 }
@@ -590,7 +589,7 @@ stop() {
 	sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
 	sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
 	clear_iptable
-	/sbin/restart_dhcpd
+	/sbin/restart_dhcpd >/dev/null 2>&1
 	unset_lock
 }
 
