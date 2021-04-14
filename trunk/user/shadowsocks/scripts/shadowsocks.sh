@@ -247,56 +247,19 @@ get_name() {
 
 gen_config_file() {
 	fastopen="false"
-	case "$2" in
-	0) config_file=$CONFIG_FILE && local stype=$(nvram get d_type) ;;
-	1) config_file=$CONFIG_UDP_FILE && local stype=$(nvram get ud_type) ;;
-	*) config_file=$CONFIG_SOCK5_FILE && local stype=$(nvram get s5_type) ;;
+	case "$3" in
+	0) config_file=$CONFIG_FILE ;;
+	1) config_file=$CONFIG_UDP_FILE ;;
+	*) config_file=$CONFIG_SOCK5_FILE ;;
 	esac
-	local type=$stype
-	case "$type" in
+	case "$2" in
 	ss)
-		lua /etc_ro/ss/genssconfig.lua $1 $3 >$config_file
+		lua /etc_ro/ss/genssconfig.lua $1 $4 >$config_file
 		sed -i 's/\\//g' $config_file
 		;;
 	ssr)
-		lua /etc_ro/ss/genssrconfig.lua $1 $3 >$config_file
+		lua /etc_ro/ss/genssrconfig.lua $1 $4 >$config_file
 		sed -i 's/\\//g' $config_file
-		;;
-	trojan)
-		tj_bin="/usr/bin/trojan"
-		if [ ! -f "$tj_bin" ]; then
-		if [ ! -f "/tmp/trojan" ];then
-			if [ $trojan_local_enable == "1" ] && [ -s $trojan_local ] ; then
-               logger -t "SS" "trojan二进制文件复制成功"
-               cat $trojan_local > /tmp/trojan
-               chmod -R 777 /tmp/trojan
-               tj_bin="/tmp/trojan"
-            else
-               curl -k -s -o /tmp/trojan --connect-timeout 10 --retry 3 $trojan_link
-                 if [ -s "/tmp/trojan" ] && [ `grep -c "404 Not Found" /tmp/trojan` == '0' ] ; then
-                    logger -t "SS" "trojan二进制文件下载成功"
-                    chmod -R 777 /tmp/trojan
-                    tj_bin="/tmp/trojan"
-                else
-                    logger -t "SS" "trojan二进制文件下载失败，可能是地址失效或者网络异常！"
-                    rm -f /tmp/trojan
-                    nvram set ss_enable=0
-                    stop
-                fi
-            fi
-		else
-			tj_bin="/tmp/trojan"
-			fi
-		fi
-		trojan_enable=1
-		#tj_file=$trojan_json_file
-		if [ "$2" = "0" ]; then
-		lua /etc_ro/ss/gentrojanconfig.lua $1 nat 1080 >$trojan_json_file
-		sed -i 's/\\//g' $trojan_json_file
-		else
-		lua /etc_ro/ss/gentrojanconfig.lua $1 client 10801 >/tmp/trojan-ssr-reudp.json
-		sed -i 's/\\//g' /tmp/trojan-ssr-reudp.json
-		fi
 		;;
 	v2ray)
 		v2_bin="/usr/bin/xray"
@@ -325,12 +288,47 @@ fi
 			fi
 		fi
 		v2ray_enable=1
-		if [ "$2" = "1" ]; then
+		if [ "$3" = "1" ]; then
 			lua /etc_ro/ss/genv2config.lua $1 udp 1080 >/tmp/v2-ssr-reudp.json
 		sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
 		else
 		lua /etc_ro/ss/genv2config.lua $1 tcp 1080 >$v2_json_file
 		sed -i 's/\\//g' $v2_json_file
+		fi
+		;;
+	trojan)
+		tj_bin="/usr/bin/trojan"
+		if [ ! -f "$tj_bin" ]; then
+		if [ ! -f "/tmp/trojan" ];then
+			if [ $trojan_local_enable == "1" ] && [ -s $trojan_local ] ; then
+               logger -t "SS" "trojan二进制文件复制成功"
+               cat $trojan_local > /tmp/trojan
+               chmod -R 777 /tmp/trojan
+               tj_bin="/tmp/trojan"
+            else
+               curl -k -s -o /tmp/trojan --connect-timeout 10 --retry 3 $trojan_link
+                 if [ -s "/tmp/trojan" ] && [ `grep -c "404 Not Found" /tmp/trojan` == '0' ] ; then
+                    logger -t "SS" "trojan二进制文件下载成功"
+                    chmod -R 777 /tmp/trojan
+                    tj_bin="/tmp/trojan"
+                else
+                    logger -t "SS" "trojan二进制文件下载失败，可能是地址失效或者网络异常！"
+                    rm -f /tmp/trojan
+                    nvram set ss_enable=0
+                    stop
+                fi
+            fi
+		else
+			tj_bin="/tmp/trojan"
+			fi
+		fi
+		trojan_enable=1
+		if [ "$3" = "0" ]; then
+		lua /etc_ro/ss/gentrojanconfig.lua $1 nat 1080 >$trojan_json_file
+		sed -i 's/\\//g' $trojan_json_file
+		else
+		lua /etc_ro/ss/gentrojanconfig.lua $1 client 10801 >/tmp/trojan-ssr-reudp.json
+		sed -i 's/\\//g' /tmp/trojan-ssr-reudp.json
 		fi
 		;;
 	esac
@@ -340,12 +338,9 @@ start_udp() {
 	if [ "$UDP_RELAY_SERVER" != "nil" ]; then
 		local type=$(nvram get ud_type)
 		redir_udp=1
-		logger -t "SS" "启动$type游戏UDP中继服务器"
-		local bin=$(find_bin $type)
-		[ ! -f "$bin" ] && echo "$(date "+%Y-%m-%d %H:%M:%S") UDP TPROXY Relay:Can't find $bin program, can't start!" >>$LOG_FILE && return 1
 		case "$type" in
 		ss | ssr)
-			gen_config_file $UDP_RELAY_SERVER 1 1080
+			gen_config_file $UDP_RELAY_SERVER $type 1 1080
 			last_config_file=$CONFIG_UDP_FILE
 			pid_file="/var/run/ssr-reudp.pid"
 			ss_program="$(first_type ${type}local ${type}-redir)"
@@ -354,12 +349,12 @@ start_udp() {
 			ln_start_bin $ss_program ${type}-redir -c $last_config_file $ss_extra_arg -f /var/run/ssr-reudp.pid >/dev/null 2>&1
 			;;
 		v2ray)
-			gen_config_file $UDP_RELAY_SERVER 1
+			gen_config_file $UDP_RELAY_SERVER $type 1
 			ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-reudp.json
 			echolog "UDP TPROXY Relay:$($(first_type "xray" "v2ray") -version | head -1) Started!"
 			;;
 		trojan)
-			gen_config_file $UDP_RELAY_SERVER 1
+			gen_config_file $UDP_RELAY_SERVER $type 1
 			ln_start_bin $(first_type trojan) $type --config /tmp/trojan-ssr-reudp.json
 			ln_start_bin $(first_type ipt2socks) ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l 1080
 			echolog "UDP TPROXY Relay:$($(first_type trojan) --version 2>&1 | head -1) Started!"
@@ -381,7 +376,7 @@ start_local() {
 	local type=$(nvram get s5_type)
 	case "$type" in
 	ss | ssr)
-		gen_config_file $local_server 3 $local_port
+		gen_config_file $local_server $type 3 $local_port
 		ss_program="$(first_type ${type}local ${type}-local)"
 		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
 			local ss_extra_arg="-U" || local ss_extra_arg="-u"
@@ -411,13 +406,13 @@ start_local() {
 }
 
 Start_Run() {
-	gen_config_file $GLOBAL_SERVER 0 1080
 	if [ "$(nvram get ss_threads)" == "0" ]; then
 		local threads=$(cat /proc/cpuinfo | grep 'processor' | wc -l)
 	else
 		local threads=$(nvram get ss_threads)
 	fi
 	local type=$(nvram get d_type)
+	gen_config_file $GLOBAL_SERVER $type 0 1080
 	case "$type" in
 	ss | ssr)
 		last_config_file=$CONFIG_FILE
