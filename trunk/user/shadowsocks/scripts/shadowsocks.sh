@@ -431,6 +431,7 @@ Start_Run() {
 			ln_start_bin "$ss_program" ${type}-redir -c $CONFIG_FILE $ARG_OTA $ss_extra_arg -f /tmp/ssr-retcp_$i.pid >/dev/null 2>&1
 			usleep 500000
 		done
+		redir_tcp=1
 		echolog "Main node:$(get_name $type) $threads Threads Started!"
 		;;
 	v2ray)
@@ -451,7 +452,6 @@ Start_Run() {
 		done
 	    ;;
 	esac
-	redir_tcp=1
 	return 0
 }
 
@@ -581,9 +581,9 @@ stop() {
 	unlock
 	set_lock
 	/usr/bin/ssr-rules -f
-	ps -w | grep -v "grep" | grep ssr-monitor | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
-	ps -w | grep -v "grep" | grep "sleep 0000" | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
-	ps -w | grep -v "grep" | grep "$TMP_PATH" | awk '{print $1}' | xargs killall -q -9 >/dev/null 2>&1 &
+	ps -w | grep -v "grep" | grep ssr-monitor | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1 &
+	ps -w | grep -v "grep" | grep "sleep 0000" | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1 &
+	ps -w | grep -v "grep" | grep "$TMP_PATH" | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1 &
 	kill_process
 	rm -f /var/lock/ssr-monitor.lock
 	sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
@@ -607,7 +607,6 @@ auto_update() {
 	sed -i '/update_chnroute/d' /etc/storage/cron/crontabs/$http_username
 	sed -i '/update_gfwlist/d' /etc/storage/cron/crontabs/$http_username
 	sed -i '/update_adblock/d' /etc/storage/cron/crontabs/$http_username
-	sed -i '/ss-watchcat/d' /etc/storage/cron/crontabs/$http_username
 	if [ $(nvram get ss_update_chnroute) = "1" ]; then
 		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
 40 1 * * * /usr/bin/update_chnroute.sh > /dev/null 2>&1
@@ -655,84 +654,98 @@ kill_process() {
 	v2ray_process=$(pidof xray)
 	if [ -n "$v2ray_process" ]; then
 		logger -t "SS" "关闭V2Ray进程..."
-		killall xray >/dev/null 2>&1
+		killall -q -9 xray >/dev/null 2>&1
 		kill -9 "$v2ray_process" >/dev/null 2>&1
 	fi
 	ssredir=$(pidof ss-redir)
 	if [ -n "$ssredir" ]; then
 		logger -t "SS" "关闭ss-redir进程..."
-		killall ss-redir >/dev/null 2>&1
+		killall -q -9 ss-redir >/dev/null 2>&1
 		kill -9 "$ssredir" >/dev/null 2>&1
 	fi
 
 	rssredir=$(pidof ssr-redir)
 	if [ -n "$rssredir" ]; then
 		logger -t "SS" "关闭ssr-redir进程..."
-		killall ssr-redir >/dev/null 2>&1
+		killall -q -9 ssr-redir >/dev/null 2>&1
 		kill -9 "$rssredir" >/dev/null 2>&1
 	fi
 	
 	sslocal_process=$(pidof ss-local)
 	if [ -n "$sslocal_process" ]; then
 		logger -t "SS" "关闭ss-local进程..."
-		killall ss-local >/dev/null 2>&1
+		killall -q -9 ss-local >/dev/null 2>&1
 		kill -9 "$sslocal_process" >/dev/null 2>&1
 	fi
 
 	trojandir=$(pidof trojan)
 	if [ -n "$trojandir" ]; then
 		logger -t "SS" "关闭trojan进程..."
-		killall trojan >/dev/null 2>&1
+		killall -q -9 trojan >/dev/null 2>&1
 		kill -9 "$trojandir" >/dev/null 2>&1
 	fi
 
 	kumasocks_process=$(pidof kumasocks)
 	if [ -n "$kumasocks_process" ]; then
 		logger -t "SS" "关闭kumasocks进程..."
-		killall kumasocks >/dev/null 2>&1
+		killall -q -9 kumasocks >/dev/null 2>&1
 		kill -9 "$kumasocks_process" >/dev/null 2>&1
 	fi
 	
 	ipt2socks_process=$(pidof ipt2socks)
 	if [ -n "$ipt2socks_process" ]; then
 		logger -t "SS" "关闭ipt2socks进程..."
-		killall ipt2socks >/dev/null 2>&1
+		killall -q -9 ipt2socks >/dev/null 2>&1
 		kill -9 "$ipt2socks_process" >/dev/null 2>&1
 	fi
 
 	socks5_process=$(pidof srelay)
 	if [ -n "$socks5_process" ]; then
 		logger -t "SS" "关闭socks5进程..."
-		killall srelay >/dev/null 2>&1
+		killall -q -9 srelay >/dev/null 2>&1
 		kill -9 "$socks5_process" >/dev/null 2>&1
 	fi
 
 	ssrs_process=$(pidof ssr-server)
 	if [ -n "$ssrs_process" ]; then
 		logger -t "SS" "关闭ssr-server进程..."
-		killall ssr-server >/dev/null 2>&1
+		killall -q -9 ssr-server >/dev/null 2>&1
 		kill -9 "$ssrs_process" >/dev/null 2>&1
 	fi
 	
 	cnd_process=$(pidof chinadns-ng)
 	if [ -n "$cnd_process" ]; then
 		logger -t "SS" "关闭chinadns-ng进程..."
-		killall chinadns-ng >/dev/null 2>&1
+		killall -q -9 chinadns-ng >/dev/null 2>&1
 		kill -9 "$cnd_process" >/dev/null 2>&1
 	fi
 
 	pdnsd_process=$(pidof pdnsd)
 	if [ -n "$pdnsd_process" ]; then
 		logger -t "SS" "关闭pdnsd进程..."
-		killall pdnsd >/dev/null 2>&1
+		killall -q -9 pdnsd >/dev/null 2>&1
 		kill -9 "$pdnsd_process" >/dev/null 2>&1
 	fi
 
 	microsocks_process=$(pidof microsocks)
 	if [ -n "$microsocks_process" ]; then
 		logger -t "SS" "关闭socks5服务端进程..."
-		killall microsocks >/dev/null 2>&1
+		killall -q -9 microsocks >/dev/null 2>&1
 		kill -9 "$microsocks_process" >/dev/null 2>&1
+	fi
+
+	v2ray-plugin_process=$(pidof v2ray-plugin)
+	if [ -n "$v2ray-plugin_process" ]; then
+		logger -t "SS" "关闭v2ray-plugin进程..."
+		killall -q -9 v2ray-plugin >/dev/null 2>&1
+		kill -9 "$v2ray-plugin_process" >/dev/null 2>&1
+	fi
+
+	obfs-local_process=$(pidof obfs-local)
+	if [ -n "$obfs-local_process" ]; then
+		logger -t "SS" "关闭obfs-local进程..."
+		killall -q -9 obfs-local >/dev/null 2>&1
+		kill -9 "$obfs-local_process" >/dev/null 2>&1
 	fi
 }
 
@@ -743,7 +756,7 @@ ressp() {
 	start_redir $BACKUP_SERVER
 	start_rules $BACKUP_SERVER
 	start_local
-	start_watchcat
+	start_monitor
 	auto_update
 	ENABLE_SERVER=$(nvram get global_server)
 	logger -t "SS" "备用服务器启动成功"
@@ -755,7 +768,6 @@ start)
 	start
 	;;
 stop)
-	#killall -q -9 ssr-switch
 	stop
 	;;
 restart)
