@@ -14,6 +14,7 @@ LOCK_FILE=/var/lock/ssrplus.lock
 LOG_FILE=/tmp/ssrplus.log
 TMP_PATH=/tmp/ssrplus
 TMP_BIN_PATH=$TMP_PATH/bin
+ARG_UDP=
 ARG_OTA=
 trojan_local_enable=`nvram get trojan_local_enable`
 trojan_link=`nvram get trojan_link`
@@ -245,7 +246,7 @@ get_name() {
 	esac
 }
 
-gen_config_file() {
+gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 	fastopen="false"
 	case "$3" in
 	0) config_file=$CONFIG_FILE ;;
@@ -335,36 +336,36 @@ fi
 }
 
 start_udp() {
-		local type=$(nvram get ud_type)
-		redir_udp=1
-		case "$type" in
-		ss | ssr)
-			gen_config_file $UDP_RELAY_SERVER $type 1 1080
-			last_config_file=$CONFIG_UDP_FILE
-			pid_file="/var/run/ssr-reudp.pid"
-			ss_program="$(first_type ${type}local ${type}-redir)"
-			[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
-				local ss_extra_arg="--protocol redir -u" || local ss_extra_arg="-U"
-			ln_start_bin $ss_program ${type}-redir -c $last_config_file $ss_extra_arg -f /var/run/ssr-reudp.pid >/dev/null 2>&1
-			;;
-		v2ray)
-			gen_config_file $UDP_RELAY_SERVER $type 1
-			ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-reudp.json
-			echolog "UDP TPROXY Relay:$($(first_type "xray" "v2ray") -version | head -1) Started!"
-			;;
-		trojan) #client
-			gen_config_file $UDP_RELAY_SERVER $type 1
-			ln_start_bin $(first_type trojan) $type --config /tmp/trojan-ssr-reudp.json
-			ln_start_bin $(first_type ipt2socks) ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l 1080
-			echolog "UDP TPROXY Relay:$($(first_type trojan) --version 2>&1 | head -1) Started!"
-			;;
-		socks5)
+	local type=$(nvram get ud_type)
+	redir_udp=1
+	case "$type" in
+	ss | ssr)
+		gen_config_file $UDP_RELAY_SERVER $type 1 1080
+		last_config_file=$CONFIG_UDP_FILE
+		pid_file="/var/run/ssr-reudp.pid"
+		ss_program="$(first_type ${type}local ${type}-redir)"
+		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
+			local ss_extra_arg="--protocol redir -u" || local ss_extra_arg="-U"
+		ln_start_bin $ss_program ${type}-redir -c $last_config_file $ss_extra_arg -f /var/run/ssr-reudp.pid >/dev/null 2>&1
+		echolog "UDP TPROXY Relay:$(get_name $type) Started!"
+		;;
+	v2ray)
+		gen_config_file $UDP_RELAY_SERVER $type 1
+		ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-reudp.json
+		echolog "UDP TPROXY Relay:$($(first_type "xray" "v2ray") -version | head -1) Started!"
+		;;
+	trojan) #client
+		gen_config_file $UDP_RELAY_SERVER $type 1
+		ln_start_bin $(first_type trojan) $type --config /tmp/trojan-ssr-reudp.json
+		ln_start_bin $(first_type ipt2socks) ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l 1080
+		echolog "UDP TPROXY Relay:$($(first_type trojan) --version 2>&1 | head -1) Started!"
+		;;
+	socks5)
 		echo "1"
-		    ;;
-		esac
+		;;
+	esac
 }
 
-# ================================= 启动 Socks5代理 ===============================
 start_local() {
 	local local_port=$(nvram get socks5_port)
 	local type=$(nvram get s5_type)
@@ -383,7 +384,7 @@ start_local() {
 		ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-local.json
 		echolog "Global_Socks5:$($(first_type "xray" "v2ray") -version | head -1) Started!"
 		;;
-	trojan)
+	trojan) #client
 		lua /etc_ro/ss/gentrojanconfig.lua $LOCAL_SERVER client $local_port >/tmp/trojan-ssr-local.json
 		sed -i 's/\\//g' /tmp/trojan-ssr-local.json
 		ln_start_bin $(first_type trojan) $type --config /tmp/trojan-ssr-local.json
@@ -494,7 +495,7 @@ start_monitor() {
 }
 
 start_rules() {
-    logger -t "SS" "正在添加防火墙规则..."
+	logger -t "SS" "正在添加防火墙规则..."
 	lua /etc_ro/ss/getconfig.lua $GLOBAL_SERVER > /tmp/server.txt
 	server=`cat /tmp/server.txt` 
 	cat /etc/storage/ss_ip.sh | grep -v '^!' | grep -v "^$" >$wan_fw_ips
@@ -761,20 +762,6 @@ kill_process() {
 	fi
 }
 
-
-# ================================= 重启 SS ===============================
-ressp() {
-	BACKUP_SERVER=$(nvram get backup_server)
-	start_redir $BACKUP_SERVER
-	start_rules $BACKUP_SERVER
-	start_local
-	start_monitor
-	auto_update
-	ENABLE_SERVER=$(nvram get global_server)
-	logger -t "SS" "备用服务器启动成功"
-	logger -t "SS" "内网IP控制为:$lancons"
-}
-
 case $1 in
 start)
 	start
@@ -786,13 +773,8 @@ restart)
 	stop
 	start
 	;;
-reserver)
-	stop
-	ressp
-	;;
 *)
 	echo "check"
-	#exit 0
 	;;
 esac
 
