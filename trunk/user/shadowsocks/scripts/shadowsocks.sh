@@ -289,10 +289,10 @@ fi
 		fi
 		v2ray_enable=1
 		if [ "$3" = "1" ]; then
-			lua /etc_ro/ss/genv2config.lua $1 udp 1080 >/tmp/v2-ssr-reudp.json
+			lua /etc_ro/ss/genv2config.lua $1 $mode 1080 >/tmp/v2-ssr-reudp.json
 		sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
 		else
-		lua /etc_ro/ss/genv2config.lua $1 tcp 1080 >$v2_json_file
+		lua /etc_ro/ss/genv2config.lua $1 $mode 1080 >$v2_json_file
 		sed -i 's/\\//g' $v2_json_file
 		fi
 		;;
@@ -335,7 +335,6 @@ fi
 }
 
 start_udp() {
-	if [ "$UDP_RELAY_SERVER" != "nil" ]; then
 		local type=$(nvram get ud_type)
 		redir_udp=1
 		case "$type" in
@@ -353,7 +352,7 @@ start_udp() {
 			ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-reudp.json
 			echolog "UDP TPROXY Relay:$($(first_type "xray" "v2ray") -version | head -1) Started!"
 			;;
-		trojan)
+		trojan) #client
 			gen_config_file $UDP_RELAY_SERVER $type 1
 			ln_start_bin $(first_type trojan) $type --config /tmp/trojan-ssr-reudp.json
 			ln_start_bin $(first_type ipt2socks) ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l 1080
@@ -363,20 +362,15 @@ start_udp() {
 		echo "1"
 		    ;;
 		esac
-	fi
-	return 0
 }
 
 # ================================= 启动 Socks5代理 ===============================
 start_local() {
 	local local_port=$(nvram get socks5_port)
-	local local_server=$(nvram get socks5_enable)
-	[ "$local_server" == "nil" ] && return 1
-	[ "$local_server" == "same" ] && local_server=$GLOBAL_SERVER
 	local type=$(nvram get s5_type)
 	case "$type" in
 	ss | ssr)
-		gen_config_file $local_server $type 3 $local_port
+		gen_config_file $LOCAL_SERVER $type 3 $local_port
 		ss_program="$(first_type ${type}local ${type}-local)"
 		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
 			local ss_extra_arg="-U" || local ss_extra_arg="-u"
@@ -384,13 +378,13 @@ start_local() {
 		echolog "Global_Socks5:$(get_name $type) Started!"
 		;;
 	v2ray)
-		lua /etc_ro/ss/genv2config.lua $local_server tcp 0 $local_port >/tmp/v2-ssr-local.json
+		lua /etc_ro/ss/genv2config.lua $LOCAL_SERVER $mode 0 $local_port >/tmp/v2-ssr-local.json
 		sed -i 's/\\//g' /tmp/v2-ssr-local.json
 		ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-local.json
 		echolog "Global_Socks5:$($(first_type "xray" "v2ray") -version | head -1) Started!"
 		;;
 	trojan)
-		lua /etc_ro/ss/gentrojanconfig.lua $local_server client $local_port >/tmp/trojan-ssr-local.json
+		lua /etc_ro/ss/gentrojanconfig.lua $LOCAL_SERVER client $local_port >/tmp/trojan-ssr-local.json
 		sed -i 's/\\//g' /tmp/trojan-ssr-local.json
 		ln_start_bin $(first_type trojan) $type --config /tmp/trojan-ssr-local.json
 		echolog "Global_Socks5:$($(first_type trojan) --version 2>&1 | head -1) Started!"
@@ -445,7 +439,7 @@ Start_Run() {
 		lua /etc_ro/ss/gensocks.lua $GLOBAL_SERVER 1080 >/dev/null 2>&1 &
 		usleep 500000
 		done
-	    ;;
+		;;
 	esac
 	return 0
 }
@@ -455,14 +449,39 @@ load_config() {
 		return 1
 	fi
 	UDP_RELAY_SERVER=$(nvram get udp_relay_server)
-	if [ "$UDP_RELAY_SERVER" = "same" ]; then
-	UDP_RELAY_SERVER=$GLOBAL_SERVER
-	fi
-	if start_rules; then
-		return 0
-	else
-		return 1
-	fi
+	LOCAL_SERVER=$(nvram get socks5_enable)
+	case "$UDP_RELAY_SERVER" in
+	nil)
+		mode="tcp"
+		;;
+	$GLOBAL_SERVER | same)
+		mode="tcp,udp"
+		ARG_UDP="-u"
+		UDP_RELAY_SERVER=$GLOBAL_SERVER
+		;;
+	*)
+		mode="udp"
+		ARG_UDP="-U"
+		start_udp
+		mode="tcp"
+		;;
+	esac
+	case "$LOCAL_SERVER" in
+	nil)
+		_local="0"
+		;;
+	$GLOBAL_SERVER | same)
+		_local="1"
+		LOCAL_SERVER=$GLOBAL_SERVER
+		start_local
+		local_enable=0
+		;;
+	*)
+		_local="2"
+		start_local
+		;;
+	esac
+	return 0
 }
 
 start_monitor() {
@@ -551,14 +570,12 @@ start() {
 	echolog "----------start------------"
 	mkdir -p /var/run /var/lock /var/log $TMP_BIN_PATH
 	ulimit -n 65535
-    ss_enable=`nvram get ss_enable`
-if load_config; then
-		if Start_Run; then
-		start_udp
+	ss_enable=`nvram get ss_enable`
+	if load_config; then
+		Start_Run
+		start_rules
 		start_dns
-		fi
-		fi
-        start_local
+	fi
 	start_monitor
         auto_update
         ENABLE_SERVER=$(nvram get global_server)
