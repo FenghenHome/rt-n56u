@@ -14,8 +14,10 @@ LOCK_FILE=/var/lock/ssrplus.lock
 LOG_FILE=/tmp/ssrplus.log
 TMP_PATH=/tmp/ssrplus
 TMP_BIN_PATH=$TMP_PATH/bin
+local_config_file=
 ARG_UDP=
 ARG_OTA=
+tmp_udp_port="301"         #udp temporary port
 trojan_local_enable=`nvram get trojan_local_enable`
 trojan_link=`nvram get trojan_link`
 trojan_local=`nvram get trojan_local`
@@ -25,7 +27,6 @@ v2_local=`nvram get v2_local`
 http_username=`nvram get http_username`
 CONFIG_FILE=/tmp/${NAME}.json
 CONFIG_UDP_FILE=/tmp/${NAME}_u.json
-CONFIG_SOCK5_FILE=/tmp/${NAME}_s.json
 CONFIG_KUMASOCKS_FILE=/tmp/kumasocks.toml
 v2_json_file="/tmp/v2-redir.json"
 trojan_json_file="/tmp/tj-redir.json"
@@ -249,9 +250,15 @@ get_name() {
 gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 	fastopen="false"
 	case "$3" in
-	0) config_file=$CONFIG_FILE ;;
-	1) config_file=$CONFIG_UDP_FILE ;;
-	*) config_file=$CONFIG_SOCK5_FILE ;;
+	1)
+		config_file=$CONFIG_FILE
+		;;
+	2)
+		config_file=$CONFIG_UDP_FILE
+		;;
+	3)
+		config_file=$local_config_file
+		;;
 	esac
 	case "$2" in
 	ss)
@@ -289,7 +296,7 @@ fi
 			fi
 		fi
 		v2ray_enable=1
-		if [ "$3" = "1" ]; then
+		if [ "$3" = "2" ]; then
 			lua /etc_ro/ss/genv2config.lua $1 $mode 1080 >/tmp/v2-ssr-reudp.json
 		sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
 		else
@@ -324,7 +331,7 @@ fi
 			fi
 		fi
 		trojan_enable=1
-		if [ "$3" = "0" ]; then
+		if [ "$3" = "1" ]; then
 		lua /etc_ro/ss/gentrojanconfig.lua $1 nat 1080 >$trojan_json_file
 		sed -i 's/\\//g' $trojan_json_file
 		else
@@ -340,9 +347,8 @@ start_udp() {
 	redir_udp=1
 	case "$type" in
 	ss | ssr)
-		gen_config_file $UDP_RELAY_SERVER $type 1 1080
+		gen_config_file $UDP_RELAY_SERVER $type 2 $tmp_udp_port
 		last_config_file=$CONFIG_UDP_FILE
-		pid_file="/var/run/ssr-reudp.pid"
 		ss_program="$(first_type ${type}local ${type}-redir)"
 		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
 			local ss_extra_arg="--protocol redir -u" || local ss_extra_arg="-U"
@@ -350,14 +356,14 @@ start_udp() {
 		echolog "UDP TPROXY Relay:$(get_name $type) Started!"
 		;;
 	v2ray)
-		gen_config_file $UDP_RELAY_SERVER $type 1
+		gen_config_file $UDP_RELAY_SERVER $type 2
 		ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-reudp.json
 		echolog "UDP TPROXY Relay:$($(first_type "xray" "v2ray") -version | head -1) Started!"
 		;;
 	trojan) #client
-		gen_config_file $UDP_RELAY_SERVER $type 1
+		gen_config_file $UDP_RELAY_SERVER $type 2
 		ln_start_bin $(first_type trojan) $type --config /tmp/trojan-ssr-reudp.json
-		ln_start_bin $(first_type ipt2socks) ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l 1080
+		ln_start_bin $(first_type ipt2socks) ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l $tmp_udp_port
 		echolog "UDP TPROXY Relay:$($(first_type trojan) --version 2>&1 | head -1) Started!"
 		;;
 	socks5)
@@ -375,7 +381,7 @@ start_local() {
 		ss_program="$(first_type ${type}local ${type}-local)"
 		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
 			local ss_extra_arg="-U" || local ss_extra_arg="-u"
-		ln_start_bin $ss_program ${type}-local -c $CONFIG_SOCK5_FILE $ss_extra_arg -f /var/run/ssr-local.pid >/dev/null 2>&1
+		ln_start_bin $ss_program ${type}-local -c $local_config_file $ss_extra_arg -f /var/run/ssr-local.pid >/dev/null 2>&1
 		echolog "Global_Socks5:$(get_name $type) Started!"
 		;;
 	v2ray)
@@ -407,7 +413,7 @@ Start_Run() {
 		local threads=$(nvram get ss_threads)
 	fi
 	local type=$(nvram get d_type)
-	gen_config_file $GLOBAL_SERVER $type 0 1080
+	gen_config_file $GLOBAL_SERVER $type 1 1080
 	case "$type" in
 	ss | ssr)
 		last_config_file=$CONFIG_FILE
@@ -474,11 +480,13 @@ load_config() {
 	$GLOBAL_SERVER | same)
 		_local="1"
 		LOCAL_SERVER=$GLOBAL_SERVER
+		local_config_file=$TMP_PATH/tcp-udp-ssr-local.json
 		start_local
 		local_enable=0
 		;;
 	*)
 		_local="2"
+		local_config_file=$TMP_PATH/tcp-udp-ssr-local.json
 		start_local
 		;;
 	esac
@@ -517,8 +525,8 @@ start_rules() {
 	if [ "$redir_udp" == "1" ]; then
 		ARG_UDP="-U"
 		lua /etc_ro/ss/getconfig.lua $UDP_RELAY_SERVER > /tmp/userver.txt
-		udp_server=`cat /tmp/userver.txt` 
-		udp_local_port="1080"
+		local udp_server=`cat /tmp/userver.txt` 
+		local udp_local_port=$tmp_udp_port
 	fi
 	gfwmode() {
 		case "$run_mode" in
