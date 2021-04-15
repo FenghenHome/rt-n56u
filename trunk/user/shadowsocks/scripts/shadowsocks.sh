@@ -14,11 +14,13 @@ LOCK_FILE=/var/lock/ssrplus.lock
 LOG_FILE=/tmp/ssrplus.log
 TMP_PATH=/tmp/ssrplus
 TMP_BIN_PATH=$TMP_PATH/bin
+tcp_config_file=
 udp_config_file=
 local_config_file=
 ARG_UDP=
 ARG_OTA=
 tmp_udp_port="301"         #udp temporary port
+tmp_udp_local_port="302"   #udp socks temporary port
 trojan_local_enable=`nvram get trojan_local_enable`
 trojan_link=`nvram get trojan_link`
 trojan_local=`nvram get trojan_local`
@@ -26,8 +28,6 @@ v2_local_enable=`nvram get v2_local_enable`
 v2_link=`nvram get v2_link`
 v2_local=`nvram get v2_local`
 http_username=`nvram get http_username`
-CONFIG_FILE=/tmp/${NAME}.json
-CONFIG_KUMASOCKS_FILE=/tmp/kumasocks.toml
 v2_json_file="/tmp/v2-redir.json"
 trojan_json_file="/tmp/tj-redir.json"
 server_count=0
@@ -251,7 +251,7 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 	fastopen="false"
 	case "$3" in
 	1)
-		config_file=$CONFIG_FILE
+		config_file=$tcp_config_file
 		;;
 	2)
 		config_file=$udp_config_file
@@ -362,7 +362,7 @@ start_udp() {
 	trojan) #client
 		gen_config_file $UDP_RELAY_SERVER $type 2
 		ln_start_bin $(first_type trojan) $type --config $udp_config_file
-		ln_start_bin $(first_type ipt2socks) ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l $tmp_udp_port
+		ln_start_bin $(first_type ipt2socks) ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p $tmp_udp_local_port -l $tmp_udp_port
 		echolog "UDP TPROXY Relay:$($(first_type trojan) --version 2>&1 | head -1) Started!"
 		;;
 	socks5)
@@ -386,8 +386,8 @@ start_local() {
 	v2ray)
 		lua /etc_ro/ss/genv2config.lua $LOCAL_SERVER $mode 0 $local_port >/tmp/v2-ssr-local.json
 		sed -i 's/\\//g' /tmp/v2-ssr-local.json
-		ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-local.json
-		echolog "Global_Socks5:$($(first_type "xray" "v2ray") -version | head -1) Started!"
+			ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-local.json
+			echolog "Global_Socks5:$($(first_type "xray" "v2ray") -version | head -1) Started!"
 		;;
 	trojan) #client
 		lua /etc_ro/ss/gentrojanconfig.lua $LOCAL_SERVER client $local_port >/tmp/trojan-ssr-local.json
@@ -415,7 +415,6 @@ Start_Run() {
 	gen_config_file $GLOBAL_SERVER $type 1 1080
 	case "$type" in
 	ss | ssr)
-		last_config_file=$CONFIG_FILE
 		ss_program="$(first_type ${type}local ${type}-redir)"
 		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
 			{
@@ -423,7 +422,7 @@ Start_Run() {
 				case ${ARG_OTA} in '-u') ARG_OTA='-U' ;; esac
 			}
 		for i in $(seq 1 $threads); do
-			ln_start_bin "$ss_program" ${type}-redir -c $CONFIG_FILE $ARG_OTA $ss_extra_arg -f /tmp/ssr-retcp_$i.pid >/dev/null 2>&1
+			ln_start_bin "$ss_program" ${type}-redir -c $tcp_config_file $ARG_OTA $ss_extra_arg
 			usleep 500000
 		done
 		redir_tcp=1
@@ -456,12 +455,14 @@ load_config() {
 	fi
 	UDP_RELAY_SERVER=$(nvram get udp_relay_server)
 	LOCAL_SERVER=$(nvram get socks5_enable)
+	tcp_config_file=$TMP_PATH/tcp-only-ssr-retcp.json
 	case "$UDP_RELAY_SERVER" in
 	nil)
 		mode="tcp"
 		;;
 	$GLOBAL_SERVER | same)
 		mode="tcp,udp"
+		tcp_config_file=$TMP_PATH/tcp-udp-ssr-retcp.json
 		ARG_UDP="-u"
 		UDP_RELAY_SERVER=$GLOBAL_SERVER
 		;;
