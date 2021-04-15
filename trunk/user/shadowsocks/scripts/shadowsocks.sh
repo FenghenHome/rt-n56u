@@ -18,7 +18,6 @@ tcp_config_file=
 udp_config_file=
 local_config_file=
 ARG_UDP=
-ARG_OTA=
 tmp_udp_port="301"         #udp temporary port
 tmp_udp_local_port="302"   #udp socks temporary port
 trojan_local_enable=`nvram get trojan_local_enable`
@@ -349,8 +348,7 @@ start_udp() {
 	ss | ssr)
 		gen_config_file $UDP_RELAY_SERVER $type 2 $tmp_udp_port
 		ss_program="$(first_type ${type}local ${type}-redir)"
-		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
-			local ss_extra_arg="--protocol redir -u" || local ss_extra_arg="-U"
+		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] && local ss_extra_arg="--protocol redir"
 		ln_start_bin $ss_program ${type}-redir -c $udp_config_file $ss_extra_arg
 		echolog "UDP TPROXY Relay:$(get_name $type) Started!"
 		;;
@@ -378,9 +376,7 @@ start_local() {
 	ss | ssr)
 		gen_config_file $LOCAL_SERVER $type 3 $local_port
 		ss_program="$(first_type ${type}local ${type}-local)"
-		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
-			local ss_extra_arg="-U" || local ss_extra_arg="-u"
-		ln_start_bin $ss_program ${type}-local -c $local_config_file $ss_extra_arg -f /var/run/ssr-local.pid >/dev/null 2>&1
+		ln_start_bin $ss_program ${type}-local -c $local_config_file
 		echolog "Global_Socks5:$(get_name $type) Started!"
 		;;
 	v2ray)
@@ -416,14 +412,9 @@ Start_Run() {
 	case "$type" in
 	ss | ssr)
 		ss_program="$(first_type ${type}local ${type}-redir)"
-		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
-			{
-				local ss_extra_arg="--protocol redir"
-				case ${ARG_OTA} in '-u') ARG_OTA='-U' ;; esac
-			}
+		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] && local ss_extra_arg="--protocol redir"
 		for i in $(seq 1 $threads); do
-			ln_start_bin "$ss_program" ${type}-redir -c $tcp_config_file $ARG_OTA $ss_extra_arg
-			usleep 500000
+			ln_start_bin "$ss_program" ${type}-redir -c $tcp_config_file $ss_extra_arg
 		done
 		redir_tcp=1
 		echolog "Main node:$(get_name $type) $threads Threads Started!"
@@ -524,7 +515,6 @@ start_rules() {
 	fi
 	local_port="1080"
 	if [ "$redir_udp" == "1" ]; then
-		ARG_UDP="-U"
 		lua /etc_ro/ss/getconfig.lua $UDP_RELAY_SERVER > /tmp/userver.txt
 		local udp_server=`cat /tmp/userver.txt` 
 		local udp_local_port=$tmp_udp_port
