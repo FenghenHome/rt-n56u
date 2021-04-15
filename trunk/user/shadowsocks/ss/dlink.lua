@@ -12,7 +12,7 @@ local tinsert = table.insert
 local ssub, slen, schar, sbyte, sformat, sgsub = string.sub, string.len, string.char, string.byte, string.format, string.gsub
 local b64decode = nixio.bin.b64decode
 local cache = {}
-local nodeResult = setmetatable({}, { __index = cache })  -- update result
+local nodeResult = setmetatable({}, {__index = cache}) -- update result
 local name = 'shadowsocksr'
 local uciType = 'servers'
 local subscribe_url = {}
@@ -27,30 +27,13 @@ subscribe_url[i] = line
 i = i+1
 end
 
-local function base64Decode(text)
-	local raw = text
-	if not text then return '' end
-	text = text:gsub("%z", "")
-	text = text:gsub("_", "/")
-	text = text:gsub("-", "+")
-	local mod4 = #text % 4
-	text = text .. string.sub('====', mod4 + 1)
-	local result = b64decode(text)
-	
-	if result then
-		return result:gsub("%z", "")
-	else
-		return raw
-	end
-end
-
 local log = function(...)
-	print(os.date("%Y-%m-%d %H:%M:%S ") .. table.concat({ ... }, " "))
+	print(os.date("%Y-%m-%d %H:%M:%S ") .. table.concat({...}, " "))
 	os.execute("logger -t 'SS' '" .. table.concat({ ... }, " ") .. "'")
 end
 -- 分割字符串
 local function split(full, sep)
-	full = full:gsub("%z", "")  -- 这里不是很清楚 有时候结尾带个\0
+	full = full:gsub("%z", "") -- 这里不是很清楚 有时候结尾带个\0
 	local off, result = 1, {}
 	while true do
 		local nStart, nEnd = full:find(sep, off)
@@ -101,14 +84,27 @@ local function md5(content)
 	--print(stdout)
 	--return stdout
 end
+-- base64
+local function base64Decode(text)
+	local raw = text
+	if not text then
+		return ''
+	end
+	text = text:gsub("%z", "")
+	text = text:gsub("_", "/")
+	text = text:gsub("-", "+")
+	local mod4 = #text % 4
+	text = text .. string.sub('====', mod4 + 1)
+	local result = b64decode(text)
+	if result then
+		return result:gsub("%z", "")
+	else
+		return raw
+	end
+end
 -- 处理数据
 local function processData(szType, content)
-
-	local result = {
-	type = szType,
-	local_port = 1234,
-	kcp_param = '--nocomp'
-	}
+	local result = {type = szType, local_port = 1234, kcp_param = '--nocomp'}
 	if szType == 'ssr' then
 		local dat = split(content, "/%?")
 		local hostInfo = split(dat[1], ':')
@@ -127,13 +123,13 @@ local function processData(szType, content)
 		result.protocol_param = base64Decode(params.protoparam)
 		local group = base64Decode(params.group)
 		if group then
-			result.alias = "["  .. group .. "] "
+			result.alias = "[" .. group .. "] "
 		end
 		result.alias = result.alias .. base64Decode(params.remarks)
 	elseif szType == 'vmess' then
-	local content2 = "[[" .. content .. "]]"
 		local info = cjson.decode(content)
-        result.type = 'v2ray'
+		result.type = 'v2ray'
+		result.v2ray_protocol = 'vmess'
 		result.server = info.add
 		result.server_port = info.port
 		result.transport = info.net
@@ -245,6 +241,7 @@ local function processData(szType, content)
 		local password = userinfo
 		result.alias = UrlDecode(alias)
 		result.type = "trojan"
+		result.v2ray_protocol = "trojan"
 		result.server = host[1]
 		-- 按照官方的建议 默认验证ssl证书
 		result.insecure = "0"
@@ -257,12 +254,10 @@ local function processData(szType, content)
 				local t = split(v, '=')
 				params[t[1]] = t[2]
 			end
-			
 			if params.peer then
 				-- 未指定peer（sni）默认使用remote addr
 				result.tls_host = params.peer
 			end
-			
 			if params.allowInsecure == "1" then
 				result.insecure = "1"
 			else
@@ -301,7 +296,7 @@ local function check_filer(result)
 		print(cjson.encode(filter_word))
 		for i, v in pairs(filter_word) do
 			if result.alias:find(v) then
-				log('订阅节点关键字过滤:“' .. v ..'” ，该节点被丢弃')
+				-- log('订阅节点关键字过滤:“' .. v ..'” ，该节点被丢弃')
 				return true
 			end
 		end
@@ -314,7 +309,6 @@ end
 	do
 		for k, url in ipairs(subscribe_url) do
 			local raw = wget(url)
-			
 			if #raw > 0 then
 				local nodes, szType
 				local groupHash = md5(url)
@@ -327,16 +321,11 @@ end
 					local nEnd = select(2, raw:find('ssd://'))
 					nodes = base64Decode(raw:sub(nEnd + 1, #raw))
 					nodes = jsonParse(nodes)
-					local extra = {
-						airport = nodes.airport,
-						port = nodes.port,
-						encryption = nodes.encryption,
-						password = nodes.password
-					}
+					local extra = {airport = nodes.airport, port = nodes.port, encryption = nodes.encryption, password = nodes.password}
 					local servers = {}
 					-- SS里面包着 干脆直接这样
 					for _, server in ipairs(nodes.servers) do
-						tinsert(servers, setmetatable(server, { __index = extra }))
+						tinsert(servers, setmetatable(server, {__index = extra}))
 					end
 					nodes = servers
 				else
@@ -365,6 +354,7 @@ end
 						else
 							log('跳过未知类型: ' .. szType)
 						end
+						-- log(result)
 						if result then
 							if
 								not result.server or
@@ -374,7 +364,7 @@ end
 							then
 								log('丢弃无效节点: ' .. result.type ..' 节点, ' .. result.alias)
 							else
-								log('成功解析: ' .. result.type ..' 节点, ' .. result.alias)
+								-- log('成功解析: ' .. result.type ..' 节点, ' .. result.alias)
 								result.grouphashkey = groupHash
 								tinsert(nodeResult[index], result)
 								cache[groupHash][result.hashkey] = nodeResult[index][#nodeResult[index]]
@@ -382,7 +372,7 @@ end
 						end
 					end
 				end
-				log('成功解析节点数量: ' ..#nodes)
+				log('成功解析节点数量: ' .. #nodes)
 			else
 				log(url .. ': 获取内容为空')
 			end
