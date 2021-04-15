@@ -14,6 +14,7 @@ LOCK_FILE=/var/lock/ssrplus.lock
 LOG_FILE=/tmp/ssrplus.log
 TMP_PATH=/tmp/ssrplus
 TMP_BIN_PATH=$TMP_PATH/bin
+udp_config_file=
 local_config_file=
 ARG_UDP=
 ARG_OTA=
@@ -26,7 +27,6 @@ v2_link=`nvram get v2_link`
 v2_local=`nvram get v2_local`
 http_username=`nvram get http_username`
 CONFIG_FILE=/tmp/${NAME}.json
-CONFIG_UDP_FILE=/tmp/${NAME}_u.json
 CONFIG_KUMASOCKS_FILE=/tmp/kumasocks.toml
 v2_json_file="/tmp/v2-redir.json"
 trojan_json_file="/tmp/tj-redir.json"
@@ -254,7 +254,7 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 		config_file=$CONFIG_FILE
 		;;
 	2)
-		config_file=$CONFIG_UDP_FILE
+		config_file=$udp_config_file
 		;;
 	3)
 		config_file=$local_config_file
@@ -348,21 +348,20 @@ start_udp() {
 	case "$type" in
 	ss | ssr)
 		gen_config_file $UDP_RELAY_SERVER $type 2 $tmp_udp_port
-		last_config_file=$CONFIG_UDP_FILE
 		ss_program="$(first_type ${type}local ${type}-redir)"
 		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] &&
 			local ss_extra_arg="--protocol redir -u" || local ss_extra_arg="-U"
-		ln_start_bin $ss_program ${type}-redir -c $last_config_file $ss_extra_arg -f /var/run/ssr-reudp.pid >/dev/null 2>&1
+		ln_start_bin $ss_program ${type}-redir -c $udp_config_file $ss_extra_arg
 		echolog "UDP TPROXY Relay:$(get_name $type) Started!"
 		;;
 	v2ray)
 		gen_config_file $UDP_RELAY_SERVER $type 2
-		ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-reudp.json
+		ln_start_bin $(first_type xray v2ray) v2ray -config $udp_config_file
 		echolog "UDP TPROXY Relay:$($(first_type "xray" "v2ray") -version | head -1) Started!"
 		;;
 	trojan) #client
 		gen_config_file $UDP_RELAY_SERVER $type 2
-		ln_start_bin $(first_type trojan) $type --config /tmp/trojan-ssr-reudp.json
+		ln_start_bin $(first_type trojan) $type --config $udp_config_file
 		ln_start_bin $(first_type ipt2socks) ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p 10801 -l $tmp_udp_port
 		echolog "UDP TPROXY Relay:$($(first_type trojan) --version 2>&1 | head -1) Started!"
 		;;
@@ -468,6 +467,7 @@ load_config() {
 		;;
 	*)
 		mode="udp"
+		udp_config_file=$TMP_PATH/udp-only-ssr-reudp.json
 		ARG_UDP="-U"
 		start_udp
 		mode="tcp"
