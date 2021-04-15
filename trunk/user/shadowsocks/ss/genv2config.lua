@@ -186,4 +186,4 @@ Xray["inbounds"] = inbounds_settings
 Xray["routing"] = routing_settings
 Xray["outbounds"] = outbounds_settings
 
-print(cjson.stringify(Xray, 1))
+print(cjson.encode(Xray))
