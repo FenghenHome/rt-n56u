@@ -269,29 +269,24 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 		sed -i 's/\\//g' $config_file
 		;;
 	v2ray)
-		v2_bin="/usr/bin/xray"
-		if [ ! -f "$v2_bin" ]; then
-		if [ ! -f "/tmp/xray" ];then
-			if [ $v2_local_enable == "1" ] && [ -s $v2_local ] ; then
-            logger -t "SS" "v2ray二进制文件复制成功"
-            cat $v2_local > /tmp/xray
-            chmod -R 777 /tmp/xray
-            v2_bin="/tmp/xray"
-else
-    curl -k -s -o /tmp/xray --connect-timeout 10 --retry 3 $v2_link
-    if [ -s "/tmp/xray" ] && [ `grep -c "404 Not Found" /tmp/xray` == '0' ] ; then
-        logger -t "SS" "v2ray二进制文件下载成功"
-        chmod -R 777 /tmp/xray
-        v2_bin="/tmp/xray"
-    else
-        logger -t "SS" "v2ray二进制文件下载失败，可能是地址失效或者网络异常！"
-        rm -f /tmp/xray
-        nvram set ss_enable=0
-        stop
-    fi
-fi
-			else
-			v2_bin="/tmp/xray"
+		if [ ! -f "/usr/bin/xray" ]; then
+			if [ ! -f "/tmp/xray" ];then
+				if [ $v2_local_enable == "1" ] && [ -s $v2_local ] ; then
+					logger -t "SS" "v2ray二进制文件复制成功"
+					cat $v2_local > /tmp/xray
+					chmod -R 777 /tmp/xray
+				else
+					curl -k -s -o /tmp/xray --connect-timeout 10 --retry 3 $v2_link
+					if [ -s "/tmp/xray" ] && [ `grep -c "404 Not Found" /tmp/xray` == '0' ] ; then
+						logger -t "SS" "v2ray二进制文件下载成功"
+						chmod -R 777 /tmp/xray
+					else
+						logger -t "SS" "v2ray二进制文件下载失败，可能是地址失效或者网络异常！"
+						rm -f /tmp/xray
+						nvram set ss_enable=0
+						stop
+					fi
+				fi
 			fi
 		fi
 		v2ray_enable=1
@@ -304,29 +299,24 @@ fi
 		fi
 		;;
 	trojan)
-		tj_bin="/usr/bin/trojan"
-		if [ ! -f "$tj_bin" ]; then
-		if [ ! -f "/tmp/trojan" ];then
-			if [ $trojan_local_enable == "1" ] && [ -s $trojan_local ] ; then
-               logger -t "SS" "trojan二进制文件复制成功"
-               cat $trojan_local > /tmp/trojan
-               chmod -R 777 /tmp/trojan
-               tj_bin="/tmp/trojan"
-            else
-               curl -k -s -o /tmp/trojan --connect-timeout 10 --retry 3 $trojan_link
-                 if [ -s "/tmp/trojan" ] && [ `grep -c "404 Not Found" /tmp/trojan` == '0' ] ; then
-                    logger -t "SS" "trojan二进制文件下载成功"
-                    chmod -R 777 /tmp/trojan
-                    tj_bin="/tmp/trojan"
-                else
-                    logger -t "SS" "trojan二进制文件下载失败，可能是地址失效或者网络异常！"
-                    rm -f /tmp/trojan
-                    nvram set ss_enable=0
-                    stop
-                fi
-            fi
-		else
-			tj_bin="/tmp/trojan"
+		if [ ! -f "/usr/bin/trojan" ]; then
+			if [ ! -f "/tmp/trojan" ];then
+				if [ $trojan_local_enable == "1" ] && [ -s $trojan_local ] ; then
+					logger -t "SS" "trojan二进制文件复制成功"
+					cat $trojan_local > /tmp/trojan
+					chmod -R 777 /tmp/trojan
+				else
+					curl -k -s -o /tmp/trojan --connect-timeout 10 --retry 3 $trojan_link
+					if [ -s "/tmp/trojan" ] && [ `grep -c "404 Not Found" /tmp/trojan` == '0' ] ; then
+						logger -t "SS" "trojan二进制文件下载成功"
+						chmod -R 777 /tmp/trojan
+					else
+						logger -t "SS" "trojan二进制文件下载失败，可能是地址失效或者网络异常！"
+						rm -f /tmp/trojan
+						nvram set ss_enable=0
+						stop
+					fi
+				fi
 			fi
 		fi
 		trojan_enable=1
@@ -634,32 +624,6 @@ EOF
 50 1 * * * /usr/bin/update_adblock.sh > /dev/null 2>&1
 EOF
 	fi
-}
-
-find_bin() {
-	case "$1" in
-	ss) ret="/usr/bin/ss-redir" ;;
-	ss-local) ret="/usr/bin/ss-local" ;;
-	ssr) ret="/usr/bin/ssr-redir" ;;
-	ssr-local) ret="/usr/bin/ssr-local" ;;
-	ssr-server) ret="/usr/bin/ssr-server" ;;
-	v2ray)
-	if [ -f "/usr/bin/xray" ] ; then
-       ret="/usr/bin/xray"
-    else
-       ret="/tmp/xray"
-    fi
-    ;;
-	trojan)
-	if [ -f "/usr/bin/trojan" ] ; then
-       ret="/usr/bin/trojan"
-    else
-       ret="/tmp/trojan"
-    fi
-    ;;
-	socks5) ret="/usr/bin/ipt2socks" ;;
-	esac
-	echo $ret
 }
 
 kill_process() {
