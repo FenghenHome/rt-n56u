@@ -247,7 +247,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			} else if (b == "trojan") {
 				showhide_div('row_ss_password', 1);
 				showhide_div('row_v2_tls', 1);
-				//showhide_div('row_tj_tls_host', 1);
+				showhide_div('row_tj_tls_host', 1);
 				showhide_div('row_ssp_insecure', 1);
 			} else if (b == "v2ray") {
 				switch_v2_type();
@@ -258,7 +258,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_v2_type', 1);
 				showhide_div('row_v2_tls', 1);
 				showhide_div('row_v2_mux', 1);
-				//showhide_div('row_tj_tls_host', 1);
+				showhide_div('row_tj_tls_host', 1);
 				showhide_div('row_ssp_insecure', 1);
 			} else if (b == "socks5") {
 				showhide_div('row_s5_enable', 1);
@@ -714,11 +714,11 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			document.getElementById("v2_quic_guise").value = 'none';
 			document.getElementById("v2_quic_security").value = 'none';
 			//trojan				
-			// document.getElementById("ssp_insecure").value = 0;
-			// document.getElementById("ssp_insecure").checked = false;
-			// document.getElementById("v2_tls").value = 1;
-			// document.getElementById("v2_tls").checked = true;
-			// document.getElementById("ssp_tls_host").value = '';
+			document.getElementById("ssp_insecure").value = 0;
+			document.getElementById("ssp_insecure").checked = false;
+			document.getElementById("v2_tls").value = 1;
+			document.getElementById("v2_tls").checked = true;
+			document.getElementById("ssp_tls_host").value = '';
 			switch_ss_type();
 		}
 		//编辑节点
@@ -944,8 +944,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 		}
 		function import_ssr_url(btn, urlname, sid) {
 			var s = document.getElementById(urlname + '-status');
-			if (!s)
-				return false;
+			if (!s) return false;
 			var ssrurl = prompt("在这里黏贴配置链接 ssr:// | ss:// | vmess:// | trojan://", "");
 			if (ssrurl == null || ssrurl == "") {
 				s.innerHTML = "<font color='red'>用户取消</font>";
@@ -961,7 +960,31 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			}
 			var event = document.createEvent("HTMLEvents");
 			event.initEvent("change", true, true);
-			if (ssu[0] == "ssr") {
+			if (ssu[0] == "ss") {
+				var ploc = ssu[1].indexOf("#");
+				if (ploc > 0) {
+					url0 = ssu[1].substr(0, ploc);
+					param = ssu[1].substr(ploc + 1);
+				} else {
+					url0 = ssu[1]
+				}
+				var sstr = b64decsafe(url0);
+				document.getElementById('ssp_type').value = "ss";
+				document.getElementById('ssp_type').dispatchEvent(event);
+				var team = sstr.split('@');
+				console.log(param);
+				var part1 = team[0].split(':');
+				var part2 = team[1].split(':');
+				document.getElementById('ssp_server').value = part2[0];
+				document.getElementById('ssp_prot').value = part2[1];
+				document.getElementById('ss_password').value = part1[1];
+				document.getElementById('ss_method').value = part1[0];
+				if (param != undefined) {
+					document.getElementById('ssp_name').value = decodeURI(param);
+				}
+				s.innerHTML = "<font color='green'>导入Shadowsocks配置信息成功</font>";
+				return false;
+			} else if (ssu[0] == "ssr") {
 				var sstr = b64decsafe(ssu[1]);
 				var ploc = sstr.indexOf("/?");
 				document.getElementById('ssp_type').value = "ssr";
@@ -994,30 +1017,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				if (typeof (rem) != 'undefined' && rem != '' && rem.length > 0)
 					document.getElementById('ssp_name').value = b64decutf8safe(rem);
 				s.innerHTML = "<font color='green'>导入ShadowsocksR配置信息成功</font>";
-				return false;
-			} else if (ssu[0] == "ss") {
-				var ploc = ssu[1].indexOf("#");
-				if (ploc > 0) {
-					url0 = ssu[1].substr(0, ploc);
-					param = ssu[1].substr(ploc + 1);
-				} else {
-					url0 = ssu[1]
-				}
-				var sstr = b64decsafe(url0);
-				document.getElementById('ssp_type').value = "ss";
-				document.getElementById('ssp_type').dispatchEvent(event);
-				var team = sstr.split('@');
-				console.log(param);
-				var part1 = team[0].split(':');
-				var part2 = team[1].split(':');
-				document.getElementById('ssp_server').value = part2[0];
-				document.getElementById('ssp_prot').value = part2[1];
-				document.getElementById('ss_password').value = part1[1];
-				document.getElementById('ss_method').value = part1[0];
-				if (param != undefined) {
-					document.getElementById('ssp_name').value = decodeURI(param);
-				}
-				s.innerHTML = "<font color='green'>导入Shadowsocks配置信息成功</font>";
 				return false;
 			} else if (ssu[0] == "trojan") {
 				var ploc = ssu[1].indexOf("#");
