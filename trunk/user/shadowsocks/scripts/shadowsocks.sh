@@ -359,9 +359,6 @@ start_udp() {
 		ln_start_bin $(first_type ipt2socks) ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p $tmp_udp_local_port -l $tmp_udp_port
 		echolog "UDP TPROXY Relay:$($(first_type trojan) --version 2>&1 | head -1) Started!"
 		;;
-	socks5)
-		echo "1"
-		;;
 	esac
 }
 
@@ -386,11 +383,6 @@ start_local() {
 		gen_config_file $LOCAL_SERVER $type 3 $local_port
 		ln_start_bin $(first_type trojan) $type --config $local_config_file
 		echolog "Global_Socks5:$($(first_type trojan) --version 2>&1 | head -1) Started!"
-		;;
-	*)
-		[ -e /proc/sys/net/ipv6 ] && local listenip='-i ::'
-		ln_start_bin $(first_type microsocks) microsocks $listenip -p $local_port tcp-udp-ssr-local
-		echolog "Global_Socks5:$type Started!"
 		;;
 	esac
 	local_enable=1
@@ -418,7 +410,6 @@ Start_Run() {
 		for i in $(seq 1 $threads); do
 			ln_start_bin "$ss_program" ${type}-redir -c $tcp_config_file $ss_extra_arg
 		done
-		redir_tcp=1
 		echolog "Main node:$(get_name $type) $threads Threads Started!"
 		;;
 	v2ray)
@@ -433,13 +424,8 @@ Start_Run() {
 		done
 		echolog "Main node:$($(first_type $type) --version 2>&1 | head -1) , $threads Threads Started!"
 		;;
-	socks5)
-		for i in $(seq 1 $threads); do
-		lua /etc_ro/ss/gensocks.lua $GLOBAL_SERVER 1080 >/dev/null 2>&1 &
-		usleep 500000
-		done
-		;;
 	esac
+	redir_tcp=1
 	return 0
 }
 
