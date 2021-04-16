@@ -19,13 +19,7 @@ local_process=$6
 pdnsd_process=$7
 trojan_process=$8
 i=0
-sock5_port=$(nvram get socks5_proxy_port)
 UDP_RELAY_SERVER=$(nvram get udp_relay_server)
-if echo $server|grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$">/dev/null; then         
-	server=${server}
-else
-	server=`cat /etc/storage/ssr_ip`
-fi
 
 while [ "1" == "1" ]; do #死循环
 	sleep 000030s
