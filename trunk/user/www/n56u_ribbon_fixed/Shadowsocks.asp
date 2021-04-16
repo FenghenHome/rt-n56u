@@ -920,8 +920,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			str = str.replace(/-/g, "+").replace(/_/g, "/");
 			l = str.length;
 			l = (4 - l % 4) % 4;
-			if (l)
-				str = padright(str, l, "=");
+			if (l) str = padright(str, l, "=");
 			return b64DecodeUnicode(str);
 		}
 		function b64encsafe(str) {
@@ -932,20 +931,18 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			str = str.replace(/-/g, "+").replace(/_/g, "/");
 			l = str.length;
 			l = (4 - l % 4) % 4;
-			if (l)
-				str = padright(str, l, "=");
+			if (l) str = padright(str, l, "=");
 			return atob(str);
 		}
 		function dictvalue(d, key) {
 			var v = d[key];
-			if (typeof (v) == 'undefined' || v == '')
-				return '';
+			if (typeof (v) == 'undefined' || v == '') return '';
 			return b64decsafe(v);
 		}
 		function import_ssr_url(btn, urlname, sid) {
 			var s = document.getElementById(urlname + '-status');
 			if (!s) return false;
-			var ssrurl = prompt("在这里黏贴配置链接 ssr:// | ss:// | vmess:// | trojan://", "");
+			var ssrurl = prompt("在这里黏贴配置链接", "");
 			if (ssrurl == null || ssrurl == "") {
 				s.innerHTML = "<font color='red'>用户取消</font>";
 				return false;
@@ -954,40 +951,75 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			//var ssu = ssrurl.match(/ssr:\/\/([A-Za-z0-9_-]+)/i);
 			var ssu = ssrurl.split('://');
 			//console.log(ssu.length);
-			if ((ssu[0] != "ssr" && ssu[0] != "ss" && ssu[0] != "vmess" && ssu[0] != "trojan") || ssu[1] == "") {
-				s.innerHTML = "<font color='red'>无效格式</font>";
-				return false;
-			}
 			var event = document.createEvent("HTMLEvents");
 			event.initEvent("change", true, true);
-			if (ssu[0] == "ss") {
+			switch (ssu[0]) {
+			case "ss":
+				var url0, param = "";
+				var sipIndex = ssu[1].indexOf("@");
 				var ploc = ssu[1].indexOf("#");
 				if (ploc > 0) {
 					url0 = ssu[1].substr(0, ploc);
 					param = ssu[1].substr(ploc + 1);
 				} else {
-					url0 = ssu[1]
+					url0 = ssu[1];
 				}
-				var sstr = b64decsafe(url0);
-				document.getElementById('ssp_type').value = "ss";
-				document.getElementById('ssp_type').dispatchEvent(event);
-				var team = sstr.split('@');
-				console.log(param);
-				var part1 = team[0].split(':');
-				var part2 = team[1].split(':');
-				document.getElementById('ssp_server').value = part2[0];
-				document.getElementById('ssp_prot').value = part2[1];
-				document.getElementById('ss_password').value = part1[1];
-				document.getElementById('ss_method').value = part1[0];
-				if (param != undefined) {
-					document.getElementById('ssp_name').value = decodeURI(param);
+				if (sipIndex != -1) {
+					// SIP002
+					var userInfo = b64decsafe(url0.substr(0, sipIndex));
+					var temp = url0.substr(sipIndex + 1).split("/?");
+					var serverInfo = temp[0].split(":");
+					var server = serverInfo[0];
+					var port = serverInfo[1];
+					var method, password, plugin, pluginOpts;
+					if (temp[1]) {
+						var pluginInfo = decodeURIComponent(temp[1]);
+						var pluginIndex = pluginInfo.indexOf(";");
+						var pluginNameInfo = pluginInfo.substr(0, pluginIndex);
+						plugin = pluginNameInfo.substr(pluginNameInfo.indexOf("=") + 1);
+						pluginOpts = pluginInfo.substr(pluginIndex + 1);
+					}
+					var userInfoSplitIndex = userInfo.indexOf(":");
+					if (userInfoSplitIndex != -1) {
+						method = userInfo.substr(0, userInfoSplitIndex);
+						password = userInfo.substr(userInfoSplitIndex + 1);
+					}
+					document.getElementById('ssp_type').value = ssu[0];
+					document.getElementById('ssp_type').dispatchEvent(event);
+					document.getElementById('ssp_server').value = server;
+					document.getElementById('ssp_prot').value = port;
+					document.getElementById('ss_password').value = password || "";
+					document.getElementById('ss_method').value = method || "";
+					document.getElementById("ss_plugin").value = plugin || "none";
+					document.getElementById("ss_plugin").dispatchEvent(event);
+					if (plugin != undefined) {
+					document.getElementById("ss_plugin_opts").value = pluginOpts || "";
+					}
+					if (param != undefined) {
+						document.getElementById('ssp_name').value = decodeURI(param);
+					}
+					s.innerHTML = "<font color='green'>导入Shadowsocks配置信息成功</font>";
+				} else {
+					var sstr = b64decsafe(url0);
+					document.getElementById('ssp_type').value = ssu[0];
+					document.getElementById('ssp_type').dispatchEvent(event);
+					var team = sstr.split('@');
+					var part1 = team[0].split(':');
+					var part2 = team[1].split(':');
+					document.getElementById('ssp_server').value = part2[0];
+					document.getElementById('ssp_prot').value = part2[1];
+					document.getElementById('ss_password').value = part1[1];
+					document.getElementById('ss_method').value = part1[0];
+					if (param != undefined) {
+						document.getElementById('ssp_name').value = decodeURI(param);
+					}
+					s.innerHTML = "<font color='green'>导入Shadowsocks配置信息成功</font>";
 				}
-				s.innerHTML = "<font color='green'>导入Shadowsocks配置信息成功</font>";
 				return false;
-			} else if (ssu[0] == "ssr") {
+			case "ssr":
 				var sstr = b64decsafe(ssu[1]);
 				var ploc = sstr.indexOf("/?");
-				document.getElementById('ssp_type').value = "ssr";
+				document.getElementById('ssp_type').value = ssu[0];
 				document.getElementById('ssp_type').dispatchEvent(event);
 				var url0, param = "";
 				if (ploc > 0) {
@@ -995,8 +1027,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					param = sstr.substr(ploc + 2);
 				}
 				var ssm = url0.match(/^(.+):([^:]+):([^:]*):([^:]+):([^:]*):([^:]+)/);
-				if (!ssm || ssm.length < 7)
-					return false;
+				if (!ssm || ssm.length < 7) return false;
 				var pdict = {};
 				if (param.length > 2) {
 					var a = param.split('&');
@@ -1014,11 +1045,11 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				document.getElementById('ss_obfs_param').value = dictvalue(pdict, 'obfsparam');
 				document.getElementById('ss_protocol_param').value = dictvalue(pdict, 'protoparam');
 				var rem = pdict['remarks'];
-				if (typeof (rem) != 'undefined' && rem != '' && rem.length > 0)
-					document.getElementById('ssp_name').value = b64decutf8safe(rem);
+				if (typeof (rem) != 'undefined' && rem != '' && rem.length > 0) document.getElementById('ssp_name').value = b64decutf8safe(rem);
 				s.innerHTML = "<font color='green'>导入ShadowsocksR配置信息成功</font>";
 				return false;
-			} else if (ssu[0] == "trojan") {
+			case "trojan":
+				var url0, param = "";
 				var ploc = ssu[1].indexOf("#");
 				if (ploc > 0) {
 					url0 = ssu[1].substr(0, ploc);
@@ -1027,23 +1058,36 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					url0 = ssu[1]
 				}
 				var sstr = url0;
-				document.getElementById('ssp_type').value = "trojan";
+				document.getElementById('ssp_type').value = "v2ray";
 				document.getElementById('ssp_type').dispatchEvent(event);
 				var team = sstr.split('@');
 				var password = team[0]
 				var serverPart = team[1].split(':');
-				var port = serverPart[1].split('?')[0];
+				var others = serverPart[1].split('?');
+				var port = parseInt(others[0]);
+				var queryParam = {}
+				if (others.length > 1) {
+					var queryParams = others[1]
+					var queryArray = queryParams.split('&');
+					for (i = 0; i < queryArray.length; i++) {
+						var params = queryArray[i].split('=');
+						queryParam[decodeURIComponent(params[0])] = decodeURIComponent(params[1] || '');
+					}
+				}
 				document.getElementById('ssp_server').value = serverPart[0];
-				document.getElementById('ssp_prot').value = port;
+				document.getElementById('ssp_prot').value = port || '443';
 				document.getElementById('ss_password').value = password;
+				document.getElementById('v2_tls').checked = true;
+				document.getElementById('v2_tls').dispatchEvent(event);
+				document.getElementById('ssp_tls_host').value = queryParam.peer || '';
+				document.getElementById('ssp_insecure').checked = queryParam.allowInsecure == '1';
 				if (param != undefined) {
 					document.getElementById('ssp_name').value = decodeURI(param);
 				}
 				s.innerHTML = "<font color='green'>导入Trojan配置信息成功</font>";
 				return false;
-			} else if (ssu[0] == "vmess") {
+			case "vmess":
 				var sstr = b64DecodeUnicode(ssu[1]);
-				console.log(sstr);
 				var ploc = sstr.indexOf("/?");
 				document.getElementById('ssp_type').value = "v2ray";
 				document.getElementById('ssp_type').dispatchEvent(event);
@@ -1058,15 +1102,17 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				document.getElementById('ssp_prot').value = ssm.port;
 				document.getElementById('v2_alter_id').value = ssm.aid;
 				document.getElementById('v2_vmess_id').value = ssm.id;
-				if (ssm.net == "tcp") {
-					document.getElementById('v2_tcp_guise').value = ssm.type;
-					document.getElementById('v2_http_host').value = ssm.host;
-					document.getElementById('v2_http_path').value = ssm.path;
-				} else {
-					document.getElementById('v2_kcp_guise').value = ssm.type;
-				}
 				document.getElementById('v2_transport').value = ssm.net;
 				document.getElementById('v2_transport').dispatchEvent(event);
+				if (ssm.net == "tcp") {
+					if (ssm.type && ssm.type != "http") {
+						ssm.type = "none"
+					}
+					document.getElementById('v2_tcp_guise').value = ssm.type;
+					document.getElementById('v2_tcp_guise').dispatchEvent(event);
+					document.getElementById('v2_http_host').value = ssm.host;
+					document.getElementById('v2_http_path').value = ssm.path;
+				}
 				if (ssm.net == "ws") {
 					document.getElementById('v2_ws_host').value = ssm.host;
 					document.getElementById('v2_ws_path').value = ssm.path;
@@ -1075,14 +1121,90 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					document.getElementById('v2_h2_host').value = ssm.host;
 					document.getElementById('v2_h2_path').value = ssm.path;
 				}
+				if (ssm.net == "quic") {
+					document.getElementById("v2_quic_security").value = ssm.securty;
+					document.getElementById("v2_quic_key").value = ssm.key;
+				}
+				if (ssm.net == "kcp") {
+					document.getElementById('v2_kcp_guise').value = ssm.type;
+				}
 				if (ssm.tls == "tls") {
-					document.getElementById('v2_tls').value = 1;
 					document.getElementById('v2_tls').checked = true;
-					document.getElementById('ssp_insecure').value = 1;
-					document.getElementById('ssp_insecure').checked = true;
+					document.getElementById('v2_tls').dispatchEvent(event);
 					document.getElementById('ssp_tls_host').value = ssm.host;
 				}
-				s.innerHTML = "<font color='green'>导入V2ray配置信息成功</font>";
+				document.getElementById("v2_mux").checked = true;
+				document.getElementById("v2_mux").dispatchEvent(event);
+				s.innerHTML = "<font color='green'>导入Vmess配置信息成功</font>";
+				return false;
+			case "vless":
+				var url0, param = "";
+				var ploc = ssu[1].indexOf("#");
+				if (ploc > 0) {
+					url0 = ssu[1].substr(0, ploc);
+					param = decodeURIComponent(ssu[1].substr(ploc + 1));
+				} else {
+					url0 = ssu[1]
+				}
+				var sstr = url0;
+				document.getElementById('ssp_type').value = "v2ray";
+				document.getElementById('ssp_type').dispatchEvent(event);
+				var team = sstr.split('@');
+				var uuid = team[0]
+				var serverPart = team[1].split(':');
+				var others = serverPart[1].split('?');
+				var port = others[0]
+				var queryParam = {}
+				if (others.length > 1) {
+					var queryParams = others[1]
+					var queryArray = queryParams.split('&');
+					for (i = 0; i < queryArray.length; i++) {
+						var params = queryArray[i].split('=');
+						queryParam[decodeURIComponent(params[0])] = decodeURIComponent(params[1] || '');
+					}
+				}
+				document.getElementById('ssp_server').value = serverPart[0];
+				document.getElementById('ssp_prot').value = port;
+				document.getElementById('v2_vmess_id').value = uuid;
+				document.getElementById('v2_transport').value = queryParam.type || "tcp";
+				document.getElementById('v2_transport').dispatchEvent(event);
+				if (queryParam.security == "tls") {
+					document.getElementById('v2_tls').checked = true;
+					document.getElementById('v2_tls').dispatchEvent(event);
+					document.getElementById('ssp_tls_host').value = queryParam.sni || serverPart[0];
+				}
+				switch (queryParam.type) {
+				case "ws":
+					document.getElementById('v2_ws_host').value = queryParam.host;
+					document.getElementById('v2_ws_path').value = queryParam.path;
+					break;
+				case "kcp":
+					document.getElementById('v2_kcp_guise').value = queryParam.headerType || "none";
+					document.getElementById('v2_kcp_guise').dispatchEvent(event);
+					break;
+				case "http":
+					document.getElementById('v2_h2_host').value = queryParam.host;
+					document.getElementById('v2_h2_path').value = queryParam.path;
+					break;
+				case "quic":
+					document.getElementById("v2_quic_guise").value = queryParam.headerType || "none";
+					document.getElementById("v2_quic_guise").dispatchEvent(event);
+					document.getElementById("v2_quic_security").value = queryParam.quicSecurity;
+					document.getElementById("v2_quic_key").value = queryParam.key;
+					break;
+				default:
+					if (queryParam.security == "xtls") {
+						document.getElementById('ssp_tls_host').value = queryParam.sni || serverPart[0];
+					}			
+					break;
+				}
+				if (param != undefined) {
+					document.getElementById('ssp_name').value = decodeURI(param);
+				}
+				s.innerHTML = "<font color='green'>导入Vless配置信息成功</font>";
+				return false;
+			default:
+				s.innerHTML = "<font color='red'>无效格式</font>";
 				return false;
 			}
 		}
