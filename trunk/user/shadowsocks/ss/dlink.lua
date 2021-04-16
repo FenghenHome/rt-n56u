@@ -1,13 +1,13 @@
+#!/usr/bin/lua
+
 ------------------------------------------------
 -- This file is part of the luci-app-ssr-plus subscribe.lua
 -- @author William Chan <root@williamchan.me>
--- 2020/03/15 by chongshengB
 ------------------------------------------------
-require 'nixio'
+require "nixio"
 local cjson = require "cjson"
 -- these global functions are accessed all the time by the event handler
 -- so caching them is worth the effort
-local luci = luci
 local tinsert = table.insert
 local ssub, slen, schar, sbyte, sformat, sgsub = string.sub, string.len, string.char, string.byte, string.format, string.gsub
 local b64decode = nixio.bin.b64decode
@@ -81,8 +81,6 @@ local function md5(content)
 	local stdout2 = stdout:read("*all")
 	-- assert(nixio.errno() == 0)
 	return trim(stdout2)
-	--print(stdout)
-	--return stdout
 end
 -- base64
 local function base64Decode(text)
@@ -240,7 +238,7 @@ local function processData(szType, content)
 		local userinfo = hostInfo[1]
 		local password = userinfo
 		result.alias = UrlDecode(alias)
-		result.type = "trojan"
+		result.type = 'v2ray'
 		result.v2ray_protocol = "trojan"
 		result.server = host[1]
 		-- 按照官方的建议 默认验证ssl证书
@@ -269,7 +267,11 @@ local function processData(szType, content)
 		result.password = password
 	end
 	if not result.alias then
-		result.alias = result.server .. ':' .. result.server_port
+		if result.server and result.server_port then
+			result.alias = result.server .. ':' .. result.server_port
+		else
+			result.alias = "NULL"
+		end
 	end
 	-- alias 不参与 hashkey 计算
 	local alias = result.alias
@@ -285,7 +287,7 @@ local function processData(szType, content)
 end
 -- wget
 local function wget(url)
-	local stdout = io.popen('curl -k -s --connect-timeout 15 --retry 5 "' .. url .. '"')
+	local stdout = io.popen('wget -q --user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36" --no-check-certificate -O- "' .. url .. '"')
 	local sresult = stdout:read("*all")
     return trim(sresult)
 end
