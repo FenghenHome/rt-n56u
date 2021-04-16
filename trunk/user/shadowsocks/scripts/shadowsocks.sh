@@ -43,6 +43,20 @@ lan_con=`nvram get lan_con`
 GLOBAL_SERVER=`nvram get global_server`
 socks=""
 
+get_host_ip() {
+	lua /etc_ro/ss/getconfig.lua $1 > /tmp/server.txt
+	local host=`cat /tmp/server.txt` 
+	local ip=$host
+	if [ -z "$(echo $host | grep -E "([0-9]{1,3}[\.]){3}[0-9]{1,3}")" ]; then
+		if [ "$host" == "${host#*:[0-9a-fA-F]}" ]; then
+			ip=$(resolveip -4 -t 3 $host | awk 'NR==1{print}')
+			[ -z "$ip" ] && ip=$(wget -q -O- http://119.29.29.29/d?dn=$host | awk -F ';' '{print $1}')
+		fi
+	fi
+	[ -z "$ip" ] && _exit 2
+	echo ${ip:="$(ip)"}
+}
+
 clean_log() {
 	local logsnum=$(cat $LOG_FILE 2>/dev/null | wc -l)
 	[ "$logsnum" -gt 1000 ] && {
@@ -491,28 +505,12 @@ start_monitor() {
 }
 
 start_rules() {
-	logger -t "SS" "正在添加防火墙规则..."
-	lua /etc_ro/ss/getconfig.lua $GLOBAL_SERVER > /tmp/server.txt
-	server=`cat /tmp/server.txt` 
 	cat /etc/storage/ss_ip.sh | grep -v '^!' | grep -v "^$" >$wan_fw_ips
 	cat /etc/storage/ss_wan_ip.sh | grep -v '^!' | grep -v "^$" >$wan_bp_ips
-	#resolve name
-	if echo $server | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$" >/dev/null; then
-		server=${server}
-	elif [ "$server" != "${server#*:[0-9a-fA-F]}" ]; then
-		server=${server}
-	else
-		server=$(ping ${server} -s 1 -c 1 | grep PING | cut -d'(' -f 2 | cut -d')' -f1)
-		if echo $server | grep -E "^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$" >/dev/null; then
-			echo $server >/etc/storage/ssr_ip
-		else
-			server=$(cat /etc/storage/ssr_ip)
-		fi
-	fi
+	local server=$(get_host_ip $GLOBAL_SERVER)
 	local local_port="1234"
 	if [ "$redir_udp" == "1" ]; then
-		lua /etc_ro/ss/getconfig.lua $UDP_RELAY_SERVER > /tmp/userver.txt
-		local udp_server=`cat /tmp/userver.txt`
+		local udp_server=$(get_host_ip $UDP_RELAY_SERVER)
 		local udp_local_port=$tmp_udp_port
 	fi
 	gfwmode() {
