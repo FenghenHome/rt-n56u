@@ -227,6 +227,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_vid', 0);
 			showhide_div('row_v2_webs_host', 0);
 			showhide_div('row_v2_webs_path', 0);
+			showhide_div('row_v2_v2ray_protocol', 0);
 			showhide_div('row_s5_enable', 0);
 			showhide_div('row_s5_username', 0);
 			showhide_div('row_s5_password', 0);
@@ -251,6 +252,27 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_ssp_insecure', 1);
 			} else if (b == "v2ray") {
 				switch_v2_type();
+				switch_v2_v2ray_protocol();
+				showhide_div('row_v2_v2ray_protocol', 1);
+			//} else if (b == "socks5") {
+				//showhide_div('row_s5_enable', 1);
+				//showhide_div('row_s5_username', 1);
+				//showhide_div('row_s5_password', 1);
+			}
+		}
+		function switch_v2_v2ray_protocol() {
+			var b = document.form.v2_v2ray_protocol.value;
+			if (b == "shadowsocks") {
+				showhide_div('row_ss_password', 1);
+				showhide_div('row_ss_method', 1);
+				showhide_div('row_ss_plugin', 1);
+				showhide_div('row_ss_plugin_opts', 1);
+			} else if (b == "trojan") {
+				showhide_div('row_ss_password', 1);
+				showhide_div('row_v2_tls', 1);
+				showhide_div('row_tj_tls_host', 1);
+				showhide_div('row_ssp_insecure', 1);
+			} else if (b == "vmess") {
 				showhide_div('row_v2_aid', 1);
 				showhide_div('row_v2_vid', 1);
 				showhide_div('row_v2_security', 1);
@@ -683,6 +705,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			//v2
 			document.getElementById("ssp_insecure").value = 0;
 			document.getElementById("ssp_insecure").checked = false;				
+			document.getElementById('v2_v2ray_protocol').value = 'vmess';
 			document.getElementById("v2_mux").value = 0;
 			document.getElementById("v2_mux").checked = false;
 			document.getElementById("v2_security").value = 'auto';
@@ -743,39 +766,55 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				document.getElementById("ss_obfs").value = getProperty(ss, 'obfs', 'plain');
 				document.getElementById("ss_obfs_param").value = getProperty(ss, 'obfs_param', '');
 			} else if (type == "v2ray") {
-				var transport = getProperty(ss, 'transport', 'tcp');
-				document.getElementById("ssp_insecure").value = getProperty(ss, 'insecure', 0);
-				document.getElementById("ssp_insecure").checked =  document.getElementById("ssp_insecure").value != 0;				
-				document.getElementById("v2_mux").value = getProperty(ss, 'mux', 0);
-				document.getElementById("v2_mux").checked =  document.getElementById("v2_mux").value != 0;
-				document.getElementById("v2_security").value = getProperty(ss, 'security', 'auto');
-				document.getElementById("v2_vmess_id").value = getProperty(ss, 'vmess_id', '');
-				document.getElementById("v2_alter_id").value = getProperty(ss, 'alter_id', '');
-				document.getElementById("v2_transport").value = transport;
-				document.getElementById("v2_tcp_guise").value = getProperty(ss, 'tcp_guise', 'none');
-				document.getElementById("v2_http_host").value = getProperty(ss, 'http_host', '');
-				document.getElementById("v2_http_path").value = getProperty(ss, 'http_path', '');
-				document.getElementById("v2_tls").value = getProperty(ss, 'tls', 0);
-				document.getElementById("v2_tls").checked =  document.getElementById("v2_tls").value != 0;
-				document.getElementById("ssp_tls_host").value = getProperty(ss, 'tls_host', '');
-				if (transport == "kcp") {
-					document.getElementById("v2_kcp_guise").value = getProperty(ss, 'kcp_guise', 'none');
-					document.getElementById("v2_mtu").value = getProperty(ss, 'mtu', '');
-					document.getElementById("v2_tti").value = getProperty(ss, 'tti', '');
-					document.getElementById("v2_uplink_capacity").value = getProperty(ss, 'uplink_capacity', '');
-					document.getElementById("v2_downlink_capacity").value = getProperty(ss, 'downlink_capacity', '');
-					document.getElementById("v2_read_buffer_size").value = getProperty(ss, 'read_buffer_size', '');
-					document.getElementById("v2_write_buffer_size").value = getProperty(ss, 'write_buffer_size', '');
-				} else if (transport == "ws") {
-					document.getElementById("v2_ws_host").value = getProperty(ss, 'ws_host', '');
-					document.getElementById("v2_ws_path").value = getProperty(ss, 'ws_path', '');
-				} else if (transport == "h2") {
-					document.getElementById("v2_h2_host").value = getProperty(ss, 'h2_host', '');
-					document.getElementById("v2_h2_path").value = getProperty(ss, 'h2_path', '');
-				} else if (transport == "quic") {
-					document.getElementById("v2_quic_guise").value = getProperty(ss, 'quic_guise', 'none');
-					document.getElementById("v2_quic_key").value = getProperty(ss, 'quic_key', '');
-					document.getElementById("v2_quic_security").value = getProperty(ss, 'quic_security', 'none');
+				var v2ray_protocol = getProperty(ss, 'v2ray_protocol', 'vmess');
+				document.getElementById('v2_v2ray_protocol').value = v2ray_protocol;
+				if (v2ray_protocol == 'shadowsocks') {
+					document.getElementById("ss_method").value = getProperty(ss, 'encrypt_method_ss', 'none'),
+					document.getElementById("ss_plugin").value = getProperty(ss, 'plugin', ''),
+					document.getElementById("ss_plugin_opts").value = getProperty(ss, 'plugin_opts', '');
+				} else if (v2ray_protocol == "vmess") {
+					var transport = getProperty(ss, 'transport', 'tcp');
+					document.getElementById("ssp_insecure").value = getProperty(ss, 'insecure', 0);
+					document.getElementById("ssp_insecure").checked =  document.getElementById("ssp_insecure").value != 0;				
+					document.getElementById("v2_mux").value = getProperty(ss, 'mux', 0);
+					document.getElementById("v2_mux").checked =  document.getElementById("v2_mux").value != 0;
+					document.getElementById("v2_security").value = getProperty(ss, 'security', 'auto');
+					document.getElementById("v2_vmess_id").value = getProperty(ss, 'vmess_id', '');
+					document.getElementById("v2_alter_id").value = getProperty(ss, 'alter_id', '');
+					document.getElementById("v2_transport").value = transport;
+					document.getElementById("v2_tcp_guise").value = getProperty(ss, 'tcp_guise', 'none');
+					document.getElementById("v2_http_host").value = getProperty(ss, 'http_host', '');
+					document.getElementById("v2_http_path").value = getProperty(ss, 'http_path', '');
+					document.getElementById("v2_tls").value = getProperty(ss, 'tls', 0);
+					document.getElementById("v2_tls").checked =  document.getElementById("v2_tls").value != 0;
+					document.getElementById("ssp_tls_host").value = getProperty(ss, 'tls_host', '');
+					if (transport == "kcp") {
+						document.getElementById("v2_kcp_guise").value = getProperty(ss, 'kcp_guise', 'none');
+						document.getElementById("v2_mtu").value = getProperty(ss, 'mtu', '');
+						document.getElementById("v2_tti").value = getProperty(ss, 'tti', '');
+						document.getElementById("v2_uplink_capacity").value = getProperty(ss, 'uplink_capacity', '');
+						document.getElementById("v2_downlink_capacity").value = getProperty(ss, 'downlink_capacity', '');
+						document.getElementById("v2_read_buffer_size").value = getProperty(ss, 'read_buffer_size', '');
+						document.getElementById("v2_write_buffer_size").value = getProperty(ss, 'write_buffer_size', '');
+					} else if (transport == "ws") {
+						document.getElementById("v2_ws_host").value = getProperty(ss, 'ws_host', '');
+						document.getElementById("v2_ws_path").value = getProperty(ss, 'ws_path', '');
+					} else if (transport == "h2") {
+						document.getElementById("v2_h2_host").value = getProperty(ss, 'h2_host', '');
+						document.getElementById("v2_h2_path").value = getProperty(ss, 'h2_path', '');
+					} else if (transport == "quic") {
+						document.getElementById("v2_quic_guise").value = getProperty(ss, 'quic_guise', 'none');
+						document.getElementById("v2_quic_key").value = getProperty(ss, 'quic_key', '');
+						document.getElementById("v2_quic_security").value = getProperty(ss, 'quic_security', 'none');
+					}
+				} else if (v2ray_protocol == "trojan") {
+					document.getElementById("ssp_insecure").value = getProperty(ss, 'insecure', 0);
+					document.getElementById("ssp_insecure").checked =  document.getElementById("ssp_insecure").value != 0;
+					document.getElementById("v2_tls").value = getProperty(ss, 'tls', 0);
+					document.getElementById("v2_tls").checked =  document.getElementById("v2_tls") != 0;
+					document.getElementById("ssp_tls_host").value = getProperty(ss, 'tls_host', '');
+				//} else if (v2ray_protocol == "socks5") {
+					//
 				}
 			} else if (type == "trojan") {
 				document.getElementById("ssp_insecure").value = getProperty(ss, 'insecure', 0);
@@ -1001,8 +1040,10 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					s.innerHTML = "<font color='green'>导入Shadowsocks配置信息成功</font>";
 				} else {
 					var sstr = b64decsafe(url0);
-					document.getElementById('ssp_type').value = ssu[0];
+					document.getElementById('ssp_type').value = "v2ray";
 					document.getElementById('ssp_type').dispatchEvent(event);
+					document.getElementById('v2_v2ray_protocol').value = "shadowsocks";
+					document.getElementById('v2_v2ray_protocol').dispatchEvent(event);
 					var team = sstr.split('@');
 					var part1 = team[0].split(':');
 					var part2 = team[1].split(':');
@@ -1060,6 +1101,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				var sstr = url0;
 				document.getElementById('ssp_type').value = "v2ray";
 				document.getElementById('ssp_type').dispatchEvent(event);
+				document.getElementById('v2_v2ray_protocol').value = "trojan";
+				document.getElementById('v2_v2ray_protocol').dispatchEvent(event);
 				var team = sstr.split('@');
 				var password = team[0]
 				var serverPart = team[1].split(':');
@@ -1091,6 +1134,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				var ploc = sstr.indexOf("/?");
 				document.getElementById('ssp_type').value = "v2ray";
 				document.getElementById('ssp_type').dispatchEvent(event);
+				document.getElementById('v2_v2ray_protocol').value = "vmess";
+				document.getElementById('v2_v2ray_protocol').dispatchEvent(event);
 				var url0, param = "";
 				if (ploc > 0) {
 					url0 = sstr.substr(0, ploc);
@@ -1149,6 +1194,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				var sstr = url0;
 				document.getElementById('ssp_type').value = "v2ray";
 				document.getElementById('ssp_type').dispatchEvent(event);
+				document.getElementById('v2_v2ray_protocol').value = "vless";
+				document.getElementById('v2_v2ray_protocol').dispatchEvent(event);
 				var team = sstr.split('@');
 				var uuid = team[0]
 				var serverPart = team[1].split(':');
@@ -1303,42 +1350,82 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					coustom: "1",
 				}
 			} else if (type == "v2ray") {
-				var DataObj = {
-					type: document.getElementById("ssp_type").value,
-					alias: document.getElementById("ssp_name").value,
-					server: document.getElementById("ssp_server").value,
-					server_port: document.getElementById("ssp_prot").value,
-					insecure: document.getElementById("ssp_insecure").value,
-					mux: document.getElementById("v2_mux").value,
-					security: document.getElementById("v2_security").value,
-					vmess_id: document.getElementById("v2_vmess_id").value,
-					alter_id: document.getElementById("v2_alter_id").value,
-					transport: document.getElementById("v2_transport").value,
-					tcp_guise: document.getElementById("v2_tcp_guise").value,
-					http_host: document.getElementById("v2_http_host").value,
-					http_path: document.getElementById("v2_http_path").value,
-					tls: document.getElementById("v2_tls").value,
-					tls_host: document.getElementById("ssp_tls_host").value,
-					coustom: "1",
-				}
-				if (document.getElementById("v2_transport").value == "kcp") {
-					DataObj.kcp_guise = document.getElementById("v2_kcp_guise").value;
-					DataObj.mtu = document.getElementById("v2_mtu").value;
-					DataObj.tti = document.getElementById("v2_tti").value;
-					DataObj.uplink_capacity = document.getElementById("v2_uplink_capacity").value;
-					DataObj.downlink_capacity = document.getElementById("v2_downlink_capacity").value;
-					DataObj.read_buffer_size = document.getElementById("v2_read_buffer_size").value;
-					DataObj.write_buffer_size = document.getElementById("v2_write_buffer_size").value;
-				} else if (document.getElementById("v2_transport").value == "ws") {
-					DataObj.ws_host = document.getElementById("v2_ws_host").value;
-					DataObj.ws_path = document.getElementById("v2_ws_path").value;
-				} else if (document.getElementById("v2_transport").value == "h2") {
-					DataObj.h2_host = document.getElementById("v2_h2_host").value;
-					DataObj.h2_path = document.getElementById("v2_h2_path").value;
-				} else if (document.getElementById("v2_transport").value == "quic") {
-					DataObj.quic_guise = document.getElementById("v2_quic_guise").value;
-					DataObj.quic_key = document.getElementById("v2_quic_key").value;
-					DataObj.quic_security = document.getElementById("v2_quic_security").value;
+				var v2ray_protocol = document.getElementById("v2_v2ray_protocol").value;
+				if (v2ray_protocol == "shadowsocks") {
+					var DataObj = {
+						type: document.getElementById("ssp_type").value,
+						v2ray_protocol: document.getElementById("v2ray_protocol").value,
+						alias: document.getElementById("ssp_name").value,
+						server: document.getElementById("ssp_server").value,
+						server_port: document.getElementById("ssp_prot").value,
+						password: document.getElementById("ss_password").value,
+						encrypt_method_ss: document.getElementById("ss_method").value,
+						plugin: document.getElementById("ss_plugin").value,
+						plugin_opts: document.getElementById("ss_plugin_opts").value,
+						coustom: "1",
+					}
+				} else if (v2ray_protocol == "vmess") {
+					var DataObj = {
+						type: document.getElementById("ssp_type").value,
+						v2ray_protocol: document.getElementById("v2ray_protocol").value,
+						alias: document.getElementById("ssp_name").value,
+						server: document.getElementById("ssp_server").value,
+						server_port: document.getElementById("ssp_prot").value,
+						insecure: document.getElementById("ssp_insecure").value,
+						mux: document.getElementById("v2_mux").value,
+						security: document.getElementById("v2_security").value,
+						vmess_id: document.getElementById("v2_vmess_id").value,
+						alter_id: document.getElementById("v2_alter_id").value,
+						transport: document.getElementById("v2_transport").value,
+						tcp_guise: document.getElementById("v2_tcp_guise").value,
+						http_host: document.getElementById("v2_http_host").value,
+						http_path: document.getElementById("v2_http_path").value,
+						tls: document.getElementById("v2_tls").value,
+						tls_host: document.getElementById("ssp_tls_host").value,
+						coustom: "1",
+					}
+					if (document.getElementById("v2_transport").value == "kcp") {
+						DataObj.kcp_guise = document.getElementById("v2_kcp_guise").value;
+						DataObj.mtu = document.getElementById("v2_mtu").value;
+						DataObj.tti = document.getElementById("v2_tti").value;
+						DataObj.uplink_capacity = document.getElementById("v2_uplink_capacity").value;
+						DataObj.downlink_capacity = document.getElementById("v2_downlink_capacity").value;
+						DataObj.read_buffer_size = document.getElementById("v2_read_buffer_size").value;
+						DataObj.write_buffer_size = document.getElementById("v2_write_buffer_size").value;
+					} else if (document.getElementById("v2_transport").value == "ws") {
+						DataObj.ws_host = document.getElementById("v2_ws_host").value;
+						DataObj.ws_path = document.getElementById("v2_ws_path").value;
+					} else if (document.getElementById("v2_transport").value == "h2") {
+						DataObj.h2_host = document.getElementById("v2_h2_host").value;
+						DataObj.h2_path = document.getElementById("v2_h2_path").value;
+					} else if (document.getElementById("v2_transport").value == "quic") {
+						DataObj.quic_guise = document.getElementById("v2_quic_guise").value;
+						DataObj.quic_key = document.getElementById("v2_quic_key").value;
+						DataObj.quic_security = document.getElementById("v2_quic_security").value;
+					}
+				} else if (v2ray_protocol == "trojan") {
+					var DataObj = {
+						type: document.getElementById("ssp_type").value,
+						v2ray_protocol: document.getElementById("v2ray_protocol").value,
+						alias: document.getElementById("ssp_name").value,
+						server: document.getElementById("ssp_server").value,
+						server_port: document.getElementById("ssp_prot").value,
+						password: document.getElementById("ss_password").value,
+						insecure: document.getElementById("ssp_insecure").value,
+						tls: document.getElementById("v2_tls").value,
+						tls_host: document.getElementById("ssp_tls_host").value,
+						coustom: "1",
+					}
+				//} else if (v2ray_protocol == "socks5") {
+					//var DataObj = {
+						//type: document.getElementById("ssp_type").value,
+						//alias: document.getElementById("ssp_name").value,
+						//server: document.getElementById("ssp_server").value,
+						//server_port: document.getElementById("ssp_prot").value,
+						//server_user: document.getElementById("s5_username").value,
+						//server_pwd: document.getElementById("s5_password").value,
+						//coustom: "1",
+					//}
 				}
 			} else if (type == "trojan") {
 				var DataObj = {
@@ -1992,6 +2079,20 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	<option value="ssr">SSR</option>
 																	<option value="trojan">Trojan</option>
 																	<option value="v2ray">V2ray</option>
+																	//<option value="socks5">SOCKS5</option>
+																</select>
+															</td>
+														</tr>
+
+														<tr> id="row_v2_v2ray_protocol" style="display:none;">
+															<th width="50%">v2ray协议</th>
+															<td>
+																<select name="v2_v2ray_protocol" id="v2_v2ray_protocol" class="input"
+																	style="width: 200px;" onchange="switch_v2_v2ray_protocol()">
+																	<option value="vless">VLESS</option>
+																	<option value="vmess">VMess</option>
+																	<option value="trojan">Trojan</option>
+																	<option value="shadowsocks">Shadowsocks</option>
 																	//<option value="socks5">SOCKS5</option>
 																</select>
 															</td>
