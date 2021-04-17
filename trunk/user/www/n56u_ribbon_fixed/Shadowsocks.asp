@@ -260,10 +260,10 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_v2_mux', 1);
 				showhide_div('row_tj_tls_host', 1);
 				showhide_div('row_ssp_insecure', 1);
-			} else if (b == "socks5") {
-				showhide_div('row_s5_enable', 1);
-				showhide_div('row_s5_username', 1);
-				showhide_div('row_s5_password', 1);
+			//} else if (b == "socks5") {
+				//showhide_div('row_s5_enable', 1);
+				//showhide_div('row_s5_username', 1);
+				//showhide_div('row_s5_password', 1);
 			}
 		}
 		function switch_v2_type() {
@@ -714,11 +714,11 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			document.getElementById("v2_quic_guise").value = 'none';
 			document.getElementById("v2_quic_security").value = 'none';
 			//trojan				
-			document.getElementById("ssp_insecure").value = 0;
-			document.getElementById("ssp_insecure").checked = false;
-			document.getElementById("v2_tls").value = 1;
-			document.getElementById("v2_tls").checked = true;
-			document.getElementById("ssp_tls_host").value = '';
+			// document.getElementById("ssp_insecure").value = 0;
+			// document.getElementById("ssp_insecure").checked = false;
+			// document.getElementById("v2_tls").value = 1;
+			// document.getElementById("v2_tls").checked = true;
+			// document.getElementById("ssp_tls_host").value = '';
 			switch_ss_type();
 		}
 		//编辑节点
@@ -783,7 +783,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				document.getElementById("v2_tls").value = getProperty(ss, 'tls', 0);
 				document.getElementById("v2_tls").checked =  document.getElementById("v2_tls") != 0;
 				document.getElementById("ssp_tls_host").value = getProperty(ss, 'tls_host', '');
-			} else if (type == "socks5") {
+			//} else if (type == "socks5") {
 				//
 			}
 			switch_ss_type();
@@ -1352,16 +1352,16 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					tls_host: document.getElementById("ssp_tls_host").value,
 					coustom: "1",
 				}
-			} else if (type == "socks5") {
-				var DataObj = {
-					type: document.getElementById("ssp_type").value,
-					alias: document.getElementById("ssp_name").value,
-					server: document.getElementById("ssp_server").value,
-					server_port: document.getElementById("ssp_prot").value,
-					server_user: document.getElementById("s5_username").value,
-					server_pwd: document.getElementById("s5_password").value,
-					coustom: "1",
-				}
+			//} else if (type == "socks5") {
+				//var DataObj = {
+					//type: document.getElementById("ssp_type").value,
+					//alias: document.getElementById("ssp_name").value,
+					//server: document.getElementById("ssp_server").value,
+					//server_port: document.getElementById("ssp_prot").value,
+					//server_user: document.getElementById("s5_username").value,
+					//server_pwd: document.getElementById("s5_password").value,
+					//coustom: "1",
+				//}
 			}
 			var post_dbus = JSON.stringify(DataObj)
 			var ids;
@@ -1992,7 +1992,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	<option value="ssr">SSR</option>
 																	<option value="trojan">Trojan</option>
 																	<option value="v2ray">V2ray</option>
-																	<option value="socks5">SOCKS5</option>
+																	//<option value="socks5">SOCKS5</option>
 																</select>
 															</td>
 														</tr>
