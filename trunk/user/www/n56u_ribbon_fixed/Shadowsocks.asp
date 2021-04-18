@@ -699,7 +699,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			document.getElementById("ss_plugin_opts").value = '';
 			document.getElementById("ss_protocol").value = 'origin';
 			document.getElementById("ss_protocol_param").value = '';
-			document.getElementById("ss_method").value = 'none';
 			document.getElementById("ss_obfs").value = 'plain';
 			document.getElementById("ss_obfs_param").value = '';
 			//v2
@@ -2084,7 +2083,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															</td>
 														</tr>
 
-														<tr> id="row_v2_v2ray_protocol" style="display:none;">
+														<tr id="row_v2_v2ray_protocol" style="display:none;">
 															<th width="50%">v2ray协议</th>
 															<td>
 																<select name="v2_v2ray_protocol" id="v2_v2ray_protocol" class="input"
