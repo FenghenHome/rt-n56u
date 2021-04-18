@@ -1,5 +1,5 @@
 SRC_NAME=strongswan-5.6.0
-URL_PATH=https://github.com/strongswan/strongswan/archive/5.6.0.tar.gz
+URL_PATH=https://download2.strongswan.org/$(SRC_NAME).tar.bz2
 
 CFLAGS += -ffunction-sections -fdata-sections
 LDFLAGS += -Wl,--gc-sections,-L$(STAGEDIR)/lib,-rpath-link=$(THISDIR)/$(SRC_NAME)/src/libtls/.libs -lcrypto
@@ -11,13 +11,13 @@ all: download_test extract_test config_test
 	$(MAKE) -C $(SRC_NAME) install-strip DESTDIR=$(THISDIR)/install
 
 download_test:
-	( if [ ! -f $(THISDIR)/$(SRC_NAME).tar.gz ]; then \
-		wget -t5 --timeout=20 --no-check-certificate -O $(SRC_NAME).tar.gz $(URL_PATH); \
+	( if [ ! -f $(THISDIR)/$(SRC_NAME).tar.bz2 ]; then \
+		wget -t5 --timeout=20 --no-check-certificate $(URL_PATH); \
 	fi )
 
 extract_test:
 	( if [ ! -d $(THISDIR)/$(SRC_NAME) ]; then \
-		tar -xf $(SRC_NAME).tar.gz; \
+		tar xjf $(SRC_NAME).tar.bz2; \
 	fi )
 
 config_test:
