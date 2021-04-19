@@ -365,7 +365,6 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 		esac
 		;;
 	esac
-	sed -i 's/\\//g' $TMP_PATH/*-ssr-*.json
 }
 
 start_udp() {
