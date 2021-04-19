@@ -477,7 +477,6 @@ function updateDateTime()
                                             <th colspan="2" style="background-color: #E3E3E3;"><#t2Misc#></th>
                                         </tr>
 										<tr id="reboot_schedule_enable_tr">
-				                        <tr>
                                             <th>启用定时重启</th>
                                             <td>
                                                 <div class="main_itoggle">
