@@ -17,6 +17,7 @@ tcp_config_file=
 udp_config_file=
 local_config_file=
 ARG_UDP=
+dns_port="65353"            #dns port
 tmp_udp_port="301"         #udp temporary port
 tmp_udp_local_port="302"   #udp socks temporary port
 trojan_local_enable=`nvram get trojan_local_enable`
@@ -153,6 +154,8 @@ start_dns() {
 	local china_dns_server=$(echo "$china_dns" | awk -F '#' '{print $1}')
 	local china_dns_port=$(echo "$china_dns" | awk -F '#' '{print $2}')
 	start_pdnsd() {
+		local usr_dns="$1"
+		local usr_port="$2"
 		if [ ! -f "$TMP_PATH/pdnsd/pdnsd.cache" ]; then
 			mkdir -p $TMP_PATH/pdnsd
 			touch $TMP_PATH/pdnsd/pdnsd.cache
@@ -165,7 +168,7 @@ start_dns() {
 			pid_file="/var/run/pdnsd.pid";
 			run_as="nobody";
 			server_ip=0.0.0.0;
-			server_port=65353;
+			server_port=$dns_port;
 			status_ctl=on;
 			paranoid=on;
 			query_method=udp_only;
@@ -177,8 +180,8 @@ start_dns() {
 			}
 			server{
 			label="routine";
-			ip=$china_dns_server;
-			port =$china_dns_port;
+			ip=$usr_dns;
+			port =$usr_port;
 			timeout=5;
 			reject = 74.125.127.102,
 			74.125.155.102,  
@@ -264,7 +267,7 @@ start_dns() {
 		ln_start_bin $(first_type pdnsd) pdnsd -c $TMP_PATH/pdnsd.conf
 	}
 	if [ $ss_dns -gt 0 ] && [ $sdns_enable -eq 0 ]; then
-		start_pdnsd
+		start_pdnsd $china_dns_server $china_dns_port
 		pdnsd_enable_flag=1
 		sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
 		sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
@@ -578,7 +581,7 @@ start() {
 	fi
 	/sbin/restart_dhcpd >/dev/null 2>&1
 	start_monitor
-        logger -t "SS" "启动成功。"
+        logger -t "SS" "启动成功"
         logger -t "SS" "内网IP控制为:$lancons"
 	clean_log
 	echolog "-----------end------------"
