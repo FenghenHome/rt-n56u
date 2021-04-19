@@ -65,6 +65,34 @@ echolog() {
 	echo -e "$d: $*" >>$LOG_FILE
 }
 
+add_cron() {
+	sed -i '/update_chnroute/d' /etc/storage/cron/crontabs/$http_username
+	sed -i '/update_gfwlist/d' /etc/storage/cron/crontabs/$http_username
+	sed -i '/update_adblock/d' /etc/storage/cron/crontabs/$http_username
+	if [ $(nvram get ss_update_chnroute) = "1" ]; then
+		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
+40 1 * * * /usr/bin/update_chnroute.sh > /dev/null 2>&1
+EOF
+	fi
+	if [ $(nvram get ss_update_gfwlist) = "1" ]; then
+		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
+45 1 * * * /usr/bin/update_gfwlist.sh > /dev/null 2>&1
+EOF
+	fi
+	if [ $(nvram get ss_update_adblock) = "1" ]; then
+		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
+50 1 * * * /usr/bin/update_adblock.sh > /dev/null 2>&1
+EOF
+	fi
+}
+
+del_cron() {
+	sed -i '/update_chnroute/d' /etc/storage/cron/crontabs/$http_username
+	sed -i '/update_gfwlist/d' /etc/storage/cron/crontabs/$http_username
+	sed -i '/update_adblock/d' /etc/storage/cron/crontabs/$http_username
+	clean_log
+}
+
 set_lock() {
 	exec 1000>"$LOCK_FILE"
 	flock -xn 1000
@@ -293,10 +321,10 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 			fi
 		fi
 		if [ "$3" = "2" ]; then
-			lua /etc_ro/ss/genv2config.lua $1 $mode 1080 >/tmp/v2-ssr-reudp.json
+			lua /etc_ro/ss/genv2config.lua $1 $mode 1234 >/tmp/v2-ssr-reudp.json
 			sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
 		else
-			lua /etc_ro/ss/genv2config.lua $1 $mode 1080 >$v2_json_file
+			lua /etc_ro/ss/genv2config.lua $1 $mode 1234 >$v2_json_file
 			sed -i 's/\\//g' $v2_json_file
 		fi
 		;;
@@ -399,7 +427,7 @@ Start_Run() {
 		tcp_config_file=$TMP_PATH/local-ssr-retcp.json
 		[ "$mode" == "tcp,udp" ] && tcp_config_file=$TMP_PATH/local-udp-ssr-retcp.json
 	fi
-	local tcp_port="1080"
+	local tcp_port="1234"
 	local type=$(nvram get d_type)
 	case "$type" in
 	ss | ssr)
@@ -486,7 +514,7 @@ start_rules() {
 	cat /etc/storage/ss_ip.sh | grep -v '^!' | grep -v "^$" >$wan_fw_ips
 	cat /etc/storage/ss_wan_ip.sh | grep -v '^!' | grep -v "^$" >$wan_bp_ips
 	local server=$(get_host_ip $GLOBAL_SERVER)
-	local local_port="1080"
+	local local_port="1234"
 	if [ "$redir_udp" == "1" ]; then
 		local udp_server=$(get_host_ip $UDP_RELAY_SERVER)
 		local udp_local_port=$tmp_udp_port
@@ -546,10 +574,10 @@ start() {
 		Start_Run
 		start_rules
 		start_dns
+		add_cron
 	fi
 	/sbin/restart_dhcpd >/dev/null 2>&1
 	start_monitor
-        auto_update
         logger -t "SS" "启动成功。"
         logger -t "SS" "内网IP控制为:$lancons"
 	clean_log
@@ -566,31 +594,13 @@ stop() {
 	ps -w | grep -v "grep" | grep "$TMP_PATH" | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1 &
 	kill_process
 	rm -f /var/lock/ssr-monitor.lock
-	sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
-	sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
+	if [ $ss_dns -gt 0 ] && [ $sdns_enable -eq 0 ]; then
+		sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
+		sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
+	fi
 	/sbin/restart_dhcpd >/dev/null 2>&1
+	del_cron
 	unset_lock
-}
-
-auto_update() {
-	sed -i '/update_chnroute/d' /etc/storage/cron/crontabs/$http_username
-	sed -i '/update_gfwlist/d' /etc/storage/cron/crontabs/$http_username
-	sed -i '/update_adblock/d' /etc/storage/cron/crontabs/$http_username
-	if [ $(nvram get ss_update_chnroute) = "1" ]; then
-		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
-40 1 * * * /usr/bin/update_chnroute.sh > /dev/null 2>&1
-EOF
-	fi
-	if [ $(nvram get ss_update_gfwlist) = "1" ]; then
-		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
-45 1 * * * /usr/bin/update_gfwlist.sh > /dev/null 2>&1
-EOF
-	fi
-	if [ $(nvram get ss_update_adblock) = "1" ]; then
-		cat >>/etc/storage/cron/crontabs/$http_username <<EOF
-50 1 * * * /usr/bin/update_adblock.sh > /dev/null 2>&1
-EOF
-	fi
 }
 
 kill_process() {
