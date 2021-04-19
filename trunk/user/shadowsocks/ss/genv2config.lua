@@ -9,9 +9,9 @@ local server = cjson.decode(servertmp)
 local Xray = {}
 
 local log_settings = {
-	access = "/tmp/access.log",
-	error = "/tmp/error.log",
-	loglevel = "info"
+	-- access = "/tmp/access.log",
+	-- error = "/tmp/error.log",
+	loglevel = "warning"
 }
 
 -- 传入连接
