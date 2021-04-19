@@ -361,12 +361,12 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				if (ss_schedule_support) {
 					updateDateTime();
 				}
+				showLoading();
+				document.form.action_mode.value = " Apply ";
+				document.form.current_page.value = "/Shadowsocks.asp";
+				document.form.next_page.value = "";
+				document.form.submit();
 			}
-			showLoading();
-			document.form.action_mode.value = " Restart ";
-			document.form.current_page.value = "Shadowsocks.asp";
-			document.form.next_page.value = "";
-			document.form.submit();
 		}
 		function submitInternet(v) {
 			showLoading();
@@ -1652,7 +1652,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															</div>
 														</td>
 													</tr>
-<tr>
+													<tr>
 														<th>本地trojan</th>
 														<td>
 															<div class="main_itoggle">
@@ -1673,20 +1673,20 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															</div>
 														</td>
 													</tr>
-<tr>
-                                            <th width="50%">本地trojan路径:</th>
-                                            <td>
-                                                <input type="text"  class="input" size="60" name="trojan_local" value="<% nvram_get_x("","trojan_local"); %>" />
-                                            </td>
-</tr>
+													<tr>
+                                            			<th width="50%">本地trojan路径:</th>
+                                            			<td>
+                                             				<input type="text"  class="input" size="60" name="trojan_local" value="<% nvram_get_x("","trojan_local"); %>" />
+                                            			</td>
+													</tr>
 
-<tr>
-                                            <th width="50%">trojan网络地址:</th>
-                                            <td>
-                                                <input type="text"  class="input" size="60" name="trojan_link" value="<% nvram_get_x("","trojan_link"); %>" />
-                                            </td>
-</tr>
-<tr>
+													<tr>
+                                            			<th width="50%">trojan网络地址:</th>
+                                           				<td>
+                                           		    		<input type="text"  class="input" size="60" name="trojan_link" value="<% nvram_get_x("","trojan_link"); %>" />
+                                           				</td>
+													</tr>
+													<tr>
 														<th>本地v2</th>
 														<td>
 															<div class="main_itoggle">
@@ -1707,19 +1707,19 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															</div>
 														</td>
 													</tr>
-<tr>
-                                            <th width="50%">本地v2路径:</th>
-                                            <td>
-                                                <input type="text"  class="input" size="60" name="v2_local" value="<% nvram_get_x("","v2_local"); %>" />
-                                            </td>
-</tr>
+													<tr>
+                                           		 		<th width="50%">本地v2路径:</th>
+                                           				<td>
+                                           					<input type="text"  class="input" size="60" name="v2_local" value="<% nvram_get_x("","v2_local"); %>" />
+                                          				</td>
+													</tr>
 
-<tr>
-                                            <th width="50%">v2网络地址:</th>
-                                            <td>
-                                                <input type="text"  class="input" size="60" name="v2_link" value="<% nvram_get_x("","v2_link"); %>" />
-                                            </td>
-</tr>
+													<tr>
+                                          		  		<th width="50%">v2网络地址:</th>
+                                          		  		<td>
+                                          		   	 		<input type="text"  class="input" size="60" name="v2_link" value="<% nvram_get_x("","v2_link"); %>" />
+                                         		   		</td>
+													</tr>
 													<tr>
 														<th>主服务器:
 														</th>
