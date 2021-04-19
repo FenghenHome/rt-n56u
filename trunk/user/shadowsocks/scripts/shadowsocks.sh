@@ -27,7 +27,6 @@ v2_link=`nvram get v2_link`
 v2_local=`nvram get v2_local`
 http_username=`nvram get http_username`
 v2_json_file="/tmp/v2-redir.json"
-trojan_json_file="/tmp/tj-redir.json"
 server_count=0
 redir_tcp=0
 redir_udp=0
@@ -38,7 +37,6 @@ wan_bp_ips="/tmp/whiteip.txt"
 wan_fw_ips="/tmp/blackip.txt"
 lan_fp_ips="/tmp/lan_ip.txt"
 run_mode=`nvram get ss_run_mode`
-ss_turn=`nvram get ss_turn`
 lan_con=`nvram get lan_con`
 GLOBAL_SERVER=`nvram get global_server`
 socks=""
@@ -273,13 +271,8 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 		;;
 	esac
 	case "$2" in
-	ss)
-		lua /etc_ro/ss/genssconfig.lua $1 $4 >$config_file
-		sed -i 's/\\//g' $config_file
-		;;
-	ssr)
-		lua /etc_ro/ss/genssrconfig.lua $1 $4 >$config_file
-		sed -i 's/\\//g' $config_file
+	ss | ssr)
+		lua /etc_ro/ss/gen_config.lua $1 $mode $4 ${ss_protocol:-redir} >$config_file
 		;;
 	v2ray)
 		if [ ! -f "/usr/bin/xray" ]; then
@@ -304,10 +297,10 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 		fi
 		if [ "$3" = "2" ]; then
 			lua /etc_ro/ss/genv2config.lua $1 $mode 1080 >/tmp/v2-ssr-reudp.json
-		sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
+			sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
 		else
-		lua /etc_ro/ss/genv2config.lua $1 $mode 1080 >$v2_json_file
-		sed -i 's/\\//g' $v2_json_file
+			lua /etc_ro/ss/genv2config.lua $1 $mode 1080 >$v2_json_file
+			sed -i 's/\\//g' $v2_json_file
 		fi
 		;;
 	trojan)
@@ -331,15 +324,20 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 				fi
 			fi
 		fi
-		if [ "$3" = "1" ]; then
-		lua /etc_ro/ss/gentrojanconfig.lua $1 nat 1080 >$trojan_json_file
-		sed -i 's/\\//g' $trojan_json_file
-		else
-		lua /etc_ro/ss/gentrojanconfig.lua $1 client 10801 >/tmp/trojan-ssr-reudp.json
-		sed -i 's/\\//g' /tmp/trojan-ssr-reudp.json
-		fi
+		case "$3" in
+		1)
+			lua /etc_ro/ss/gen_config.lua $1 nat $4 >$config_file
+			;;
+		2)
+			lua /etc_ro/ss/gen_config.lua $1 client $4 >$config_file
+			;;
+		3)
+			lua /etc_ro/ss/gen_config.lua $1 client $4 >$config_file
+			;;
+		esac
 		;;
 	esac
+	sed -i 's/\\//g' $TMP_PATH/*-ssr-*.json
 }
 
 start_udp() {
@@ -358,7 +356,7 @@ start_udp() {
 		echolog "UDP TPROXY Relay:$($(first_type "xray" "v2ray") -version | head -1) Started!"
 		;;
 	trojan) #client
-		gen_config_file $UDP_RELAY_SERVER $type 2
+		gen_config_file $UDP_RELAY_SERVER $type 2 $tmp_udp_local_port
 		ln_start_bin $(first_type trojan) $type --config $udp_config_file
 		ln_start_bin $(first_type ipt2socks) ipt2socks -U -b 0.0.0.0 -4 -s 127.0.0.1 -p $tmp_udp_local_port -l $tmp_udp_port
 		echolog "UDP TPROXY Relay:$($(first_type trojan) --version 2>&1 | head -1) Started!"
@@ -377,15 +375,15 @@ start_local() {
 		echolog "Global_Socks5:$(get_name $type) Started!"
 		;;
 	v2ray)
-		lua /etc_ro/ss/genv2config.lua $LOCAL_SERVER $mode 0 $local_port >/tmp/v2-ssr-local.json
-		sed -i 's/\\//g' /tmp/v2-ssr-local.json
-			ln_start_bin $(first_type xray v2ray) v2ray -config /tmp/v2-ssr-local.json
+		if [ "$_local" == "2" ]; then
+			gen_config_file $LOCAL_SERVER $type 3 0 $local_port
+			ln_start_bin $(first_type xray v2ray) v2ray -config $local_config_file
 			echolog "Global_Socks5:$($(first_type "xray" "v2ray") -version | head -1) Started!"
+		fi
 		;;
 	trojan) #client
-		lua /etc_ro/ss/gentrojanconfig.lua $LOCAL_SERVER client $local_port >/tmp/trojan-ssr-local.json
-		sed -i 's/\\//g' /tmp/trojan-ssr-local.json
-		ln_start_bin $(first_type trojan) $type --config /tmp/trojan-ssr-local.json
+		gen_config_file $LOCAL_SERVER $type 3 $local_port
+		ln_start_bin $(first_type trojan) $type --config $local_config_file
 		echolog "Global_Socks5:$($(first_type trojan) --version 2>&1 | head -1) Started!"
 		;;
 	esac
@@ -399,11 +397,16 @@ Start_Run() {
 	else
 		local threads=$(nvram get ss_threads)
 	fi
+	if [ "$_local" == "1" ]; then
+		local socks_port=$(nvram get socks5_port)
+		tcp_config_file=$TMP_PATH/local-ssr-retcp.json
+		[ "$mode" == "tcp,udp" ] && tcp_config_file=$TMP_PATH/local-udp-ssr-retcp.json
+	fi
 	local tcp_port="1080"
 	local type=$(nvram get d_type)
-	gen_config_file $GLOBAL_SERVER $type 1 $tcp_port
 	case "$type" in
 	ss | ssr)
+		gen_config_file $GLOBAL_SERVER $type 1 $tcp_port
 		ss_program="$(first_type ${type}local ${type}-redir)"
 		for i in $(seq 1 $threads); do
 			ln_start_bin "$ss_program" ${type}-redir -c $tcp_config_file
@@ -412,12 +415,14 @@ Start_Run() {
 		echolog "Main node:$(get_name $type) $threads Threads Started!"
 		;;
 	v2ray)
+		gen_config_file $GLOBAL_SERVER $type 1 $tcp_port
 		ln_start_bin $(first_type xray v2ray) v2ray -config $v2_json_file
 		echolog "Main node:$($(first_type xray v2ray) -version | head -1) Started!"
 		;;
 	trojan)
+		gen_config_file $GLOBAL_SERVER $type 1 $tcp_port
 		for i in $(seq 1 $threads); do
-			ln_start_bin $(first_type $type) $type --config $trojan_json_file
+			ln_start_bin $(first_type $type) $type --config $tcp_config_file
 		done
 		echolog "Main node:$($(first_type $type) --version 2>&1 | head -1) , $threads Threads Started!"
 		;;
