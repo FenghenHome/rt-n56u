@@ -30,11 +30,9 @@ v2_json_file="/tmp/v2-redir.json"
 trojan_json_file="/tmp/tj-redir.json"
 server_count=0
 redir_tcp=0
-v2ray_enable=0
-trojan_enable=0
 redir_udp=0
-tunnel_enable=0
 local_enable=0
+ss_protocol=
 pdnsd_enable_flag=0
 wan_bp_ips="/tmp/whiteip.txt"
 wan_fw_ips="/tmp/blackip.txt"
@@ -270,6 +268,7 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 		config_file=$udp_config_file
 		;;
 	3)
+		local ss_protocol="socks"
 		config_file=$local_config_file
 		;;
 	esac
@@ -303,7 +302,6 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 				fi
 			fi
 		fi
-		v2ray_enable=1
 		if [ "$3" = "2" ]; then
 			lua /etc_ro/ss/genv2config.lua $1 $mode 1080 >/tmp/v2-ssr-reudp.json
 		sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
@@ -333,7 +331,6 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 				fi
 			fi
 		fi
-		trojan_enable=1
 		if [ "$3" = "1" ]; then
 		lua /etc_ro/ss/gentrojanconfig.lua $1 nat 1080 >$trojan_json_file
 		sed -i 's/\\//g' $trojan_json_file
@@ -352,8 +349,7 @@ start_udp() {
 	ss | ssr)
 		gen_config_file $UDP_RELAY_SERVER $type 2 $tmp_udp_port
 		ss_program="$(first_type ${type}local ${type}-redir)"
-		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] && local ss_extra_arg="--protocol redir"
-		ln_start_bin $ss_program ${type}-redir -c $udp_config_file $ss_extra_arg
+		ln_start_bin $ss_program ${type}-redir -c $udp_config_file
 		echolog "UDP TPROXY Relay:$(get_name $type) Started!"
 		;;
 	v2ray)
@@ -409,9 +405,8 @@ Start_Run() {
 	case "$type" in
 	ss | ssr)
 		ss_program="$(first_type ${type}local ${type}-redir)"
-		[ "$(printf '%s' "$ss_program" | awk -F '/' '{print $NF}')" = "${type}local" ] && local ss_extra_arg="--protocol redir"
 		for i in $(seq 1 $threads); do
-			ln_start_bin "$ss_program" ${type}-redir -c $tcp_config_file $ss_extra_arg
+			ln_start_bin "$ss_program" ${type}-redir -c $tcp_config_file
 		done
 		redir_tcp=1
 		echolog "Main node:$(get_name $type) $threads Threads Started!"
