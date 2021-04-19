@@ -25,7 +25,6 @@ trojan_local=`nvram get trojan_local`
 v2_local_enable=`nvram get v2_local_enable`
 v2_link=`nvram get v2_link`
 v2_local=`nvram get v2_local`
-http_username=`nvram get http_username`
 v2_json_file="/tmp/v2-redir.json"
 server_count=0
 redir_tcp=0
@@ -36,14 +35,13 @@ pdnsd_enable_flag=0
 wan_bp_ips="/tmp/whiteip.txt"
 wan_fw_ips="/tmp/blackip.txt"
 lan_fp_ips="/tmp/lan_ip.txt"
+http_username=`nvram get http_username`
 run_mode=`nvram get ss_run_mode`
 lan_con=`nvram get lan_con`
-GLOBAL_SERVER=`nvram get global_server`
-socks=""
 
 get_host_ip() {
 	lua /etc_ro/ss/getconfig.lua $1 > /tmp/server.txt
-	local host=`cat /tmp/server.txt` 
+	local host=`cat /tmp/server.txt`
 	local ip=$host
 	if [ -z "$(echo $host | grep -E "([0-9]{1,3}[\.]){3}[0-9]{1,3}")" ]; then
 		if [ "$host" == "${host#*:[0-9a-fA-F]}" ]; then
@@ -257,7 +255,6 @@ get_name() {
 }
 
 gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
-	fastopen="false"
 	case "$3" in
 	1)
 		config_file=$tcp_config_file
@@ -431,6 +428,7 @@ Start_Run() {
 }
 
 load_config() {
+	GLOBAL_SERVER=$(nvram get global_server)
 	if [ "$GLOBAL_SERVER" == "nil" ]; then
 		return 1
 	fi
@@ -473,13 +471,6 @@ load_config() {
 		;;
 	esac
 	return 0
-}
-
-check_server() {
-	ENABLE_SERVER=$(nvram get global_server)
-	if [ "$ENABLE_SERVER" == "nil" ]; then
-		return 1
-	fi
 }
 
 start_monitor() {
@@ -551,14 +542,12 @@ start() {
 	echolog "----------start------------"
 	mkdir -p /var/run /var/lock /var/log $TMP_BIN_PATH
 	ulimit -n 65535
-	ss_enable=`nvram get ss_enable`
 	if load_config; then
 		Start_Run
 		start_rules
 		start_dns
 	fi
 	/sbin/restart_dhcpd >/dev/null 2>&1
-	check_server
 	start_monitor
         auto_update
         logger -t "SS" "启动成功。"
@@ -579,19 +568,8 @@ stop() {
 	rm -f /var/lock/ssr-monitor.lock
 	sed -i '/no-resolv/d' /etc/storage/dnsmasq/dnsmasq.conf
 	sed -i '/server=127.0.0.1/d' /etc/storage/dnsmasq/dnsmasq.conf
-	clear_iptable
 	/sbin/restart_dhcpd >/dev/null 2>&1
 	unset_lock
-}
-
-clear_iptable()
-{
-	s5_port=$(nvram get socks5_port)
-	iptables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
-	iptables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
-	ip6tables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
-	ip6tables -t filter -D INPUT -p tcp --dport $s5_port -j ACCEPT
-	
 }
 
 auto_update() {
