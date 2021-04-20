@@ -772,7 +772,7 @@ struct nvram_pair router_defaults[] = {
 	{ "sdns_gfw", "0" },
 	{ "sdns_adblock", "0" },
 	{ "snds_redirect", "0" },
-	{ "snds_cache", "512" },
+	{ "snds_cache", "1024" },
 	{ "sdns_ttl", "300" },
 	{ "sdns_ttl_min", "60" },
 	{ "sdns_ttl_max", "86400" },
