@@ -1925,7 +1925,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 											</div>
 											<!--节点列表-->
 											<div id="wnd_ss_add">
-											<table width="100%" cellpadding="4" cellspacing="0" class="table">
+												<table width="100%" cellpadding="4" cellspacing="0" class="table">
 													<tr>
 														<th colspan="2" style="background-color: #E3E3E3;">
 															订阅节点:添加完地址请先点击一下保存设置按钮,再点击更新订阅按钮。</th>
@@ -2052,6 +2052,15 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 												</table>
 												<table id="table99"></table>
 
+												<table class="table">
+													<tr>
+														<td style="border: 0 none; padding: 0px;">
+															<center><input name="button" type="button"
+																	class="btn btn-primary" style="width: 200px"
+																	onclick="applyRule();" value="应用设置" /></center>
+														</td>
+													</tr>
+												</table>
 												<div id="vpnc_settings" class="contentM_qis"
 													style="z-index:9999; box-shadow: 3px 3px 10px #000;margin-top: 0px;">
 													<table width="100%" cellpadding="4" cellspacing="0" class="table"
