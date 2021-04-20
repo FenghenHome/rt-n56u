@@ -39,6 +39,8 @@ lan_fp_ips="/tmp/lan_ip.txt"
 http_username=`nvram get http_username`
 run_mode=`nvram get ss_run_mode`
 lan_con=`nvram get lan_con`
+ss_dns=`nvram get ss_dns`
+sdns_enable=`nvram get sdns_enable`
 
 get_host_ip() {
 	lua /etc_ro/ss/getconfig.lua $1 > /tmp/server.txt
@@ -148,8 +150,6 @@ ln_start_bin() {
 }
 
 start_dns() {
-	local ss_dns=`nvram get ss_dns`
-	local sdns_enable=`nvram get sdns_enable`
 	local china_dns=`nvram get china_dns`
 	local china_dns_server=$(echo "$china_dns" | awk -F '#' '{print $1}')
 	local china_dns_port=$(echo "$china_dns" | awk -F '#' '{print $2}')
