@@ -689,18 +689,18 @@ kill_process() {
 		kill -9 "$microsocks_process" >/dev/null 2>&1
 	fi
 
-	v2ray-plugin_process=$(pidof v2ray-plugin)
-	if [ -n "$v2ray-plugin_process" ]; then
+	v2rayplugin_process=$(pidof v2ray-plugin)
+	if [ -n "$v2rayplugin_process" ]; then
 		logger -t "SS" "关闭v2ray-plugin进程..."
 		killall -q -9 v2ray-plugin >/dev/null 2>&1
-		kill -9 "$v2ray-plugin_process" >/dev/null 2>&1
+		kill -9 "$v2rayplugin_process" >/dev/null 2>&1
 	fi
 
-	obfs-local_process=$(pidof obfs-local)
-	if [ -n "$obfs-local_process" ]; then
+	obfslocal_process=$(pidof obfs-local)
+	if [ -n "$obfslocal_process" ]; then
 		logger -t "SS" "关闭obfs-local进程..."
 		killall -q -9 obfs-local >/dev/null 2>&1
-		kill -9 "$obfs-local_process" >/dev/null 2>&1
+		kill -9 "$obfslocal_process" >/dev/null 2>&1
 	fi
 }
 
