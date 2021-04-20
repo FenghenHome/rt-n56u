@@ -606,12 +606,20 @@ stop() {
 }
 
 kill_process() {
-	v2ray_process=$(pidof xray)
-	if [ -n "$v2ray_process" ]; then
+	xray_process=$(pidof xray)
+	if [ -n "$xray_process" ]; then
 		logger -t "SS" "关闭V2Ray进程..."
 		killall -q -9 xray >/dev/null 2>&1
+		kill -9 "$xray_process" >/dev/null 2>&1
+	fi
+
+	v2ray_process=$(pidof v2ray)
+	if [ -n "$v2ray_process" ]; then
+		logger -t "SS" "关闭V2Ray进程..."
+		killall -q -9 v2ray >/dev/null 2>&1
 		kill -9 "$v2ray_process" >/dev/null 2>&1
 	fi
+
 	ssredir=$(pidof ss-redir)
 	if [ -n "$ssredir" ]; then
 		logger -t "SS" "关闭ss-redir进程..."
