@@ -251,7 +251,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_tj_tls_host', 1);
 				showhide_div('row_ssp_insecure', 1);
 			} else if (b == "v2ray") {
-				switch_v2_type();
 				switch_v2_v2ray_protocol();
 				showhide_div('row_v2_v2ray_protocol', 1);
 			//} else if (b == "socks5") {
@@ -261,6 +260,45 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			}
 		}
 		function switch_v2_v2ray_protocol() {
+			showhide_div('row_quic_header', 0);
+			showhide_div('row_quic_key', 0);
+			showhide_div('row_quic_security', 0);
+			showhide_div('row_s5_password', 0);
+			showhide_div('row_s5_username', 0);
+			showhide_div('row_ss_method', 0);
+			showhide_div('row_ss_obfs_para', 0);
+			showhide_div('row_ss_obfs', 0);
+			showhide_div('row_ss_password', 0);
+			showhide_div('row_ss_plugin_opts', 0);
+			showhide_div('row_ss_plugin', 0);
+			showhide_div('row_ss_protocol_para', 0);
+			showhide_div('row_ss_protocol', 0);
+			showhide_div('row_ssp_insecure', 0);
+			showhide_div('row_tj_tls_host', 0);
+			showhide_div('row_v2_aid', 0);
+			showhide_div('row_v2_http_host', 0);
+			showhide_div('row_v2_http_path', 0);
+			showhide_div('row_v2_http2_host', 0);
+			showhide_div('row_v2_http2_path', 0);
+			showhide_div('row_v2_mkcp_congestion', 0);
+			showhide_div('row_v2_mkcp_downlink', 0);
+			showhide_div('row_v2_mkcp_mtu', 0);
+			showhide_div('row_v2_mkcp_readbu', 0);
+			showhide_div('row_v2_mkcp_tti', 0);
+			showhide_div('row_v2_mkcp_uplink', 0);
+			showhide_div('row_v2_mkcp_writebu', 0);
+			showhide_div('row_v2_mux', 0);
+			showhide_div('row_v2_net', 0);
+			showhide_div('row_v2_security', 0);
+			showhide_div('row_v2_tls', 0);
+			showhide_div('row_v2_type_tcp', 0);
+			showhide_div('row_v2_type', 0);
+			showhide_div('row_v2_vid', 0);
+			showhide_div('row_v2_webs_host', 0);
+			showhide_div('row_v2_webs_path', 0);
+			showhide_div('row_s5_enable', 0);
+			showhide_div('row_s5_username', 0);
+			showhide_div('row_s5_password', 0);
 			var b = document.form.v2_v2ray_protocol.value;
 			if (b == "shadowsocks") {
 				showhide_div('row_ss_password', 1);
@@ -273,6 +311,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_tj_tls_host', 1);
 				showhide_div('row_ssp_insecure', 1);
 			} else if (b == "vmess") {
+				switch_v2_type();
 				showhide_div('row_v2_aid', 1);
 				showhide_div('row_v2_vid', 1);
 				showhide_div('row_v2_security', 1);
@@ -504,7 +543,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					var s5nodeList = document.getElementById("s5_nodeList"); // 获取节点
 					for (var key in db_ss) { // 遍历对象
 						var optionObj = JSON.parse(db_ss[key]); // 字符串转为对象
-						//if(optionObj.ping != "failed"){   //过滤ping不通的节点
 						var text = '[ ' + (optionObj.type ? optionObj.type : "类型获取失败") + ' ] ' + (optionObj
 							.alias ? optionObj.alias : "名字获取失败"); // 判断下怕获取失败 ，括号是运算的问题
 						// 添加 
@@ -537,12 +575,9 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 							return 0;
 						}).appendTo('#s5_nodeList');
 						$j('#s5_nodeList>option').eq(0).attr("selected", "selected");
-						//$j('#nodeList').selectpicker('val', '<% nvram_get_x("","global_server"); %>'); //主服务器列表默认
-						//$j('#u_nodeList').selectpicker('val', '<% nvram_get_x("","udp_relay_server"); %>'); //UDP服务器列表默认
 						document.form.global_server.value = '<% nvram_get_x("","global_server"); %>';
 						document.form.udp_relay_server.value = '<% nvram_get_x("","udp_relay_server"); %>';
 						document.form.socks5_enable.value = '<% nvram_get_x("","socks5_enable"); %>';
-						//}
 					}
 					//订阅节点表格
 					var myss = new Array();
@@ -857,7 +892,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			for (var key in row) {
 				ns[p + "_json_" + row[key].ids] = "deleting";
 			}
-			//console.log(ns)
 			document.getElementById("btn_del_link").value="正在删除节点";
 			$j.ajax({
 				url: "/applydb.cgi?userm1=del&p=ss",
@@ -988,7 +1022,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			s.innerHTML = "";
 			//var ssu = ssrurl.match(/ssr:\/\/([A-Za-z0-9_-]+)/i);
 			var ssu = ssrurl.split('://');
-			//console.log(ssu.length);
 			var event = document.createEvent("HTMLEvents");
 			event.initEvent("change", true, true);
 			switch (ssu[0]) {
@@ -1305,7 +1338,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 		//点击保存节点按钮
 		function showNodeData(idName, obj) {
 			var nodeData = document.getElementById(idName);
-			//console.log(nodeData);
 			for (var key in obj) {
 				var tr = document.createElement("tr");
 				var td = document.createElement("td");
@@ -1460,7 +1492,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			var ns = {};
 			ns["ssconf_basic_json_" + ids] = post_dbus;
 			push_data(ns);
-			console.log(DataObj)
 		}
 		//post数据到后台处理
 		function push_data(obj) {
@@ -2052,15 +2083,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 												</table>
 												<table id="table99"></table>
 
-												<table class="table">
-													<tr>
-														<td style="border: 0 none; padding: 0px;">
-															<center><input name="button" type="button"
-																	class="btn btn-primary" style="width: 200px"
-																	onclick="applyRule();" value="应用设置" /></center>
-														</td>
-													</tr>
-												</table>
 												<div id="vpnc_settings" class="contentM_qis"
 													style="z-index:9999; box-shadow: 3px 3px 10px #000;margin-top: 0px;">
 													<table width="100%" cellpadding="4" cellspacing="0" class="table"
