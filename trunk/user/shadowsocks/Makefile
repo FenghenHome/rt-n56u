@@ -119,9 +119,6 @@ ifeq ($(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS),y)
 	#ln -sf /var/ss-redir $(ROMFSDIR)/usr/bin/ss-redir
 	#ln -sf /var/ss-tunnel $(ROMFSDIR)/usr/bin/ss-local
 endif
-ifeq ($(CONFIG_FIRMWARE_INCLUDE_SSSERVER),y)
-	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SSR_NAME)/server/ss-server /usr/bin/ss-server
-endif
 ifeq ($(CONFIG_FIRMWARE_INCLUDE_TROJAN),n)
 	cp -fP $(CONFIG_CROSS_COMPILER_ROOT)/mipsel-linux-uclibc/sysroot/lib/libstdc++.so* $(ROMFSDIR)/lib
 endif
