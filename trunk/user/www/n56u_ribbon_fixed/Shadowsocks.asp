@@ -98,10 +98,12 @@
 			if($j("#v2_xtls").is(':checked')){
 			document.getElementById('v2_xtls').value=1;
 			showhide_div('row_tj_tls_host', 1);
+			showhide_div('row_v2_vless_flow', 1);
 			showhide_div('row_v2_tls', 0);
 			}else{
 			document.getElementById('v2_xtls').value=0;
 			showhide_div('row_tj_tls_host', 0);
+			showhide_div('row_v2_vless_flow', 0);
 			showhide_div('row_v2_tls', 1);
 			}
 			});
@@ -236,6 +238,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_security', 0);
 			showhide_div('row_v2_tls', 0);
 			showhide_div('row_v2_xtls', 0);
+			showhide_div('row_v2_vless_flow', 0);
 			showhide_div('row_v2_type_tcp', 0);
 			showhide_div('row_v2_type', 0);
 			showhide_div('row_v2_vid', 0);
@@ -306,6 +309,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_security', 0);
 			showhide_div('row_v2_tls', 0);
 			showhide_div('row_v2_xtls', 0);
+			showhide_div('row_v2_vless_flow', 0);
 			showhide_div('row_v2_type_tcp', 0);
 			showhide_div('row_v2_type', 0);
 			showhide_div('row_v2_vid', 0);
@@ -343,6 +347,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_v2_type', 1);
 				showhide_div('row_v2_tls', 1);
 				showhide_div('row_v2_xtls', 1);
+				showhide_div('row_v2_vless_flow', 1);
 				showhide_div('row_v2_mux', 1);
 				showhide_div('row_tj_tls_host', 1);
 				showhide_div('row_ssp_insecure', 1);
@@ -778,6 +783,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			document.getElementById("v2_tls").checked = false;
 			document.getElementById("v2_xtls").value = 0;
 			document.getElementById("v2_xtls").checked = false;
+			document.getElementById("v2_vless_flow").value = 'xtls-rprx-splice';
 			document.getElementById("ssp_tls_host").value = '';
 			//"v2 tcp"
 			document.getElementById("v2_kcp_guise").value = 'none';
@@ -883,6 +889,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					document.getElementById("v2_tls").checked =  document.getElementById("v2_tls").value != 0;
 					document.getElementById("v2_xtls").value = getProperty(ss, 'xtls', 0);
 					document.getElementById("v2_xtls").checked =  document.getElementById("v2_xtls").value != 0;
+					document.getElementById("v2_vless_flow").value = getProperty(ss, 'vless_flow', 'xtls-rprx-splice');
 					document.getElementById("ssp_tls_host").value = getProperty(ss, 'tls_host', '');
 					if (transport == "kcp") {
 						document.getElementById("v2_kcp_guise").value = getProperty(ss, 'kcp_guise', 'none');
@@ -1511,6 +1518,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 						http_path: document.getElementById("v2_http_path").value,
 						tls: document.getElementById("v2_tls").value,
 						xtls: document.getElementById("v2_xtls").value,
+						vless_flow: document.getElementById("v2_vless_flow").value,
 						tls_host: document.getElementById("ssp_tls_host").value,
 						coustom: "1",
 					}
@@ -2614,6 +2622,19 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																<input type="text" class="input" size="15"
 																	name="ssp_tls_host" id="ssp_tls_host"
 																	style="width: 200px" value="">
+															</td>
+														</tr>
+														<tr id="row_v2_vless_flow" style="display:none;">
+															<th width="50%">流控模式</th>
+															<td>
+																<select name="v2_vless_flow" id="v2_vless_flow" class="input" style="width: 200px;">
+																	<option value="xtls-rprx-origin">xtls-rprx-origin</option>
+																	<option value="xtls-rprx-origin-udp443">xtls-rprx-origin-udp443</option>
+																	<option value="xtls-rprx-direct">xtls-rprx-direct</option>
+																	<option value="xtls-rprx-direct-udp443">xtls-rprx-direct-udp443</option>
+																	<option value="xtls-rprx-splice">xtls-rprx-splice</option>
+																	<option value="xtls-rprx-splice-udp443">xtls-rprx-splice-udp443</option>
+																</select>
 															</td>
 														</tr>
 														<tr id="row_v2_mux" style="display:none;">
