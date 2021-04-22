@@ -1072,10 +1072,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					s.innerHTML = "<font color='green'>导入Shadowsocks配置信息成功</font>";
 				} else {
 					var sstr = b64decsafe(url0);
-					document.getElementById('ssp_type').value = "v2ray";
+					document.getElementById('ssp_type').value = ssu[0];
 					document.getElementById('ssp_type').dispatchEvent(event);
-					document.getElementById('v2_v2ray_protocol').value = "shadowsocks";
-					document.getElementById('v2_v2ray_protocol').dispatchEvent(event);
 					var team = sstr.split('@');
 					var part1 = team[0].split(':');
 					var part2 = team[1].split(':');
@@ -1154,8 +1152,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				document.getElementById('ss_password').value = password;
 				document.getElementById('v2_tls').checked = true;
 				document.getElementById('v2_tls').dispatchEvent(event);
-				document.getElementById('ssp_tls_host').value = queryParam.peer || '';
-				document.getElementById('ssp_insecure').checked = queryParam.allowInsecure == '1';
+				document.getElementById('ssp_tls_host').value = queryParam.sni || '';
 				if (param != undefined) {
 					document.getElementById('ssp_name').value = decodeURI(param);
 				}
@@ -2109,7 +2106,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	<option value="ssr">SSR</option>
 																	<option value="trojan">Trojan</option>
 																	<option value="v2ray">V2ray</option>
-																	//<option value="socks5">SOCKS5</option>
+																	<!--<option value="socks5">SOCKS5</option>-->
 																</select>
 															</td>
 														</tr>
@@ -2123,7 +2120,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	<option value="vmess">VMess</option>
 																	<option value="trojan">Trojan</option>
 																	<option value="shadowsocks">Shadowsocks</option>
-																	//<option value="socks5">SOCKS5</option>
+																	<!--<option value="socks5">SOCKS5</option>-->
 																</select>
 															</td>
 														</tr>
