@@ -17,7 +17,7 @@ tcp_config_file=
 udp_config_file=
 local_config_file=
 ARG_UDP=
-dns_port="65353"            #dns port
+dns_port="65353"            #dnscache port
 tmp_udp_port="301"         #udp temporary port
 tmp_udp_local_port="302"   #udp socks temporary port
 trojan_local_enable=`nvram get trojan_local_enable`
@@ -31,7 +31,6 @@ server_count=0
 redir_tcp=0
 redir_udp=0
 local_enable=0
-ss_protocol=
 pdnsd_enable_flag=0
 wan_bp_ips="/tmp/whiteip.txt"
 wan_fw_ips="/tmp/blackip.txt"
@@ -702,6 +701,13 @@ kill_process() {
 		logger -t "SS" "关闭v2ray-plugin进程..."
 		killall -q -9 v2ray-plugin >/dev/null 2>&1
 		kill -9 "$v2rayplugin_process" >/dev/null 2>&1
+	fi
+
+	xrayplugin_process=$(pidof xray-plugin)
+	if [ -n "$xrayplugin_process" ]; then
+		logger -t "SS" "关闭v2ray-plugin进程..."
+		killall -q -9 xray-plugin >/dev/null 2>&1
+		kill -9 "$xrayplugin_process" >/dev/null 2>&1
 	fi
 
 	obfslocal_process=$(pidof obfs-local)
