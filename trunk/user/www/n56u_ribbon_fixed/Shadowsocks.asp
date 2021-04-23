@@ -1501,9 +1501,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				} else if (v2ray_protocol == "vless") {
 					var DataObj = {
 						type: document.getElementById("ssp_type").value,
-
 						v2ray_protocol: document.getElementById("v2ray_protocol").value,
-
 						alias: document.getElementById("ssp_name").value,
 						server: document.getElementById("ssp_server").value,
 						server_port: document.getElementById("ssp_prot").value,
@@ -2216,7 +2214,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	<option value="ssr">SSR</option>
 																	<option value="trojan">Trojan</option>
 																	<option value="v2ray">V2ray</option>
-																	<!--<option value="socks5">SOCKS5</option>-->
 																</select>
 															</td>
 														</tr>
@@ -2230,7 +2227,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	<option value="vmess">VMess</option>
 																	<option value="trojan">Trojan</option>
 																	<option value="shadowsocks">Shadowsocks</option>
-																	<!--<option value="socks5">SOCKS5</option>-->
 																</select>
 															</td>
 														</tr>
@@ -2613,7 +2609,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 														<tr id="row_v2_xtls" style="display:none;">
 															<th>XTLS</th>
 															<td>
-																<input type="checkbox" name="v2_xtls" id="v2_xtls">
+																<input type="checkbox" name="v2_xtls" id="v2_xtls" >
 															</td>
 														</tr>
 														<tr id="row_tj_tls_host" style="display:none;">
