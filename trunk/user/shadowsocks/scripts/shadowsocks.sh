@@ -391,6 +391,7 @@ start_udp() {
 }
 
 start_local() {
+	[ "$LOCAL_SERVER" = "nil" ] && return 1
 	local local_port=$(nvram get socks5_port)
 	local type=$(nvram get s5_type)
 	case "$type" in
@@ -458,11 +459,15 @@ Start_Run() {
 
 load_config() {
 	GLOBAL_SERVER=$(nvram get global_server)
+	LOCAL_SERVER=$(nvram get socks5_enable)
 	if [ "$GLOBAL_SERVER" == "nil" ]; then
+		mode="tcp,udp"
+		_local="2"
+		local_config_file=$TMP_PATH/tcp-udp-ssr-local.json
+		start_local
 		return 1
 	fi
 	UDP_RELAY_SERVER=$(nvram get udp_relay_server)
-	LOCAL_SERVER=$(nvram get socks5_enable)
 	tcp_config_file=$TMP_PATH/tcp-only-ssr-retcp.json
 	case "$UDP_RELAY_SERVER" in
 	nil)
