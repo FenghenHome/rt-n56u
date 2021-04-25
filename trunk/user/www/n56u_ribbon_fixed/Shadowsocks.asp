@@ -94,19 +94,6 @@
 			showhide_div('row_v2_xtls', 1);
 			}
 			});
-			$j("#v2_xtls").change(function() { 
-			if($j("#v2_xtls").is(':checked')){
-			document.getElementById('v2_xtls').value=1;
-			showhide_div('row_tj_tls_host', 1);
-			showhide_div('row_v2_vless_flow', 1);
-			showhide_div('row_v2_tls', 0);
-			}else{
-			document.getElementById('v2_xtls').value=0;
-			showhide_div('row_tj_tls_host', 0);
-			showhide_div('row_v2_vless_flow', 0);
-			showhide_div('row_v2_tls', 1);
-			}
-			});
 			$j("#v2_mux").change(function() { 
 			if($j("#v2_mux").is(':checked')){
 			document.getElementById('v2_mux').value=1;
@@ -2613,7 +2600,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															</td>
 														</tr>
 														<tr id="row_tj_tls_host" style="display:none;">
-															<th>TLS/XTLS Host</th>
+															<th>TLS Host</th>
 															<td>
 																<input type="text" class="input" size="15"
 																	name="ssp_tls_host" id="ssp_tls_host"
