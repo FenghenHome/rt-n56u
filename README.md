@@ -15,12 +15,76 @@
 * 默认wifi密码:1234567890
 * 集成/取消新增插件请修改此文件: trunk/build_firmware_modify
 
+![CI](https://github.com/hanwckf/rt-n56u/workflows/CI/badge.svg)
+![GitHub All Releases](https://img.shields.io/github/downloads/hanwckf/rt-n56u/total)
+[![release](https://img.shields.io/github/release/hanwckf/rt-n56u.svg)](https://github.com/hanwckf/rt-n56u/releases)
+
+# README #
+
+Welcome to the rt-n56u project
+
+This project aims to improve the rt-n56u and other supported devices on the software part, allowing power user to take full control over their hardware.
+This project was created in hope to be useful, but comes without warranty or support. Installing it will probably void your warranty. 
+Contributors of this project are not responsible for what happens next.
+
+### How do I get set up? ###
+
+* [Get the tools to build the system](https://bitbucket.org/padavan/rt-n56u/wiki/EN/HowToMakeFirmware) or [Download pre-built system image](https://bitbucket.org/padavan/rt-n56u/downloads)
+* Feed the device with the system image file (Follow instructions of updating your current system)
+* Perform factory reset
+* Open web browser on http://my.router to configure the services
+
+### Contribution guidelines ###
+
+* To be completed
+
+***
+
+### 特别说明 ###
+* 汉化字典来自：https://github.com/gorden5566/padavan
+* 更新日志：https://www.jianshu.com/p/d76a63a12eae
+
+***
+
+### 固件特点 ###
+- 使用[gorden5566](https://github.com/gorden5566/padavan)的汉化字典
+- aria2前端更换为[AriaNg](https://github.com/mayswind/AriaNg)
+- [curl](https://github.com/curl/curl)可选编译可执行程序 ```CONFIG_FIRMWARE_INCLUDE_CURL```
+- 使用了[PROMETHEUS](http://pm.freize.net/index.html)提供的部分补丁
+- 使用了[Linaro1985/padavan-ng](https://gitlab.com/padavan-ng/padavan-ng)的部分软件包
+- 可选以下插件：
+>- [scutclient](https://github.com/hanwckf/scutclient) ```CONFIG_FIRMWARE_INCLUDE_SCUTCLIENT```
+>- [gdut-drcom](https://github.com/chenhaowen01/gdut-drcom) ```CONFIG_FIRMWARE_INCLUDE_GDUT_DRCOM```
+>- [dogcom](https://github.com/hanwckf/dogcom) ```CONFIG_FIRMWARE_INCLUDE_DOGCOM```
+>- [minieap](https://github.com/hanwckf/minieap) ```CONFIG_FIRMWARE_INCLUDE_MINIEAP```
+>- [njit-client](https://github.com/hanwckf/njit8021xclient) ```CONFIG_FIRMWARE_INCLUDE_NJIT_CLIENT```
+>- [napt66](https://github.com/mzweilin/napt66) ```CONFIG_FIRMWARE_INCLUDE_NAPT66```
+>- [softether-vpnserver](https://github.com/SoftEtherVPN/SoftEtherVPN_Stable) ```CONFIG_FIRMWARE_INCLUDE_SOFTETHERVPN_SERVER```
+>- [softether-vpnclient](https://github.com/SoftEtherVPN/SoftEtherVPN_Stable) ```CONFIG_FIRMWARE_INCLUDE_SOFTETHERVPN_CLIENT```
+>- [softether-vpncmd](https://github.com/SoftEtherVPN/SoftEtherVPN_Stable) ```CONFIG_FIRMWARE_INCLUDE_SOFTETHERVPN_CMD```
+>- [vlmcsd](https://github.com/hanwckf/vlmcsd) ```CONFIG_FIRMWARE_INCLUDE_VLMCSD```
+>- [ttyd](https://github.com/tsl0922/ttyd) ```CONFIG_FIRMWARE_INCLUDE_TTYD```
+>- [lrzsz](https://ohse.de/uwe/software/lrzsz.html) ```CONFIG_FIRMWARE_INCLUDE_LRZSZ```
+>- [htop](https://hisham.hm/htop/releases/) ```CONFIG_FIRMWARE_INCLUDE_HTOP```
+>- [nano](https://www.nano-editor.org/dist/) ```CONFIG_FIRMWARE_INCLUDE_NANO```
+>- [iperf3](https://github.com/esnet/iperf) ```CONFIG_FIRMWARE_INCLUDE_IPERF3```
+>- [dump1090](https://github.com/hanwckf/dump1090) ```CONFIG_FIRMWARE_INCLUDE_DUMP1090```
+>- [rtl-sdr](https://github.com/osmocom/rtl-sdr) ```CONFIG_FIRMWARE_INCLUDE_RTL_SDR```
+>- [samba3.6](https://gitlab.com/padavan-ng/padavan-ng/tree/master/trunk/user/samba36) ```CONFIG_FIRMWARE_INCLUDE_SMBD36```
+>- [mtr](https://github.com/traviscross/mtr) ```CONFIG_FIRMWARE_INCLUDE_MTR```
+>- [socat](http://www.dest-unreach.org/socat) ```CONFIG_FIRMWARE_INCLUDE_SOCAT```
+>- [srelay](https://socks-relay.sourceforge.io) ```CONFIG_FIRMWARE_INCLUDE_SRELAY```
+>- [3proxy](https://github.com/z3APA3A/3proxy) ```CONFIG_FIRMWARE_INCLUDE_3PROXY```
+>- [mentohust](https://github.com/hanwckf/mentohust-1) ```CONFIG_FIRMWARE_INCLUDE_MENTOHUST```
+>- [frpc](https://github.com/fatedier/frp) ```CONFIG_FIRMWARE_INCLUDE_FRPC```
+>- [frps](https://github.com/fatedier/frp) ```CONFIG_FIRMWARE_INCLUDE_FRPS```
+>- [tunsafe](https://github.com/TunSafe/TunSafe) ```CONFIG_FIRMWARE_INCLUDE_TUNSAFE```
+>- [wireguard-go](https://git.zx2c4.com/wireguard-go/) ```CONFIG_FIRMWARE_INCLUDE_WIREGUARD```
+
 - 已适配除官方适配外的以下机型
->- MI-R3P(感谢群里emmmm适配,可能led控制有点问题,其它功能正常)
 >- 京东云路由(文件来自Lintel) 编译代码: JDC-1
 >- 歌华链(感谢群里Heaven适配与测试）编译代码: GHL
 >- NEWIFI-D1
->- B70(感谢Untitled提供荒野无灯的适配文件)
 >- JCG-AC856M(感谢群里的旅途中的我适配和测试,gpio值还未完全适配，但不影响使用)
 >- JCG-AC836M(感谢群里的碧霄客修改和测试)
 >- YK-L1(L1、L1C、L1W通刷)
@@ -34,6 +98,8 @@
 >- MI-3 (USB)
 >- MI-3C
 >- MI-R3G (USB)
+>- MI-R4A
+>- MI-R3P (USB)
 >- HC5661A
 >- HC5761A (USB)
 >- HC5861B
@@ -61,6 +127,9 @@
 >- JCG-Y2(USB)
 >- E8820V2(USB)
 >- MSG1500(USB)
+>- R6220
+>- NETGEAR-CHJ (R6260, R6350, R6850, WAC124)
+>- NETGEAR-BZV (R6800, R6700-v2, R7200, Nighthawk AC2400)
 
 ***
 
