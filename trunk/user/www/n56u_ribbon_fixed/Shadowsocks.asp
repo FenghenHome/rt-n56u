@@ -87,11 +87,9 @@
 			if($j("#v2_tls").is(':checked')){
 			document.getElementById('v2_tls').value=1;
 			showhide_div('row_tj_tls_host', 1);
-			showhide_div('row_v2_xtls', 0);
 			}else{
 			document.getElementById('v2_tls').value=0;
 			showhide_div('row_tj_tls_host', 0);
-			showhide_div('row_v2_xtls', 1);
 			}
 			});
 			$j("#v2_mux").change(function() { 
@@ -224,8 +222,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_net', 0);
 			showhide_div('row_v2_security', 0);
 			showhide_div('row_v2_tls', 0);
-			showhide_div('row_v2_xtls', 0);
-			showhide_div('row_v2_vless_flow', 0);
 			showhide_div('row_v2_type_tcp', 0);
 			showhide_div('row_v2_type', 0);
 			showhide_div('row_v2_vid', 0);
@@ -295,8 +291,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_net', 0);
 			showhide_div('row_v2_security', 0);
 			showhide_div('row_v2_tls', 0);
-			showhide_div('row_v2_xtls', 0);
-			showhide_div('row_v2_vless_flow', 0);
 			showhide_div('row_v2_type_tcp', 0);
 			showhide_div('row_v2_type', 0);
 			showhide_div('row_v2_vid', 0);
@@ -322,19 +316,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_v2_net', 1);
 				showhide_div('row_v2_type', 1);
 				showhide_div('row_v2_tls', 1);
-				showhide_div('row_v2_mux', 1);
-				showhide_div('row_tj_tls_host', 1);
-				showhide_div('row_ssp_insecure', 1);
-			} else if (b == "vless") {
-				switch_v2_type();
-				showhide_div('row_v2_aid', 1);
-				showhide_div('row_v2_vid', 1);
-				showhide_div('row_v2_security', 1);
-				showhide_div('row_v2_net', 1);
-				showhide_div('row_v2_type', 1);
-				showhide_div('row_v2_tls', 1);
-				showhide_div('row_v2_xtls', 1);
-				showhide_div('row_v2_vless_flow', 1);
 				showhide_div('row_v2_mux', 1);
 				showhide_div('row_tj_tls_host', 1);
 				showhide_div('row_ssp_insecure', 1);
@@ -768,9 +749,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			document.getElementById("v2_http_path").value = '';
 			document.getElementById("v2_tls").value = 0;
 			document.getElementById("v2_tls").checked = false;
-			document.getElementById("v2_xtls").value = 0;
-			document.getElementById("v2_xtls").checked = false;
-			document.getElementById("v2_vless_flow").value = 'xtls-rprx-splice';
 			document.getElementById("ssp_tls_host").value = '';
 			//"v2 tcp"
 			document.getElementById("v2_kcp_guise").value = 'none';
@@ -839,44 +817,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					document.getElementById("v2_http_path").value = getProperty(ss, 'http_path', '');
 					document.getElementById("v2_tls").value = getProperty(ss, 'tls', 0);
 					document.getElementById("v2_tls").checked =  document.getElementById("v2_tls").value != 0;
-					document.getElementById("ssp_tls_host").value = getProperty(ss, 'tls_host', '');
-					if (transport == "kcp") {
-						document.getElementById("v2_kcp_guise").value = getProperty(ss, 'kcp_guise', 'none');
-						document.getElementById("v2_mtu").value = getProperty(ss, 'mtu', '');
-						document.getElementById("v2_tti").value = getProperty(ss, 'tti', '');
-						document.getElementById("v2_uplink_capacity").value = getProperty(ss, 'uplink_capacity', '');
-						document.getElementById("v2_downlink_capacity").value = getProperty(ss, 'downlink_capacity', '');
-						document.getElementById("v2_read_buffer_size").value = getProperty(ss, 'read_buffer_size', '');
-						document.getElementById("v2_write_buffer_size").value = getProperty(ss, 'write_buffer_size', '');
-					} else if (transport == "ws") {
-						document.getElementById("v2_ws_host").value = getProperty(ss, 'ws_host', '');
-						document.getElementById("v2_ws_path").value = getProperty(ss, 'ws_path', '');
-					} else if (transport == "h2") {
-						document.getElementById("v2_h2_host").value = getProperty(ss, 'h2_host', '');
-						document.getElementById("v2_h2_path").value = getProperty(ss, 'h2_path', '');
-					} else if (transport == "quic") {
-						document.getElementById("v2_quic_guise").value = getProperty(ss, 'quic_guise', 'none');
-						document.getElementById("v2_quic_key").value = getProperty(ss, 'quic_key', '');
-						document.getElementById("v2_quic_security").value = getProperty(ss, 'quic_security', 'none');
-					}
-				} else if (v2ray_protocol == "vless") {
-					var transport = getProperty(ss, 'transport', 'tcp');
-					document.getElementById("ssp_insecure").value = getProperty(ss, 'insecure', 0);
-					document.getElementById("ssp_insecure").checked =  document.getElementById("ssp_insecure").value != 0;				
-					document.getElementById("v2_mux").value = getProperty(ss, 'mux', 0);
-					document.getElementById("v2_mux").checked =  document.getElementById("v2_mux").value != 0;
-					document.getElementById("v2_security").value = getProperty(ss, 'security', 'auto');
-					document.getElementById("v2_vmess_id").value = getProperty(ss, 'vmess_id', '');
-					document.getElementById("v2_alter_id").value = getProperty(ss, 'alter_id', '');
-					document.getElementById("v2_transport").value = transport;
-					document.getElementById("v2_tcp_guise").value = getProperty(ss, 'tcp_guise', 'none');
-					document.getElementById("v2_http_host").value = getProperty(ss, 'http_host', '');
-					document.getElementById("v2_http_path").value = getProperty(ss, 'http_path', '');
-					document.getElementById("v2_tls").value = getProperty(ss, 'tls', 0);
-					document.getElementById("v2_tls").checked =  document.getElementById("v2_tls").value != 0;
-					document.getElementById("v2_xtls").value = getProperty(ss, 'xtls', 0);
-					document.getElementById("v2_xtls").checked =  document.getElementById("v2_xtls").value != 0;
-					document.getElementById("v2_vless_flow").value = getProperty(ss, 'vless_flow', 'xtls-rprx-splice');
 					document.getElementById("ssp_tls_host").value = getProperty(ss, 'tls_host', '');
 					if (transport == "kcp") {
 						document.getElementById("v2_kcp_guise").value = getProperty(ss, 'kcp_guise', 'none');
@@ -1463,47 +1403,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 						http_host: document.getElementById("v2_http_host").value,
 						http_path: document.getElementById("v2_http_path").value,
 						tls: document.getElementById("v2_tls").value,
-						tls_host: document.getElementById("ssp_tls_host").value,
-						coustom: "1",
-					}
-					if (document.getElementById("v2_transport").value == "kcp") {
-						DataObj.kcp_guise = document.getElementById("v2_kcp_guise").value;
-						DataObj.mtu = document.getElementById("v2_mtu").value;
-						DataObj.tti = document.getElementById("v2_tti").value;
-						DataObj.uplink_capacity = document.getElementById("v2_uplink_capacity").value;
-						DataObj.downlink_capacity = document.getElementById("v2_downlink_capacity").value;
-						DataObj.read_buffer_size = document.getElementById("v2_read_buffer_size").value;
-						DataObj.write_buffer_size = document.getElementById("v2_write_buffer_size").value;
-					} else if (document.getElementById("v2_transport").value == "ws") {
-						DataObj.ws_host = document.getElementById("v2_ws_host").value;
-						DataObj.ws_path = document.getElementById("v2_ws_path").value;
-					} else if (document.getElementById("v2_transport").value == "h2") {
-						DataObj.h2_host = document.getElementById("v2_h2_host").value;
-						DataObj.h2_path = document.getElementById("v2_h2_path").value;
-					} else if (document.getElementById("v2_transport").value == "quic") {
-						DataObj.quic_guise = document.getElementById("v2_quic_guise").value;
-						DataObj.quic_key = document.getElementById("v2_quic_key").value;
-						DataObj.quic_security = document.getElementById("v2_quic_security").value;
-					}
-				} else if (v2ray_protocol == "vless") {
-					var DataObj = {
-						type: document.getElementById("ssp_type").value,
-						v2ray_protocol: document.getElementById("v2ray_protocol").value,
-						alias: document.getElementById("ssp_name").value,
-						server: document.getElementById("ssp_server").value,
-						server_port: document.getElementById("ssp_prot").value,
-						insecure: document.getElementById("ssp_insecure").value,
-						mux: document.getElementById("v2_mux").value,
-						security: document.getElementById("v2_security").value,
-						vmess_id: document.getElementById("v2_vmess_id").value,
-						alter_id: document.getElementById("v2_alter_id").value,
-						transport: document.getElementById("v2_transport").value,
-						tcp_guise: document.getElementById("v2_tcp_guise").value,
-						http_host: document.getElementById("v2_http_host").value,
-						http_path: document.getElementById("v2_http_path").value,
-						tls: document.getElementById("v2_tls").value,
-						xtls: document.getElementById("v2_xtls").value,
-						vless_flow: document.getElementById("v2_vless_flow").value,
 						tls_host: document.getElementById("ssp_tls_host").value,
 						coustom: "1",
 					}
@@ -2593,31 +2492,12 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 
 															</td>
 														</tr>
-														<tr id="row_v2_xtls" style="display:none;">
-															<th>XTLS</th>
-															<td>
-																<input type="checkbox" name="v2_xtls" id="v2_xtls" >
-															</td>
-														</tr>
 														<tr id="row_tj_tls_host" style="display:none;">
-															<th>TLS Host</th>
+															<th>TLS/XTLS Host</th>
 															<td>
 																<input type="text" class="input" size="15"
 																	name="ssp_tls_host" id="ssp_tls_host"
 																	style="width: 200px" value="">
-															</td>
-														</tr>
-														<tr id="row_v2_vless_flow" style="display:none;">
-															<th width="50%">流控模式</th>
-															<td>
-																<select name="v2_vless_flow" id="v2_vless_flow" class="input" style="width: 200px;">
-																	<option value="xtls-rprx-origin">xtls-rprx-origin</option>
-																	<option value="xtls-rprx-origin-udp443">xtls-rprx-origin-udp443</option>
-																	<option value="xtls-rprx-direct">xtls-rprx-direct</option>
-																	<option value="xtls-rprx-direct-udp443">xtls-rprx-direct-udp443</option>
-																	<option value="xtls-rprx-splice">xtls-rprx-splice</option>
-																	<option value="xtls-rprx-splice-udp443">xtls-rprx-splice-udp443</option>
-																</select>
 															</td>
 														</tr>
 														<tr id="row_v2_mux" style="display:none;">
