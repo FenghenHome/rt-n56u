@@ -872,6 +872,44 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 						document.getElementById("v2_quic_key").value = getProperty(ss, 'quic_key', '');
 						document.getElementById("v2_quic_security").value = getProperty(ss, 'quic_security', 'none');
 					}
+				} else if (v2ray_protocol == "vless") {
+					var transport = getProperty(ss, 'transport', 'tcp');
+					document.getElementById("ssp_insecure").value = getProperty(ss, 'insecure', 0);
+					document.getElementById("ssp_insecure").checked =  document.getElementById("ssp_insecure").value != 0;				
+					document.getElementById("v2_mux").value = getProperty(ss, 'mux', 0);
+					document.getElementById("v2_mux").checked =  document.getElementById("v2_mux").value != 0;
+					document.getElementById("v2_security").value = getProperty(ss, 'security', 'auto');
+					document.getElementById("v2_vmess_id").value = getProperty(ss, 'vmess_id', '');
+					document.getElementById("v2_alter_id").value = getProperty(ss, 'alter_id', '');
+					document.getElementById("v2_transport").value = transport;
+					document.getElementById("v2_tcp_guise").value = getProperty(ss, 'tcp_guise', 'none');
+					document.getElementById("v2_http_host").value = getProperty(ss, 'http_host', '');
+					document.getElementById("v2_http_path").value = getProperty(ss, 'http_path', '');
+					document.getElementById("v2_tls").value = getProperty(ss, 'tls', 0);
+					document.getElementById("v2_tls").checked =  document.getElementById("v2_tls").value != 0;
+					document.getElementById("v2_xtls").value = getProperty(ss, 'xtls', 0);
+					document.getElementById("v2_xtls").checked =  document.getElementById("v2_xtls").value != 0;
+					document.getElementById("v2_vless_flow").value = getProperty(ss, 'vless_flow', 'xtls-rprx-splice');
+					document.getElementById("ssp_tls_host").value = getProperty(ss, 'tls_host', '');
+					if (transport == "kcp") {
+						document.getElementById("v2_kcp_guise").value = getProperty(ss, 'kcp_guise', 'none');
+						document.getElementById("v2_mtu").value = getProperty(ss, 'mtu', '');
+						document.getElementById("v2_tti").value = getProperty(ss, 'tti', '');
+						document.getElementById("v2_uplink_capacity").value = getProperty(ss, 'uplink_capacity', '');
+						document.getElementById("v2_downlink_capacity").value = getProperty(ss, 'downlink_capacity', '');
+						document.getElementById("v2_read_buffer_size").value = getProperty(ss, 'read_buffer_size', '');
+						document.getElementById("v2_write_buffer_size").value = getProperty(ss, 'write_buffer_size', '');
+					} else if (transport == "ws") {
+						document.getElementById("v2_ws_host").value = getProperty(ss, 'ws_host', '');
+						document.getElementById("v2_ws_path").value = getProperty(ss, 'ws_path', '');
+					} else if (transport == "h2") {
+						document.getElementById("v2_h2_host").value = getProperty(ss, 'h2_host', '');
+						document.getElementById("v2_h2_path").value = getProperty(ss, 'h2_path', '');
+					} else if (transport == "quic") {
+						document.getElementById("v2_quic_guise").value = getProperty(ss, 'quic_guise', 'none');
+						document.getElementById("v2_quic_key").value = getProperty(ss, 'quic_key', '');
+						document.getElementById("v2_quic_security").value = getProperty(ss, 'quic_security', 'none');
+					}
 				} else if (v2ray_protocol == "trojan") {
 					document.getElementById("ssp_insecure").value = getProperty(ss, 'insecure', 0);
 					document.getElementById("ssp_insecure").checked =  document.getElementById("ssp_insecure").value != 0;
