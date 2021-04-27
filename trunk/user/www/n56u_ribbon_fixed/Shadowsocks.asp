@@ -303,8 +303,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			if (b == "shadowsocks") {
 				showhide_div('row_ss_password', 1);
 				showhide_div('row_ss_method', 1);
-				showhide_div('row_ss_plugin', 1);
-				showhide_div('row_ss_plugin_opts', 1);
 			} else if (b == "trojan") {
 				showhide_div('row_ss_password', 1);
 				showhide_div('row_v2_tls', 1);
@@ -804,8 +802,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				document.getElementById('v2_v2ray_protocol').value = v2ray_protocol;
 				if (v2ray_protocol == 'shadowsocks') {
 					document.getElementById("ss_method").value = getProperty(ss, 'encrypt_method_ss', 'none'),
-					document.getElementById("ss_plugin").value = getProperty(ss, 'plugin', ''),
-					document.getElementById("ss_plugin_opts").value = getProperty(ss, 'plugin_opts', '');
 				} else if (v2ray_protocol == "vmess") {
 					var transport = getProperty(ss, 'transport', 'tcp');
 					document.getElementById("ssp_insecure").value = getProperty(ss, 'insecure', 0);
@@ -1388,8 +1384,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 						server_port: document.getElementById("ssp_prot").value,
 						password: document.getElementById("ss_password").value,
 						encrypt_method_ss: document.getElementById("ss_method").value,
-						plugin: document.getElementById("ss_plugin").value,
-						plugin_opts: document.getElementById("ss_plugin_opts").value,
 						coustom: "1",
 					}
 				} else if (v2ray_protocol == "vmess") {
