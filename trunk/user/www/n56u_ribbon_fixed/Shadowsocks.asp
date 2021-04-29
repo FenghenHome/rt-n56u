@@ -437,12 +437,12 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				if (ss_schedule_support) {
 					updateDateTime();
 				}
-				showLoading();
-				document.form.action_mode.value = " Apply ";
-				document.form.current_page.value = "/Shadowsocks.asp";
-				document.form.next_page.value = "";
-				document.form.submit();
 			}
+			showLoading();
+			document.form.action_mode.value = " Restart ";
+			document.form.current_page.value = "Shadowsocks.asp";
+			document.form.next_page.value = "";
+			document.form.submit();
 		}
 		function submitInternet(v) {
 			showLoading();
@@ -1273,8 +1273,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					document.getElementById('v2_h2_path').value = ssm.path;
 				}
 				if (ssm.net == "quic") {
-					document.getElementById("v2_quic_security").value = ssm.securty;
-					document.getElementById("v2_quic_key").value = ssm.key;
+					document.getElementById('v2_quic_security').value = ssm.securty;
+					document.getElementById('v2_quic_key').value = ssm.key;
 				}
 				if (ssm.net == "kcp") {
 					document.getElementById('v2_kcp_guise').value = ssm.type;
@@ -1284,8 +1284,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					document.getElementById('v2_tls').dispatchEvent(event);
 					document.getElementById('ssp_tls_host').value = ssm.host;
 				}
-				document.getElementById("v2_mux").checked = true;
-				document.getElementById("v2_mux").dispatchEvent(event);
+				document.getElementById('v2_mux').checked = true;
+				document.getElementById('v2_mux').dispatchEvent(event);
 				s.innerHTML = "<font color='green'>导入Vmess配置信息成功</font>";
 				return false;
 			case "vless":
@@ -1341,10 +1341,10 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					document.getElementById('v2_h2_path').value = queryParam.path;
 					break;
 				case "quic":
-					document.getElementById("v2_quic_guise").value = queryParam.headerType || "none";
-					document.getElementById("v2_quic_guise").dispatchEvent(event);
-					document.getElementById("v2_quic_security").value = queryParam.quicSecurity;
-					document.getElementById("v2_quic_key").value = queryParam.key;
+					document.getElementById('v2_quic_guise').value = queryParam.headerType || "none";
+					document.getElementById('v2_quic_guise').dispatchEvent(event);
+					document.getElementById('v2_quic_security').value = queryParam.quicSecurity;
+					document.getElementById('v2_quic_key').value = queryParam.key;
 					break;
 				default:
 					if (queryParam.security == "xtls") {
@@ -1515,7 +1515,9 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				} else if (v2ray_protocol == "vless") {
 					var DataObj = {
 						type: document.getElementById("ssp_type").value,
+
 						v2ray_protocol: document.getElementById("v2ray_protocol").value,
+
 						alias: document.getElementById("ssp_name").value,
 						server: document.getElementById("ssp_server").value,
 						server_port: document.getElementById("ssp_prot").value,
@@ -1955,7 +1957,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															<select name="pdnsd_enable" id="pdnsd_enable" class="input"
 																style="width: 200px;" onchange="switch_dns()">
 																<option value="0">使用dns2tcp查询</option>
-																<option value="1">使用pdnsd查询</option>
+																<option value="1">使用其它服务器查询</option>
 															</select>
 														</td>
 													</tr>-->
@@ -2729,8 +2731,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 </div>
 </td>
 </tr>
--->
-													<!--  <tr>
+													<tr>
 														<th width="50%">自动切换检查周期(秒)</th>
 														<td>
 															<input type="text" class="input" size="15" name="ss_turn_s"
@@ -2745,8 +2746,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																style="width: 200px"
 																value="<% nvram_get_x("", "ss_turn_ss"); %>">
 														</td>
-													</tr>-->
-													<!--
+													</tr>
 <tr> <th width="50%">自定义国内IP更新地址:</th>
 	<td>
 		<input type="text" class="input" size="15" name="ss_chnroute_url" style="width: 200px"  value="<% nvram_get_x("","ss_chnroute_url"); %>" />
