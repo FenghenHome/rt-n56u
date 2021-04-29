@@ -99,10 +99,12 @@
 			document.getElementById('v2_xtls').value=1;
 			showhide_div('row_tj_tls_host', 1);
 			showhide_div('row_v2_vless_flow', 1);
+			showhide_div('row_v2_vless_encryption', 1);
 			showhide_div('row_v2_tls', 0);
 			}else{
 			document.getElementById('v2_xtls').value=0;
 			showhide_div('row_tj_tls_host', 0);
+			showhide_div('row_v2_vless_encryption', 0);
 			showhide_div('row_v2_vless_flow', 0);
 			showhide_div('row_v2_tls', 1);
 			}
@@ -239,6 +241,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_tls', 0);
 			showhide_div('row_v2_xtls', 0);
 			showhide_div('row_v2_vless_flow', 0);
+			showhide_div('row_v2_vless_encryption', 0);
 			showhide_div('row_v2_type_tcp', 0);
 			showhide_div('row_v2_type', 0);
 			showhide_div('row_v2_vid', 0);
@@ -248,7 +251,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_s5_enable', 0);
 			showhide_div('row_s5_username', 0);
 			showhide_div('row_s5_password', 0);
-			
+
 			var b = document.form.ssp_type.value;
 			if (b == "ss") {
 				showhide_div('row_ss_password', 1);
@@ -286,6 +289,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_ss_obfs_para', 0);
 			showhide_div('row_ss_obfs', 0);
 			showhide_div('row_ss_password', 0);
+			showhide_div('row_ss_plugin_opts', 0);
+			showhide_div('row_ss_plugin', 0);
 			showhide_div('row_ss_protocol_para', 0);
 			showhide_div('row_ss_protocol', 0);
 			showhide_div('row_ssp_insecure', 0);
@@ -308,6 +313,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_tls', 0);
 			showhide_div('row_v2_xtls', 0);
 			showhide_div('row_v2_vless_flow', 0);
+			showhide_div('row_v2_vless_encryption', 0);
 			showhide_div('row_v2_type_tcp', 0);
 			showhide_div('row_v2_type', 0);
 			showhide_div('row_v2_vid', 0);
@@ -320,6 +326,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			if (b == "shadowsocks") {
 				showhide_div('row_ss_password', 1);
 				showhide_div('row_ss_method', 1);
+				showhide_div('row_ss_plugin', 1);
+				showhide_div('row_ss_plugin_opts', 1);
 			} else if (b == "trojan") {
 				showhide_div('row_ss_password', 1);
 				showhide_div('row_v2_tls', 1);
@@ -345,6 +353,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_v2_type', 1);
 				showhide_div('row_v2_tls', 1);
 				showhide_div('row_v2_xtls', 1);
+				showhide_div('row_v2_vless_encryption', 1);
 				showhide_div('row_v2_vless_flow', 1);
 				showhide_div('row_v2_mux', 1);
 				showhide_div('row_tj_tls_host', 1);
@@ -682,9 +691,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 							formatter: actionFormatter
 						}]
 					});
-
-				
-				
 		}
 		function cellStylesales(value, row, index) {
 			var ping = row.ping
@@ -782,6 +788,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			document.getElementById("v2_xtls").value = 0;
 			document.getElementById("v2_xtls").checked = false;
 			document.getElementById("v2_vless_flow").value = 'xtls-rprx-splice';
+			document.getElementById("v2_vless_encryption").value = 'none';
 			document.getElementById("ssp_tls_host").value = '';
 			//"v2 tcp"
 			document.getElementById("v2_kcp_guise").value = 'none';
@@ -835,6 +842,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				document.getElementById('v2_v2ray_protocol').value = v2ray_protocol;
 				if (v2ray_protocol == 'shadowsocks') {
 					document.getElementById("ss_method").value = getProperty(ss, 'encrypt_method_ss', 'none'),
+					document.getElementById("ss_plugin").value = getProperty(ss, 'plugin', ''),
+					document.getElementById("ss_plugin_opts").value = getProperty(ss, 'plugin_opts', '');
 				} else if (v2ray_protocol == "vmess") {
 					var transport = getProperty(ss, 'transport', 'tcp');
 					document.getElementById("ssp_insecure").value = getProperty(ss, 'insecure', 0);
@@ -888,6 +897,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					document.getElementById("v2_xtls").value = getProperty(ss, 'xtls', 0);
 					document.getElementById("v2_xtls").checked =  document.getElementById("v2_xtls").value != 0;
 					document.getElementById("v2_vless_flow").value = getProperty(ss, 'vless_flow', 'xtls-rprx-splice');
+					document.getElementById("v2_vless_encryption").value = getProperty(ss, 'vless_encryption', 'none');
 					document.getElementById("ssp_tls_host").value = getProperty(ss, 'tls_host', '');
 					if (transport == "kcp") {
 						document.getElementById("v2_kcp_guise").value = getProperty(ss, 'kcp_guise', 'none');
@@ -1311,6 +1321,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				document.getElementById('v2_vmess_id').value = uuid;
 				document.getElementById('v2_transport').value = queryParam.type || "tcp";
 				document.getElementById('v2_transport').dispatchEvent(event);
+				document.getElementById('v2_vless_encryption').value = queryParam.encryption || "none";
 				if (queryParam.security == "tls") {
 					document.getElementById('v2_tls').checked = true;
 					document.getElementById('v2_tls').dispatchEvent(event);
@@ -1337,6 +1348,9 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					break;
 				default:
 					if (queryParam.security == "xtls") {
+						document.getElementById('v2_xtls').checked = true;
+						document.getElementById('v2_xtls').dispatchEvent(event);
+						document.getElementById('v2_vless_flow').value = queryParam.flow || "xtls-rprx-splice";
 						document.getElementById('ssp_tls_host').value = queryParam.sni || serverPart[0];
 					}			
 					break;
@@ -1455,6 +1469,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 						server_port: document.getElementById("ssp_prot").value,
 						password: document.getElementById("ss_password").value,
 						encrypt_method_ss: document.getElementById("ss_method").value,
+						plugin: document.getElementById("ss_plugin").value,
+						plugin_opts: document.getElementById("ss_plugin_opts").value,
 						coustom: "1",
 					}
 				} else if (v2ray_protocol == "vmess") {
@@ -1515,6 +1531,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 						tls: document.getElementById("v2_tls").value,
 						xtls: document.getElementById("v2_xtls").value,
 						vless_flow: document.getElementById("v2_vless_flow").value,
+						vless_encryption: document.getElementById("v2_vless_encryption").value,
 						tls_host: document.getElementById("ssp_tls_host").value,
 						coustom: "1",
 					}
@@ -2212,6 +2229,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	<option value="ssr">SSR</option>
 																	<option value="trojan">Trojan</option>
 																	<option value="v2ray">V2ray</option>
+																	//<option value="socks5">SOCKS5</option>
 																</select>
 															</td>
 														</tr>
@@ -2225,6 +2243,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	<option value="vmess">VMess</option>
 																	<option value="trojan">Trojan</option>
 																	<option value="shadowsocks">Shadowsocks</option>
+																	//<option value="socks5">SOCKS5</option>
 																</select>
 															</td>
 														</tr>
@@ -2617,6 +2636,10 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	name="ssp_tls_host" id="ssp_tls_host"
 																	style="width: 200px" value="">
 															</td>
+														</tr>
+														<tr id="row_v2_vless_encryption" style="display:none;">
+															<th width="50%">Vless 加密</th>
+																<input type="text" class="input" size="15" name="v2_vless_encryption" id="v2_vless_encryption" style="width: 200px" value="" />
 														</tr>
 														<tr id="row_v2_vless_flow" style="display:none;">
 															<th width="50%">流控模式</th>
