@@ -148,7 +148,8 @@ local outbounds_settings = {}
 				congestion = (server.congestion == "1") and true or false,
 				readBufferSize = tonumber(server.read_buffer_size),
 				writeBufferSize = tonumber(server.write_buffer_size),
-				header = {type = server.kcp_guise}
+				header = {type = server.kcp_guise},
+				seed = server.seed or nil
 			} or nil,
 			wsSettings = (server.transport == "ws") and (server.ws_path or server.ws_host or server.tls_host) and {
 				-- ws
