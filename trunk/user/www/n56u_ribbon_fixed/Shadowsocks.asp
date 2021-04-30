@@ -231,6 +231,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_mkcp_congestion', 0);
 			showhide_div('row_v2_mkcp_downlink', 0);
 			showhide_div('row_v2_mkcp_mtu', 0);
+			showhide_div('row_v2_mkcp_seed', 0);
 			showhide_div('row_v2_mkcp_readbu', 0);
 			showhide_div('row_v2_mkcp_tti', 0);
 			showhide_div('row_v2_mkcp_uplink', 0);
@@ -303,6 +304,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_mkcp_congestion', 0);
 			showhide_div('row_v2_mkcp_downlink', 0);
 			showhide_div('row_v2_mkcp_mtu', 0);
+			showhide_div('row_v2_mkcp_seed', 0);
 			showhide_div('row_v2_mkcp_readbu', 0);
 			showhide_div('row_v2_mkcp_tti', 0);
 			showhide_div('row_v2_mkcp_uplink', 0);
@@ -375,6 +377,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_mkcp_congestion', 0);
 			showhide_div('row_v2_mkcp_downlink', 0);
 			showhide_div('row_v2_mkcp_mtu', 0);
+			showhide_div('row_v2_mkcp_seed', 0);
 			showhide_div('row_v2_mkcp_readbu', 0);
 			showhide_div('row_v2_mkcp_tti', 0);
 			showhide_div('row_v2_mkcp_uplink', 0);
@@ -395,6 +398,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_v2_type', 1);
 				showhide_div('v2_kcp_guise', 1);
 				showhide_div('row_v2_mkcp_mtu', 1);
+				showhide_div('row_v2_mkcp_seed', 1);
 				showhide_div('row_v2_mkcp_tti', 1);
 				showhide_div('row_v2_mkcp_uplink', 1);
 				showhide_div('row_v2_mkcp_downlink', 1);
@@ -793,6 +797,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			//"v2 tcp"
 			document.getElementById("v2_kcp_guise").value = 'none';
 			document.getElementById("v2_mtu").value = '';
+			document.getElementById("v2_mkcp_seed").value = '';
 			document.getElementById("v2_tti").value = '';
 			document.getElementById("v2_uplink_capacity").value = '';
 			document.getElementById("v2_downlink_capacity").value = '';
@@ -863,6 +868,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					if (transport == "kcp") {
 						document.getElementById("v2_kcp_guise").value = getProperty(ss, 'kcp_guise', 'none');
 						document.getElementById("v2_mtu").value = getProperty(ss, 'mtu', '');
+						document.getElementById("v2_mkcp_seed").value = getProperty(ss, 'seed', '');
 						document.getElementById("v2_tti").value = getProperty(ss, 'tti', '');
 						document.getElementById("v2_uplink_capacity").value = getProperty(ss, 'uplink_capacity', '');
 						document.getElementById("v2_downlink_capacity").value = getProperty(ss, 'downlink_capacity', '');
@@ -902,6 +908,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					if (transport == "kcp") {
 						document.getElementById("v2_kcp_guise").value = getProperty(ss, 'kcp_guise', 'none');
 						document.getElementById("v2_mtu").value = getProperty(ss, 'mtu', '');
+						document.getElementById("v2_mkcp_seed").value = getProperty(ss, 'seed', '');
 						document.getElementById("v2_tti").value = getProperty(ss, 'tti', '');
 						document.getElementById("v2_uplink_capacity").value = getProperty(ss, 'uplink_capacity', '');
 						document.getElementById("v2_downlink_capacity").value = getProperty(ss, 'downlink_capacity', '');
@@ -1496,6 +1503,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					if (document.getElementById("v2_transport").value == "kcp") {
 						DataObj.kcp_guise = document.getElementById("v2_kcp_guise").value;
 						DataObj.mtu = document.getElementById("v2_mtu").value;
+						DataObj.seed = document.getElementById("v2_mkcp_seed").value;
 						DataObj.tti = document.getElementById("v2_tti").value;
 						DataObj.uplink_capacity = document.getElementById("v2_uplink_capacity").value;
 						DataObj.downlink_capacity = document.getElementById("v2_downlink_capacity").value;
@@ -1540,6 +1548,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					if (document.getElementById("v2_transport").value == "kcp") {
 						DataObj.kcp_guise = document.getElementById("v2_kcp_guise").value;
 						DataObj.mtu = document.getElementById("v2_mtu").value;
+						DataObj.seed = document.getElementById("v2_mkcp_seed").value;
 						DataObj.tti = document.getElementById("v2_tti").value;
 						DataObj.uplink_capacity = document.getElementById("v2_uplink_capacity").value;
 						DataObj.downlink_capacity = document.getElementById("v2_downlink_capacity").value;
@@ -2477,6 +2486,12 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																</select>
 															</td>
 														</tr>
+														<tr id="row_v2_mkcp_seed" style="display:none;">
+															<td>
+															<th width="50%">kcp 加密</th>
+																<input type="text" class="input" size="15" name="v2_mkcp_seed" id="v2_mkcp_seed" style="width: 200px" value="" />
+															</td>
+														</tr>
 														<tr id="row_v2_http_host" style="display:none;">
 															<th width="50%">HTTP Host</th>
 															<td>
@@ -2641,7 +2656,9 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 														</tr>
 														<tr id="row_v2_vless_encryption" style="display:none;">
 															<th width="50%">Vless 加密</th>
+															<td>
 																<input type="text" class="input" size="15" name="v2_vless_encryption" id="v2_vless_encryption" style="width: 200px" value="" />
+															</td>
 														</tr>
 														<tr id="row_v2_vless_flow" style="display:none;">
 															<th width="50%">流控模式</th>
