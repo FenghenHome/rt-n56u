@@ -1319,7 +1319,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				document.getElementById('ssp_server').value = serverPart[0];
 				document.getElementById('ssp_prot').value = port;
 				document.getElementById('v2_vmess_id').value = uuid;
-				document.getElementById('v2_transport').value = queryParam.type || "tcp";
+				document.getElementById('v2_transport').value = queryParam.type ? (queryParam.type == "http" ? "h2" : queryParam.type) : "tcp";
 				document.getElementById('v2_transport').dispatchEvent(event);
 				document.getElementById('v2_vless_encryption').value = queryParam.encryption || "none";
 				if (queryParam.security == "tls") {
@@ -1330,20 +1330,20 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				switch (queryParam.type) {
 				case "ws":
 					document.getElementById('v2_ws_host').value = queryParam.host;
-					document.getElementById('v2_ws_path').value = queryParam.path;
+					document.getElementById('v2_ws_path').value = queryParam.path || "/";
 					break;
 				case "kcp":
 					document.getElementById('v2_kcp_guise').value = queryParam.headerType || "none";
 					document.getElementById('v2_kcp_guise').dispatchEvent(event);
 					break;
 				case "http":
-					document.getElementById('v2_h2_host').value = queryParam.host;
-					document.getElementById('v2_h2_path').value = queryParam.path;
+					document.getElementById('v2_h2_host').value = queryParam.host || serverPart[0];
+					document.getElementById('v2_h2_path').value = queryParam.path || "/";
 					break;
 				case "quic":
 					document.getElementById('v2_quic_guise').value = queryParam.headerType || "none";
 					document.getElementById('v2_quic_guise').dispatchEvent(event);
-					document.getElementById('v2_quic_security').value = queryParam.quicSecurity;
+					document.getElementById('v2_quic_security').value = queryParam.quicSecurity || "none";
 					document.getElementById('v2_quic_key').value = queryParam.key;
 					break;
 				default:
