@@ -31,6 +31,31 @@ local log = function(...)
 	print(os.date("%Y-%m-%d %H:%M:%S ") .. table.concat({...}, " "))
 	os.execute("logger -t 'SS' '" .. table.concat({ ... }, " ") .. "'")
 end
+local encrypt_methods_ss = {
+	-- aead
+	"aes-128-gcm",
+	"aes-192-gcm",
+	"aes-256-gcm",
+	"chacha20-ietf-poly1305",
+	"xchacha20-ietf-poly1305"
+	--[[ stream
+	"table",
+	"rc4",
+	"rc4-md5",
+	"aes-128-cfb",
+	"aes-192-cfb",
+	"aes-256-cfb",
+	"aes-128-ctr",
+	"aes-192-ctr",
+	"aes-256-ctr",
+	"bf-cfb",
+	"camellia-128-cfb",
+	"camellia-192-cfb",
+	"camellia-256-cfb",
+	"salsa20",
+	"chacha20",
+	"chacha20-ietf" ]]
+}
 -- 分割字符串
 local function split(full, sep)
 	full = full:gsub("%z", "") -- 这里不是很清楚 有时候结尾带个\0
@@ -99,6 +124,15 @@ local function base64Decode(text)
 	else
 		return raw
 	end
+end
+-- 检查数组(table)中是否存在某个字符值
+-- https://www.04007.cn/article/135.html
+local function checkTabValue(tab)
+	local revtab = {}
+	for k,v in pairs(tab) do
+		revtab[v] = true
+	end
+	return revtab
 end
 -- 处理数据
 local function processData(szType, content)
@@ -214,8 +248,13 @@ local function processData(szType, content)
 		else
 			result.server_port = host[2]
 		end
-		result.encrypt_method_ss = method
-		result.password = password
+		if checkTabValue(encrypt_methods_ss)[method] then
+			result.encrypt_method_ss = method
+			result.password = password
+		else
+			-- 1202 年了还不支持 SS AEAD 的屑机场
+			result = nil
+		end
 	elseif szType == "ssd" then
 		result.type = "ss"
 		result.server = content.server
@@ -322,7 +361,7 @@ end
 					szType = 'ssd'
 					local nEnd = select(2, raw:find('ssd://'))
 					nodes = base64Decode(raw:sub(nEnd + 1, #raw))
-					nodes = jsonParse(nodes)
+					nodes = cjson.decode(nodes)
 					local extra = {airport = nodes.airport, port = nodes.port, encryption = nodes.encryption, password = nodes.password}
 					local servers = {}
 					-- SS里面包着 干脆直接这样
