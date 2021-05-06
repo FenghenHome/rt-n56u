@@ -628,6 +628,8 @@ start_httpd(int restart_fw)
 
 	_eval(httpd_argv, NULL, 0, NULL);
 
+	nvram_set_int_temp("httpd_started", 1);
+
 	if (restart_fw && restart_fw_need && nvram_match("fw_enable_x", "1"))
 		restart_firewall();
 }
@@ -635,6 +637,7 @@ start_httpd(int restart_fw)
 void
 stop_httpd(void)
 {
+	nvram_set_int_temp("httpd_started", 0);
 	char* svcs[] = { "httpd", NULL };
 	kill_services(svcs, 3, 1);
 }
