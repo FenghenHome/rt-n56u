@@ -274,7 +274,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			} else if (b == "trojan") {
 				showhide_div('row_ss_password', 1);
 				showhide_div('row_v2_tls', 1);
-				showhide_div('row_tj_tls_host', 1);
+				//showhide_div('row_tj_tls_host', 1);
 				showhide_div('row_ssp_insecure', 1);
 			} else if (b == "v2ray") {
 				switch_v2_v2ray_protocol();
@@ -339,8 +339,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			} else if (b == "trojan") {
 				showhide_div('row_ss_password', 1);
 				showhide_div('row_v2_tls', 1);
-				showhide_div('row_tj_tls_host', 1);
-				showhide_div('row_tj_tls_fingerprint', 1);
+				//showhide_div('row_tj_tls_host', 1);
+				//showhide_div('row_tj_tls_fingerprint', 1);
 				showhide_div('row_ssp_insecure', 1);
 			} else if (b == "vmess") {
 				switch_v2_type();
@@ -350,8 +350,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_v2_net', 1);
 				showhide_div('row_v2_tls', 1);
 				showhide_div('row_v2_mux', 1);
-				showhide_div('row_tj_tls_host', 1);
-				showhide_div('row_tj_tls_fingerprint', 1);
+				//showhide_div('row_tj_tls_host', 1);
+				//showhide_div('row_tj_tls_fingerprint', 1);
 				showhide_div('row_ssp_insecure', 1);
 			} else if (b == "vless") {
 				switch_v2_type();
@@ -360,11 +360,11 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_v2_net', 1);
 				showhide_div('row_v2_tls', 1);
 				showhide_div('row_v2_xtls', 1);
-				showhide_div('row_v2_vless_encryption', 1);
-				showhide_div('row_v2_vless_flow', 1);
+				//showhide_div('row_v2_vless_encryption', 1);
+				//showhide_div('row_v2_vless_flow', 1);
 				showhide_div('row_v2_mux', 1);
-				showhide_div('row_tj_tls_host', 1);
-				showhide_div('row_tj_tls_fingerprint', 1);
+				//showhide_div('row_tj_tls_host', 1);
+				//showhide_div('row_tj_tls_fingerprint', 1);
 				showhide_div('row_ssp_insecure', 1);
 			//} else if (b == "socks5") {
 				//showhide_div('row_s5_enable', 1);
@@ -2672,7 +2672,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 															<th width="50%">TLS/XTLS 指纹</th>
 															<td>
 																<select name="tj_tls_fingerprint" id="tj_tls_fingerprint" class="input" style="width: 200px;">
-																	<option value="disable">disable</option>
+																	<option value="disable">禁用</option>
 																	<option value="firefox">firefox</option>
 																	<option value="chrome">chrome</option>
 																	<option value="safari">safari</option>
