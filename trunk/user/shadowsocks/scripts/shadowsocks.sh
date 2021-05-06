@@ -32,6 +32,7 @@ redir_tcp=0
 redir_udp=0
 local_enable=0
 pdnsd_enable_flag=0
+PS="/bin/busybox ps"
 wan_bp_ips="/tmp/whiteip.txt"
 wan_fw_ips="/tmp/blackip.txt"
 lan_fp_ips="/tmp/lan_ip.txt"
@@ -595,9 +596,9 @@ stop() {
 	unlock
 	set_lock
 	/usr/bin/ssr-rules -f
-	ps -w | grep -v "grep" | grep ssr-monitor | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1 &
-	ps -w | grep -v "grep" | grep "sleep 0000" | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1 &
-	ps -w | grep -v "grep" | grep "$TMP_PATH" | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1 &
+	$PS -w | grep -v "grep" | grep ssr-monitor | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1 &
+	$PS -w | grep -v "grep" | grep "sleep 0000" | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1 &
+	$PS -w | grep -v "grep" | grep "$TMP_PATH" | awk '{print $1}' | xargs kill -9 >/dev/null 2>&1 &
 	kill_process
 	rm -f /var/lock/ssr-monitor.lock
 	if [ $ss_dns -gt 0 ] && [ $sdns_enable -eq 0 ]; then
