@@ -81,14 +81,14 @@ ln -sf /etc_ro/ipkg.conf /etc/ipkg.conf
 
 # tune linux kernel
 echo 65536        > /proc/sys/fs/file-max
-echo 1024 65535 > /proc/sys/net/ipv4/ip_local_port_range
+echo "1024 65535" > /proc/sys/net/ipv4/ip_local_port_range
 echo 0 > /proc/sys/vm/swappiness
 echo 1000 > /proc/sys/vm/vfs_cache_pressure
 echo 1 > /proc/sys/net/ipv4/tcp_abort_on_overflow
 echo 0 > /proc/sys/net/ipv4/tcp_slow_start_after_idle
-echo 4096 87380 1747600 > /proc/sys/net/ipv4/tcp_rmem
-echo 4096 87380 1747600 > /proc/sys/net/ipv4/tcp_wmem
-echo 4096 5120 6144 > /proc/sys/net/ipv4/tcp_mem
+echo "4096 87380 1747600" > /proc/sys/net/ipv4/tcp_rmem
+echo "4096 87380 1747600" > /proc/sys/net/ipv4/tcp_wmem
+echo "4096 5120 6144" > /proc/sys/net/ipv4/tcp_mem
 echo 873800 > /proc/sys/net/core/rmem_default
 echo 873800 > /proc/sys/net/core/wmem_default
 
