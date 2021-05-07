@@ -500,7 +500,7 @@ function changeBgColor(obj, num){
                                         <tr>
                                             <th colspan="2" style="background-color: #E3E3E3;"><#t2Advanced#></th>
                                         </tr>
-										<tr>
+                                        <tr>
                                             <th width="50%"><a class="help_tooltip" href="javascript:void(0);" onmouseover="openTooltip(this,5,13);">禁止解析IPv6 DNS记录</a></th>
                                             <td>
                                                 <div class="main_itoggle">
