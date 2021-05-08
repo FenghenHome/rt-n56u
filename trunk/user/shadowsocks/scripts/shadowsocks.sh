@@ -324,10 +324,10 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 			fi
 		fi
 		if [ "$3" = "2" ]; then
-			lua /etc_ro/ss/genv2config.lua $1 $mode 1234 >/tmp/v2-ssr-reudp.json
+			lua /etc_ro/ss/gen_config.lua $1 $mode 1234 >/tmp/v2-ssr-reudp.json
 			sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
 		else
-			lua /etc_ro/ss/genv2config.lua $1 $mode 1234 >$v2_json_file
+			lua /etc_ro/ss/gen_config.lua $1 $mode 1234 >$v2_json_file
 			sed -i 's/\\//g' $v2_json_file
 		fi
 		;;
