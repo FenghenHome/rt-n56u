@@ -118,7 +118,7 @@ local outbounds_settings = {}
 		-- 底层传输配置
 		streamSettings = {
 			network = server.transport or "tcp",
-			security = (server.xtls == '1') and "xtls" or (server.tls == '1') and "tls" or nil,
+			security = (server.xtls == '1') and "xtls" or (server.tls == '1'or server.transport == "grpc") and "tls" or nil,
 			tlsSettings = (server.tls == '1' and (server.insecure == "1" or server.tls_host or server.fingerprint)) and {
 				-- tls
 				allowInsecure = (server.insecure == "1") and true or nil,
@@ -169,9 +169,14 @@ local outbounds_settings = {}
 				security = server.quic_security,
 				key = server.quic_key,
 				header = {type = server.quic_guise}
+			} or nil,
+			grpcSettings = (server.transport == "grpc") and {
+				-- grpc
+				serviceName = server.serviceName or "",
+				multiMode = (server.mux == "1") and true or false
 			} or nil
 		},
-		mux = (server.mux == "1" and server.xtls ~= "1") and {
+		mux = (server.mux == "1" and server.xtls ~= "1" and server.transport ~= "grpc") and {
 			-- mux
 			enabled = true,
 			concurrency = tonumber(server.concurrency)
