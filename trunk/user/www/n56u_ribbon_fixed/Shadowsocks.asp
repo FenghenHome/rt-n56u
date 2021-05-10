@@ -232,6 +232,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_http_host', 0);
 			showhide_div('row_v2_http_path', 0);
 			showhide_div('row_v2_http2_host', 0);
+			showhide_div('row_v2_grpc_serviceName', 0);
 			showhide_div('row_v2_http2_path', 0);
 			showhide_div('row_v2_mkcp_congestion', 0);
 			showhide_div('row_v2_mkcp_downlink', 0);
@@ -306,6 +307,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_http_host', 0);
 			showhide_div('row_v2_http_path', 0);
 			showhide_div('row_v2_http2_host', 0);
+			showhide_div('row_v2_grpc_serviceName', 0);
 			showhide_div('row_v2_http2_path', 0);
 			showhide_div('row_v2_mkcp_congestion', 0);
 			showhide_div('row_v2_mkcp_downlink', 0);
@@ -379,6 +381,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			showhide_div('row_v2_http_host', 0);
 			showhide_div('row_v2_http_path', 0);
 			showhide_div('row_v2_http2_host', 0);
+			showhide_div('row_v2_grpc_serviceName', 0);
 			showhide_div('row_v2_http2_path', 0);
 			showhide_div('row_v2_mkcp_congestion', 0);
 			showhide_div('row_v2_mkcp_downlink', 0);
@@ -421,6 +424,10 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_quic_security', 1);
 				showhide_div('row_quic_key', 1);
 				showhide_div('row_quic_header', 1);
+			} else if (b == "grpc") {
+				if (document.form.v2_v2ray_protocol.value == "vless") {
+					showhide_div('row_v2_grpc_serviceName', 1);
+				}
 			}
 		}
 		function switch_dns() {
@@ -820,6 +827,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			document.getElementById("v2_quic_key").value = '';
 			document.getElementById("v2_quic_guise").value = 'none';
 			document.getElementById("v2_quic_security").value = 'none';
+			//v2 grpc
+			document.getElementById("v2_grpc_serviceName").value = '';
 			//trojan				
 			// document.getElementById("ssp_insecure").value = 0;
 			// document.getElementById("ssp_insecure").checked = false;
@@ -933,6 +942,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 						document.getElementById("v2_quic_guise").value = getProperty(ss, 'quic_guise', 'none');
 						document.getElementById("v2_quic_key").value = getProperty(ss, 'quic_key', '');
 						document.getElementById("v2_quic_security").value = getProperty(ss, 'quic_security', 'none');
+					} else if (transport == "grpc") {
+						document.getElementById("v2_grpc_serviceName").value = getProperty(ss, 'serviceName', '');
 					}
 				} else if (v2ray_protocol == "trojan") {
 					document.getElementById("ssp_insecure").value = getProperty(ss, 'insecure', 0);
@@ -1364,6 +1375,9 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					document.getElementById('v2_quic_security').value = queryParam.quicSecurity || "none";
 					document.getElementById('v2_quic_key').value = queryParam.key;
 					break;
+				case "grpc":
+					document.getElementById('v2_grpc_serviceName').value = queryParam.serviceName;
+					break;
 				default:
 					if (queryParam.security == "xtls") {
 						document.getElementById('v2_xtls').checked = true;
@@ -1577,6 +1591,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 						DataObj.quic_guise = document.getElementById("v2_quic_guise").value;
 						DataObj.quic_key = document.getElementById("v2_quic_key").value;
 						DataObj.quic_security = document.getElementById("v2_quic_security").value;
+					} else if (document.getElementById("v2_transport").value == "grpc") {
+						DataObj.serviceName = document.getElementById("v2_grpc_serviceName").value;
 					}
 				} else if (v2ray_protocol == "trojan") {
 					var DataObj = {
@@ -2478,6 +2494,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	<option value="ws">WebSocket</option>
 																	<option value="h2">HTTP/2</option>
 																	<option value="quic">QUIC</option>
+																	<option value="grpc">gRPC</option>
 																</select>
 															</td>
 														</tr>
@@ -2638,6 +2655,12 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 																	<option value="dtls">DTLS 1.2</option>
 																	<option value="wireguard">WireGuard</option>
 																</select>
+															</td>
+														</tr>
+														<tr id="row_v2_grpc_serviceName" style="display:none;">
+															<th width="50%">serviceName</th>
+															<td>
+																<input type="text" class="input" size="15" name="v2_grpc_serviceName" id="v2_mkcp_seed" style="width: 200px" value="" />
 															</td>
 														</tr>
 														<tr id="row_ssp_insecure" style="display:none;">
