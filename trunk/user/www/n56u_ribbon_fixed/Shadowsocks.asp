@@ -87,22 +87,30 @@
 			if($j("#v2_tls").is(':checked')){
 			document.getElementById('v2_tls').value=1;
 			showhide_div('row_tj_tls_host', 1);
-			showhide_div('row_tj_tls_fingerprint', 1);
+				if (document.form.v2_v2ray_protocol.value == "vmess") {
+					showhide_div('row_tj_tls_fingerprint', 1);
+				}
 			showhide_div('row_v2_xtls', 0);
 			}else{
 			document.getElementById('v2_tls').value=0;
 			showhide_div('row_tj_tls_host', 0);
 			showhide_div('row_tj_tls_fingerprint', 0);
-			showhide_div('row_v2_xtls', 1);
+				if (document.form.v2_v2ray_protocol.value == "vless") {
+					showhide_div('row_v2_xtls', 1);
+				}
 			}
 			});
 			$j("#v2_xtls").change(function() { 
 			if($j("#v2_xtls").is(':checked')){
 			document.getElementById('v2_xtls').value=1;
 			showhide_div('row_tj_tls_host', 1);
-			showhide_div('row_tj_tls_fingerprint', 1);
-			showhide_div('row_v2_vless_flow', 1);
-			showhide_div('row_v2_vless_encryption', 1);
+				if (document.form.v2_v2ray_protocol.value == "vmess") {
+					showhide_div('row_tj_tls_fingerprint', 1);
+				}
+				if (document.form.v2_v2ray_protocol.value == "vless") {
+					showhide_div('row_v2_vless_flow', 1);
+					showhide_div('row_v2_vless_encryption', 1);
+				}
 			showhide_div('row_v2_tls', 0);
 			}else{
 			document.getElementById('v2_xtls').value=0;
