@@ -2660,7 +2660,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 														<tr id="row_v2_grpc_serviceName" style="display:none;">
 															<th width="50%">serviceName</th>
 															<td>
-																<input type="text" class="input" size="15" name="v2_grpc_serviceName" id="v2_mkcp_seed" style="width: 200px" value="" />
+																<input type="text" class="input" size="15" name="v2_grpc_serviceName" id="v2_grpc_serviceName" style="width: 200px" value="" />
 															</td>
 														</tr>
 														<tr id="row_ssp_insecure" style="display:none;">
