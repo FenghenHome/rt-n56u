@@ -81,7 +81,6 @@ configure_ss:
 
 clean: clean_ssr clean_ss
 	rm -f ssr_config_done ss_config_done
-	#rm -rf $(GFWLIST_DIR)
 
 clean_ssr:
 	( if [ -f $(SRC_SSR_NAME)/Makefile ] ; then \
@@ -97,7 +96,6 @@ romfs:
 ifeq ($(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS),y)
 	chmod -R +x scripts/
 	$(ROMFSINST) $(THISDIR)/scripts/ /usr/bin/
-	#$(ROMFSINST) $(THISDIR)/gfwlist/gfwlist.bz2 /etc_ro/gfwlist.bz2
 	$(ROMFSINST) $(THISDIR)/oversea/oversea_list.conf /etc_ro/oversea_list.conf
 	$(ROMFSINST) $(THISDIR)/gfwlist/gfwlist_list.conf /etc_ro/gfwlist_list.conf
 	$(ROMFSINST) $(THISDIR)/adblock/adblock_list.conf /etc_ro/adblock_list.conf
@@ -108,16 +106,11 @@ ifeq ($(CONFIG_FIRMWARE_INCLUDE_SHADOWSOCKS),y)
 	$(ROMFSINST) /etc_ro/ss_lan_ip.sh
 	$(ROMFSINST) /etc_ro/ss_wan_ip.sh
 	$(ROMFSINST) /etc_ro/ss_dlink.sh
-	#$(ROMFSINST) /etc_ro/dlink.js
 	$(ROMFSINST) $(THISDIR)/ss/ /etc_ro/ss/
 	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SSR_NAME)/src/ss-redir /usr/bin/ssr-redir
 	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SSR_NAME)/src/ss-local /usr/bin/ssr-local
-	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SSR_NAME)/server/ss-check /usr/bin/ssr-check
 	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/src/ss-redir /usr/bin/ss-redir
-	#$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/src/ss-tunnel /usr/bin/ss-tunne
 	$(ROMFSINST) -p +x $(THISDIR)/$(SRC_SS_NAME)/src/ss-local /usr/bin/ss-local
-	#ln -sf /var/ss-redir $(ROMFSDIR)/usr/bin/ss-redir
-	#ln -sf /var/ss-tunnel $(ROMFSDIR)/usr/bin/ss-local
 endif
 ifeq ($(CONFIG_FIRMWARE_INCLUDE_TROJAN),n)
 	cp -fP $(CONFIG_CROSS_COMPILER_ROOT)/mipsel-linux-uclibc/sysroot/lib/libstdc++.so* $(ROMFSDIR)/lib
