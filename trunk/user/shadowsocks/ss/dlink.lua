@@ -102,7 +102,7 @@ local function trim(text)
 end
 -- md5
 local function md5(content)
-	local stdout = io.popen("echo -n '" .. urlEncode(content) .. "'|md5sum|cut -d ' ' -f1")
+	local stdout = io.popen('echo \"' .. urlEncode(content) .. '\" | md5sum | cut -d \" \" -f1')
 	local stdout2 = stdout:read("*all")
 	-- assert(nixio.errno() == 0)
 	return trim(stdout2)
