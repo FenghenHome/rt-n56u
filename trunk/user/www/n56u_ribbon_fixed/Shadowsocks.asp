@@ -104,7 +104,6 @@
 			if($j("#v2_xtls").is(':checked')){
 			document.getElementById('v2_xtls').value=1;
 			showhide_div('row_tj_tls_host', 1);
-			showhide_div('row_tj_tls_fingerprint', 1);
 				if (document.form.v2_v2ray_protocol.value == "vless") {
 					showhide_div('row_v2_vless_flow', 1);
 					showhide_div('row_v2_vless_encryption', 1);
@@ -113,7 +112,6 @@
 			}else{
 			document.getElementById('v2_xtls').value=0;
 			showhide_div('row_tj_tls_host', 0);
-			showhide_div('row_tj_tls_fingerprint', 0);
 				if (document.form.v2_v2ray_protocol.value == "vless") {
 					showhide_div('row_v2_vless_flow', 0);
 					showhide_div('row_v2_vless_encryption', 0);
