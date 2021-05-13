@@ -413,7 +413,9 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_v2_type', 1);
 				showhide_div('v2_kcp_guise', 1);
 				showhide_div('row_v2_mkcp_mtu', 1);
-				showhide_div('row_v2_mkcp_seed', 1);
+				if (document.form.v2_v2ray_protocol.value == "vless") {
+					showhide_div('row_v2_mkcp_seed', 1);
+				}
 				showhide_div('row_v2_mkcp_tti', 1);
 				showhide_div('row_v2_mkcp_uplink', 1);
 				showhide_div('row_v2_mkcp_downlink', 1);
@@ -891,7 +893,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					if (transport == "kcp") {
 						document.getElementById("v2_kcp_guise").value = getProperty(ss, 'kcp_guise', 'none');
 						document.getElementById("v2_mtu").value = getProperty(ss, 'mtu', '');
-						document.getElementById("v2_mkcp_seed").value = getProperty(ss, 'seed', '');
 						document.getElementById("v2_tti").value = getProperty(ss, 'tti', '');
 						document.getElementById("v2_uplink_capacity").value = getProperty(ss, 'uplink_capacity', '');
 						document.getElementById("v2_downlink_capacity").value = getProperty(ss, 'downlink_capacity', '');
@@ -1535,7 +1536,6 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					if (document.getElementById("v2_transport").value == "kcp") {
 						DataObj.kcp_guise = document.getElementById("v2_kcp_guise").value;
 						DataObj.mtu = document.getElementById("v2_mtu").value;
-						DataObj.seed = document.getElementById("v2_mkcp_seed").value;
 						DataObj.tti = document.getElementById("v2_tti").value;
 						DataObj.uplink_capacity = document.getElementById("v2_uplink_capacity").value;
 						DataObj.downlink_capacity = document.getElementById("v2_downlink_capacity").value;
