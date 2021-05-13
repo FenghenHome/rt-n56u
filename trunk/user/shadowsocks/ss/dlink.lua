@@ -168,7 +168,6 @@ local function processData(szType, content)
 		result.alter_id = info.aid
 		result.vmess_id = info.id
 		result.alias = info.ps
-		result.network = info.net
 		-- result.mux = 1
 		-- result.concurrency = 8
 		if info.net == 'ws' then
@@ -291,14 +290,9 @@ local function processData(szType, content)
 				local t = split(v, '=')
 				params[t[1]] = t[2]
 			end
-			if params.peer then
+			if params.sni then
 				-- 未指定peer（sni）默认使用remote addr
-				result.tls_host = params.peer
-			end
-			if params.allowInsecure == "1" then
-				result.insecure = "1"
-			else
-				result.insecure = "0"
+				result.tls_host = params.sni
 			end
 		else
 			result.server_port = host[2]
