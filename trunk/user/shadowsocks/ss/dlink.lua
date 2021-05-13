@@ -488,12 +488,12 @@ end
 		end
 		local add, del = 0, 0
 		for line in io.lines("/tmp/dlinkold.txt") do
-		newline = line
-		local olddb = io.popen("dbus get ssconf_basic_json_" ..line)
-		local old = olddb:read("*all")
-		--print(#old)
-		if #old > 1 then
-		old = cjson.decode(old)
+			newline = line
+			local olddb = io.popen("dbus get ssconf_basic_json_" ..line)
+			local old = olddb:read("*all")
+			--print(#old)
+			if #old > 1 then
+				old = cjson.decode(old)
 				if old.grouphashkey or old.hashkey then -- 没有 hash 的不参与删除
 					if not nodeResult[old.grouphashkey] or not nodeResult[old.grouphashkey][old.hashkey] then
 						io.popen("dbus remove ssconf_basic_json_" ..i)
@@ -501,7 +501,7 @@ end
 					else
 						local dat = nodeResult[old.grouphashkey][old.hashkey]
 						-- 标记一下
-						setmetatable(nodeResult[old.grouphashkey][old.hashkey], { __index =  { _ignore = true } })
+						setmetatable(nodeResult[old.grouphashkey][old.hashkey], {__index = {_ignore = true}})
 					end
 				else
 					if not old.coustom then
@@ -512,12 +512,13 @@ end
 	
 			end
 		end
+
 		local ssrindext = io.popen('dbus list ssconf_basic_|grep _json_ | cut -d "=" -f1|cut -d "_" -f4|sort -rn|head -n1')
 		local ssrindex = ssrindext:read("*all")
 		if #ssrindex == 0 then
 			ssrindex = 1
 		else
-		ssrindex = tonumber(ssrindex) + 1
+			ssrindex = tonumber(ssrindex) + 1
 		end
 
 		for k, v in ipairs(nodeResult) do
