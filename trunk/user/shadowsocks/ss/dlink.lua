@@ -322,7 +322,7 @@ end
 local function wget(url)
 	local stdout = io.popen('wget -q --user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36" --no-check-certificate -O- "' .. url .. '"')
 	local sresult = stdout:read("*all")
-    return trim(sresult)
+	return trim(sresult)
 end
 
 local function check_filer(result)
@@ -391,13 +391,9 @@ end
 						end
 						-- log(result)
 						if result then
-							if
-								not result.server or
-								not result.server_port or
-								check_filer(result) or
-								result.server:match("[^0-9a-zA-Z%-%.%s]") -- 中文做地址的 也没有人拿中文域名搞，就算中文域也有Puny Code SB 机场
-							then
-								log('丢弃无效节点: ' .. result.type ..' 节点, ' .. result.alias)
+							-- 中文做地址的 也没有人拿中文域名搞，就算中文域也有Puny Code SB 机场
+							if not result.server or not result.server_port or result.alias == "NULL" or check_filer(result) or result.server:match("[^0-9a-zA-Z%-%.%s]") then
+								log('丢弃无效节点: ' .. result.type .. ' 节点, ' .. result.alias)
 							else
 								-- log('成功解析: ' .. result.type ..' 节点, ' .. result.alias)
 								result.grouphashkey = groupHash
@@ -419,7 +415,6 @@ end
 			log("更新失败，没有可用的节点信息")
 			return
 		end
-		
 		local add, del = 0, 0
 		for line in io.lines("/tmp/dlinkold.txt") do
 		newline = line
@@ -456,11 +451,10 @@ end
 
 		for k, v in ipairs(nodeResult) do
 			for kk, vv in ipairs(v) do
-				if not vv._ignore then				
+				if not vv._ignore then
 					io.popen("dbus set ssconf_basic_json_" .. ssrindex .. "='" .. cjson.encode(vv) .. "'")
 					ssrindex = ssrindex + 1
 					add = add + 1
-
 				end
 			end
 		end
