@@ -366,8 +366,12 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_v2_aid', 1);
 				showhide_div('row_v2_vid', 1);
 				showhide_div('row_v2_net', 1);
-				showhide_div('row_v2_tls', 1);
-				showhide_div('row_v2_xtls', 1);
+				if (document.getElementById('v2_xtls').value == "0") {
+					showhide_div('row_v2_tls', 1);
+				}
+				if (document.getElementById('v2_tls').value == "0") {
+					showhide_div('row_v2_xtls', 1);
+				}
 				//showhide_div('row_v2_vless_encryption', 1);
 				//showhide_div('row_v2_vless_flow', 1);
 				showhide_div('row_v2_mux', 1);
