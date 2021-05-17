@@ -448,9 +448,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_quic_key', 1);
 				showhide_div('row_quic_header', 1);
 			} else if (b == "grpc") {
-				if (document.form.v2_v2ray_protocol.value == "vless") {
-					showhide_div('row_v2_grpc_serviceName', 1);
-				}
+				showhide_div('row_v2_grpc_serviceName', 1);
 			}
 		}
 		function switch_dns() {
