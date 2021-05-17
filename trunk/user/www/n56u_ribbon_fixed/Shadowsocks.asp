@@ -89,14 +89,18 @@
 			showhide_div('row_tj_tls_host', 1);
 			showhide_div('row_tj_tls_fingerprint', 1);
 				if (document.form.v2_v2ray_protocol.value == "vless") {
-					showhide_div('row_v2_xtls', 0);
+					if (document.form.v2_transport.value == "tcp" or document.form.v2_transport.value == "kcp") {
+						showhide_div('row_v2_xtls', 0);
+					}
 				}
 			}else{
 			document.getElementById('v2_tls').value=0;
 			showhide_div('row_tj_tls_host', 0);
 			showhide_div('row_tj_tls_fingerprint', 0);
 				if (document.form.v2_v2ray_protocol.value == "vless") {
-					showhide_div('row_v2_xtls', 1);
+					if (document.form.v2_transport.value == "tcp" or document.form.v2_transport.value == "kcp") {
+						showhide_div('row_v2_xtls', 1);
+					}
 				}
 			}
 			});
@@ -376,7 +380,9 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					showhide_div('row_v2_tls', 1);
 				}
 				if (document.getElementById('v2_tls').value == "0") {
-					showhide_div('row_v2_xtls', 1);
+					if (document.form.v2_transport.value == "tcp" or document.form.v2_transport.value == "kcp") {
+						showhide_div('row_v2_xtls', 1);
+					}
 				}
 				if (document.getElementById('v2_xtls').value == "1") {
 					showhide_div('row_tj_tls_host', 1);
