@@ -389,7 +389,9 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					showhide_div('row_v2_vless_flow', 1);
 				}
 				showhide_div('row_v2_mux', 1);
-				//showhide_div('row_tj_tls_host', 1);
+				if (document.getElementById('v2_xtls').value == "1" || document.getElementById('v2_tls').value == "1") {
+					showhide_div('row_tj_tls_host', 1);
+				}
 				if (document.getElementById('v2_tls').value == "1") {
 					showhide_div('row_tj_tls_fingerprint', 1);
 				}
