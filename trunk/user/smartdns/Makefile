@@ -6,7 +6,7 @@ all: extract_test config_test
 
 extract_test:
 	( if [ ! -d $(SRC_NAME) ]; then \
-		tar zxf $(SRC_NAME).tar.gz ; \
+		tar -xf $(SRC_NAME).tar.gz ; \
 	fi )
 
 config_test:

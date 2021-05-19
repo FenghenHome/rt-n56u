@@ -145,6 +145,7 @@ endif
 dir_$(CONFIG_FIRMWARE_INCLUDE_SSOBFS)                      += simple-obfs
 dir_$(CONFIG_FIRMWARE_INCLUDE_ZEROTIER)	                       += zerotier
 dir_$(CONFIG_FIRMWARE_INCLUDE_WYY)						+= unblockmusic
+dir_$(CONFIG_FIRMWARE_INCLUDE_SMARTDNS)	+= smartdns
 dir_$(OPENSSH_ENABLED)				+= openssh
 dir_$(DROPBEAR_ENABLED)				+= dropbear
 dir_$(CONFIG_FIRMWARE_INCLUDE_HTOP)		+= htop
@@ -182,7 +183,6 @@ dir_$(CONFIG_FIRMWARE_INCLUDE_IPERF3)			+= iperf3
 dir_$(CONFIG_FIRMWARE_INCLUDE_MINIEAP)			+= minieap
 dir_$(CONFIG_FIRMWARE_INCLUDE_NJIT_CLIENT)		+= njit-client
 dir_$(CONFIG_FIRMWARE_INCLUDE_MENTOHUST)		+= mentohust
-dir_$(CONFIG_FIRMWARE_INCLUDE_SMARTDNS)		+= smartdns
 dir_$(CONFIG_FIRMWARE_INCLUDE_CADDY)		+= caddy
 dir_$(CONFIG_FIRMWARE_INCLUDE_xTUN) 			+= xTun
 ifeq ($(CONFIG_FIRMWARE_INCLUDE_WING),y)
