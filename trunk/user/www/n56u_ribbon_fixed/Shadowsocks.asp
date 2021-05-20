@@ -385,14 +385,13 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					}
 				}
 				if (document.getElementById('v2_xtls').value == "1") {
+					showhide_div('row_tj_tls_host', 1);
 					showhide_div('row_v2_vless_encryption', 1);
 					showhide_div('row_v2_vless_flow', 1);
 				}
 				showhide_div('row_v2_mux', 1);
-				if (document.getElementById('v2_xtls').value == "1" || document.getElementById('v2_tls').value == "1") {
-					showhide_div('row_tj_tls_host', 1);
-				}
 				if (document.getElementById('v2_tls').value == "1") {
+					showhide_div('row_tj_tls_host', 1);
 					showhide_div('row_tj_tls_fingerprint', 1);
 				}
 				showhide_div('row_ssp_insecure', 1);
@@ -624,13 +623,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					var unodeList = document.getElementById("u_nodeList"); // 获取节点
 					var s5nodeList = document.getElementById("s5_nodeList"); // 获取节点
 					for (var key in db_ss) { // 遍历对象
-						var optionObj = null;
-						try {
-							optionObj = JSON.parse(removeUselessChars(db_ss[key])); // 字符串转为对象
-						} catch(e) {
-							optionObj = null;
-						}
-						if (optionObj == null) continue;
+						var optionObj = JSON.parse(db_ss[key]); // 字符串转为对象
 						var text = '[ ' + (optionObj.type ? optionObj.type : "类型获取失败") + ' ] ' + (optionObj
 							.alias ? optionObj.alias : "名字获取失败"); // 判断下怕获取失败 ，括号是运算的问题
 						// 添加 
@@ -671,13 +664,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					var myss = new Array();
 					var i = 0;
 					for (var key in db_ss) { // 遍历对象
-						var dbss = null;
-						try {
-							dbss = JSON.parse(removeUselessChars(db_ss[key]));
-						} catch(e) {
-							dbss = null;
-						}
-						if (dbss == null) continue;
+						var dbss = JSON.parse(db_ss[key])
 						dbss.ids = key.replace("ssconf_basic_json_", '');
 						myss[i] = dbss;
 						i = i + 1;
@@ -1314,7 +1301,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					url0 = sstr.substr(0, ploc);
 					param = sstr.substr(ploc + 2);
 				}
-				var ssm = JSON.parse(removeUselessChars(sstr));
+				var ssm = JSON.parse(sstr);
 				document.getElementById('ssp_name').value = ssm.ps;
 				document.getElementById('ssp_server').value = ssm.add;
 				document.getElementById('ssp_prot').value = ssm.port;
@@ -1711,17 +1698,17 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 		}
 		function showsdlinkList() {
 			var key = "ssconf_basic_json_" + document.getElementById("nodeList").value;
-			var result = JSON.parse(removeUselessChars(db_ss[key]));
+			var result = JSON.parse(db_ss[key]);
 			document.getElementById("d_type").value = result.type;
 		}
 		function showsudlinkList() {
 			var key = "ssconf_basic_json_" + document.getElementById("u_nodeList").value;
-			var result = JSON.parse(removeUselessChars(db_ss[key]));
+			var result = JSON.parse(db_ss[key]);
 			document.getElementById("ud_type").value = result.type;
 		}
 		function shows5dlinkList() {
 			var key = "ssconf_basic_json_" + document.getElementById("s5_nodeList").value;
-			var result = JSON.parse(removeUselessChars(db_ss[key]));
+			var result = JSON.parse(db_ss[key]);
 			document.getElementById("s5_type").value = result.type;
 		}
 	</script>
