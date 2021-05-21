@@ -108,18 +108,18 @@
 			if($j("#v2_xtls").is(':checked')){
 			document.getElementById('v2_xtls').value=1;
 			showhide_div('row_tj_tls_host', 1);
+			showhide_div('row_v2_tls', 0);
 				if (document.form.v2_v2ray_protocol.value == "vless") {
 					showhide_div('row_v2_vless_flow', 1);
 					showhide_div('row_v2_vless_encryption', 1);
-					showhide_div('row_v2_tls', 0);
 				}
 			}else{
 			document.getElementById('v2_xtls').value=0;
 			showhide_div('row_tj_tls_host', 0);
+			showhide_div('row_v2_tls', 1);
 				if (document.form.v2_v2ray_protocol.value == "vless") {
 					showhide_div('row_v2_vless_flow', 0);
 					showhide_div('row_v2_vless_encryption', 0);
-					showhide_div('row_v2_tls', 1);
 				}
 			}
 			});
@@ -285,7 +285,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			} else if (b == "trojan") {
 				showhide_div('row_ss_password', 1);
 				showhide_div('row_v2_tls', 1);
-				if (document.getElementById('v2_tls').value == "1") {
+				if (document.getElementById('v2_tls').value != 0) {
 					showhide_div('row_tj_tls_host', 1);
 				}
 				showhide_div('row_ssp_insecure', 1);
@@ -353,7 +353,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 			} else if (b == "trojan") {
 				showhide_div('row_ss_password', 1);
 				showhide_div('row_v2_tls', 1);
-				if (document.getElementById('v2_tls').value == "1") {
+				if (document.getElementById('v2_tls').value != 0) {
 					showhide_div('row_tj_tls_host', 1);
 					showhide_div('row_tj_tls_fingerprint', 1);
 				}
@@ -366,7 +366,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_v2_net', 1);
 				showhide_div('row_v2_tls', 1);
 				showhide_div('row_v2_mux', 1);
-				if (document.getElementById('v2_tls').value == "1") {
+				if (document.getElementById('v2_tls').value != 0) {
 					showhide_div('row_tj_tls_host', 1);
 					showhide_div('row_tj_tls_fingerprint', 1);
 				}
@@ -376,21 +376,21 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				showhide_div('row_v2_aid', 1);
 				showhide_div('row_v2_vid', 1);
 				showhide_div('row_v2_net', 1);
-				if (document.getElementById('v2_xtls').value == "0") {
+				if (document.getElementById('v2_xtls').value == 0) {
 					showhide_div('row_v2_tls', 1);
 				}
-				if (document.getElementById('v2_tls').value == "0") {
+				if (document.getElementById('v2_tls').value == 0) {
 					if (document.form.v2_transport.value == "tcp" || document.form.v2_transport.value == "kcp") {
 						showhide_div('row_v2_xtls', 1);
 					}
 				}
-				if (document.getElementById('v2_xtls').value == "1") {
+				if (document.getElementById('v2_xtls').value != 0) {
 					showhide_div('row_tj_tls_host', 1);
 					showhide_div('row_v2_vless_encryption', 1);
 					showhide_div('row_v2_vless_flow', 1);
 				}
 				showhide_div('row_v2_mux', 1);
-				if (document.getElementById('v2_tls').value == "1") {
+				if (document.getElementById('v2_tls').value != 0) {
 					showhide_div('row_tj_tls_host', 1);
 					showhide_div('row_tj_tls_fingerprint', 1);
 				}
@@ -1574,9 +1574,7 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				} else if (v2ray_protocol == "vless") {
 					var DataObj = {
 						type: document.getElementById("ssp_type").value,
-
 						v2ray_protocol: document.getElementById("v2ray_protocol").value,
-
 						alias: document.getElementById("ssp_name").value,
 						server: document.getElementById("ssp_server").value,
 						server_port: document.getElementById("ssp_prot").value,
