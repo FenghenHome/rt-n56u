@@ -91,6 +91,8 @@
 				if (document.form.v2_v2ray_protocol.value == "vless") {
 					if (document.form.v2_transport.value == "tcp" || document.form.v2_transport.value == "kcp") {
 						showhide_div('row_v2_xtls', 0);
+						document.getElementById('v2_xtls').value = 0;
+						document.getElementById('v2_xtls').checked = false
 					}
 				}
 			}else{
@@ -112,6 +114,8 @@
 					showhide_div('row_v2_vless_flow', 1);
 					showhide_div('row_v2_vless_encryption', 1);
 					showhide_div('row_v2_tls', 0);
+					document.getElementById('v2_tls').value = 0;
+					document.getElementById('v2_tls').checked = false
 				}
 			}else{
 			document.getElementById('v2_xtls').value=0;
