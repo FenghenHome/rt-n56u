@@ -6,6 +6,89 @@ local socks_port = arg[4] or "0"
 local ssrindext = io.popen("dbus get ssconf_basic_json_" .. server_section)
 local servertmp = ssrindext:read("*all")
 local server = cjson.decode(servertmp)
+local outbound_settings = nil
+function vmess_vless()
+	outbound_settings = {
+		vnext = {
+			{
+				address = server.server,
+				port = tonumber(server.server_port),
+				users = {
+					{
+						id = server.vmess_id,
+						alterId = (server.v2ray_protocol == "vmess" or not server.v2ray_protocol) and tonumber(server.alter_id) or nil,
+						security = (server.v2ray_protocol == "vmess" or not server.v2ray_protocol) and server.security or nil,
+						encryption = (server.v2ray_protocol == "vless") and server.vless_encryption or nil,
+						flow = (server.xtls == '1') and (server.vless_flow and server.vless_flow or "xtls-rprx-splice") or nil
+					}
+				}
+			}
+		}
+	}
+end
+function trojan_shadowsocks()
+	outbound_settings = {
+		servers = {
+			{
+				address = server.server,
+				port = tonumber(server.server_port),
+				password = server.password,
+				method = (server.v2ray_protocol == "shadowsocks") and server.encrypt_method_v2ray_ss or nil,
+				flow = (server.v2ray_protocol == "trojan") and (server.xtls == '1') and (server.vless_flow and server.vless_flow or "xtls-rprx-splice") or nil
+			}
+		}
+	}
+end
+function socks_http()
+	outbound_settings = {
+		servers = {
+			{
+				address = server.server,
+				port = tonumber(server.server_port),
+				users = (server.auth_enable == "1") and {
+					{
+						user = server.username,
+						pass = server.password
+					}
+				} or nil
+			}
+		}
+	}
+end
+local outbound = {}
+function outbound:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+function outbound:handleIndex(index)
+	local switch = {
+		vmess = function()
+			vmess_vless()
+		end,
+		vless = function()
+			vmess_vless()
+		end,
+		trojan = function()
+			trojan_shadowsocks()
+		end,
+		shadowsocks = function()
+			trojan_shadowsocks()
+		end,
+		socks = function()
+			socks_http()
+		end,
+		http = function()
+			socks_http()
+		end
+	}
+	if switch[index] then
+		switch[index]()
+	end
+end
+local settings = outbound:new()
+settings:handleIndex(server.v2ray_protocol)
 local Xray = {}
 
 local log_settings = {
@@ -47,7 +130,7 @@ local inbounds_settings = {}
 
 table.insert(inbounds_settings,inbounds_localin)
 table.insert(inbounds_settings,inbounds_socksin)
-table.insert(inbounds_settings,inbounds_dnsin)
+-- table.insert(inbounds_settings,inbounds_dnsin)
 
 
 local routing_settings = {}
@@ -80,7 +163,7 @@ local routing_rules_settings = {}
 
 table.insert(routing_rules_settings,routing_rules_localin)
 table.insert(routing_rules_settings,routing_rules_socksin)
-table.insert(routing_rules_settings,routing_rules_dnsin)
+-- table.insert(routing_rules_settings,routing_rules_dnsin)
 
 routing_settings["rules"] = routing_rules_settings
 
@@ -99,28 +182,15 @@ local outbounds_settings = {}
 
 	local outbounds_proxyout = {
 		tag = "proxy-out",
-		protocol = "vmess",
-		settings = {
-			vnext = {
-				{
-					address = server.server,
-					port = tonumber(server.server_port),
-					users = {
-						{
-							id = server.vmess_id,
-							alterId = tonumber(server.alter_id),
-							security = server.security
-						}
-					}
-				}
-			}
-		},
+		protocol = server.v2ray_protocol,
+		settings = outbound_settings,
 		-- 底层传输配置
 		streamSettings = {
 			network = server.transport or "tcp",
 			security = (server.xtls == '1') and "xtls" or (server.tls == '1'or server.transport == "grpc") and "tls" or nil,
 			tlsSettings = (server.tls == '1' and (server.insecure == "1" or server.tls_host or server.fingerprint)) and {
 				-- tls
+				fingerprint = server.fingerprint,
 				allowInsecure = (server.insecure == "1") and true or nil,
 				serverName = server.tls_host
 			} or nil,
@@ -183,7 +253,7 @@ local outbounds_settings = {}
 		} or nil
 	}
 
-table.insert(outbounds_settings,outbounds_dnsout)
+-- table.insert(outbounds_settings,outbounds_dnsout)
 table.insert(outbounds_settings,outbounds_proxyout)
 
 Xray["log"] = log_settings
@@ -191,4 +261,96 @@ Xray["inbounds"] = inbounds_settings
 Xray["routing"] = routing_settings
 Xray["outbounds"] = outbounds_settings
 
-print(cjson.encode(Xray))
+local cipher = "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA"
+local cipher13 = "TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384"
+local trojan = {
+	log_level = 3,
+	run_type = (proto == "nat" or proto == "tcp") and "nat" or "client",
+	local_addr = "0.0.0.0",
+	local_port = tonumber(local_port),
+	remote_addr = server.server,
+	remote_port = tonumber(server.server_port),
+	udp_timeout = 60,
+	-- 传入连接
+	password = {server.password},
+	-- 传出连接
+	ssl = {
+		verify = (server.insecure == "0") and true or false,
+		verify_hostname = (server.tls == "1") and true or false,
+		cert = (server.certificate) and server.certpath or nil,
+		cipher = cipher,
+		cipher_tls13 = cipher13,
+		sni = server.tls_host,
+		alpn = {"h2", "http/1.1"},
+		curve = "",
+		reuse_session = true,
+		session_ticket = (server.tls_sessionTicket == "1") and true or false
+	},
+	udp_timeout = 60,
+	tcp = {
+		-- tcp
+		no_delay = true,
+		keep_alive = true,
+		reuse_port = true,
+		fast_open = (server.fast_open == "1") and true or false,
+		fast_open_qlen = 20
+	}
+}
+local naiveproxy = {
+	proxy = (server.username and server.password and server.server and server.server_port) and "https://" .. server.username .. ":" .. server.password .. "@" .. server.server .. ":" .. server.server_port,
+	listen = (proto == "redir") and "redir" .. "://0.0.0.0:" .. tonumber(local_port) or "socks" .. "://0.0.0.0:" .. tonumber(local_port),
+	concurrency = (socks_port ~= "0") and tonumber(socks_port) or "1"
+}
+local ss = {
+	server = (server.kcp_enable == "1") and "127.0.0.1" or server.server,
+	server_port = tonumber(server.server_port),
+	local_address = "0.0.0.0",
+	local_port = tonumber(local_port),
+	mode = (proto == "tcp,udp") and "tcp_and_udp" or proto .. "_only",
+	password = server.password,
+	method = server.encrypt_method_ss,
+	timeout = tonumber(server.timeout),
+	fast_open = (server.fast_open == "1") and true or false,
+	reuse_port = true
+}
+local config = {}
+function config:new(o)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
+end
+function config:handleIndex(index)
+	local switch = {
+		ss = function()
+			ss.protocol = socks_port
+			if server.plugin and server.plugin ~= "none" then
+				ss.plugin = server.plugin
+				ss.plugin_opts = server.plugin_opts or nil
+			end
+			print(cjson.encode(ss))
+		end,
+		ssr = function()
+			ss.protocol = server.protocol
+			ss.protocol_param = server.protocol_param
+			ss.method = server.encrypt_method
+			ss.obfs = server.obfs
+			ss.obfs_param = server.obfs_param
+			print(cjson.encode(ss))
+		end,
+		v2ray = function()
+			print(cjson.encode(Xray))
+		end,
+		trojan = function()
+			print(cjson.encode(trojan))
+		end,
+		naiveproxy = function()
+			print(cjson.encode(naiveproxy))
+		end
+	}
+	if switch[index] then
+		switch[index]()
+	end
+end
+local f = config:new()
+f:handleIndex(server.type)
