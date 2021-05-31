@@ -26,7 +26,6 @@ trojan_local=`nvram get trojan_local`
 v2_local_enable=`nvram get v2_local_enable`
 v2_link=`nvram get v2_link`
 v2_local=`nvram get v2_local`
-v2_json_file="/tmp/v2-redir.json"
 server_count=0
 redir_tcp=0
 redir_udp=0
@@ -323,13 +322,7 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 				fi
 			fi
 		fi
-		if [ "$3" = "2" ]; then
-			lua /etc_ro/ss/gen_config.lua $1 $mode 1234 >/tmp/v2-ssr-reudp.json
-			sed -i 's/\\//g' /tmp/v2-ssr-reudp.json
-		else
-			lua /etc_ro/ss/gen_config.lua $1 $mode 1234 >$v2_json_file
-			sed -i 's/\\//g' $v2_json_file
-		fi
+		lua /etc_ro/ss/gen_config.lua $1 $mode $4 $5 >$config_file
 		;;
 	trojan)
 		if [ ! -f "/usr/bin/trojan" ]; then
@@ -365,6 +358,7 @@ gen_config_file() { #server1 type2 code3 local_port4 socks_port5 threads5
 		esac
 		;;
 	esac
+	sed -i 's/\\//g' $TMP_PATH/*-ssr-*.json
 }
 
 start_udp() {
@@ -378,7 +372,7 @@ start_udp() {
 		echolog "UDP TPROXY Relay:$(get_name $type) Started!"
 		;;
 	v2ray)
-		gen_config_file $UDP_RELAY_SERVER $type 2
+		gen_config_file $UDP_RELAY_SERVER $type 2 $tmp_udp_port
 		ln_start_bin $(first_type xray v2ray) v2ray -config $udp_config_file
 		echolog "UDP TPROXY Relay:$($(first_type "xray" "v2ray") -version | head -1) Started!"
 		;;
@@ -439,12 +433,11 @@ Start_Run() {
 		for i in $(seq 1 $threads); do
 			ln_start_bin "$ss_program" ${type}-redir -c $tcp_config_file
 		done
-		redir_tcp=1
 		echolog "Main node:$(get_name $type) $threads Threads Started!"
 		;;
 	v2ray)
-		gen_config_file $GLOBAL_SERVER $type 1 $tcp_port
-		ln_start_bin $(first_type xray v2ray) v2ray -config $v2_json_file
+		gen_config_file $GLOBAL_SERVER $type 1 $tcp_port $socks_port
+		ln_start_bin $(first_type xray v2ray) v2ray -config $tcp_config_file
 		echolog "Main node:$($(first_type xray v2ray) -version | head -1) Started!"
 		;;
 	trojan)
@@ -455,6 +448,7 @@ Start_Run() {
 		echolog "Main node:$($(first_type $type) --version 2>&1 | head -1) , $threads Threads Started!"
 		;;
 	esac
+	redir_tcp=1
 	return 0
 }
 
