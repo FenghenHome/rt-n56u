@@ -25,7 +25,10 @@ extract_ssr_test:
 		patch -d $(SRC_SSR_NAME) -p1 -i ../patches/0001-Add-ss-server-and-ss-check.patch; \
 		patch -d $(SRC_SSR_NAME) -p1 -i ../patches/0002-Revert-verify_simple-and-auth_simple.patch; \
 		patch -d $(SRC_SSR_NAME) -p1 -i ../patches/0003-Refine-Usage.patch; \
-		patch -d $(SRC_SSR_NAME) -p1 -i ../patches/999-Fix-Werror-sizeof-pointer-memaccess.patch; \
+		patch -d $(SRC_SSR_NAME) -p1 -i ../patches/100-fix-gcc-10.patch; \
+		patch -d $(SRC_SSR_NAME) -p1 -i ../patches/101-Fix-Werror-sizeof-pointer-memaccess.patch; \
+		patch -d $(SRC_SSR_NAME) -p1 -i ../patches/102-Read-listening-mode-from-config.patch; \
+		patch -d $(SRC_SSR_NAME) -p1 -i ../patches/103-Add-TPROXY-support-for-TCP-ssr-redir.patch; \
 	fi )
 
 extract_ss_test:
