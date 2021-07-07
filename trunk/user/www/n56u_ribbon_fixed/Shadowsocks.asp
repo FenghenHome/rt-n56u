@@ -191,8 +191,8 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				document.form.ss_date_x_Thu.checked = getDateCheck(document.form.ss_schedule.value, 4);
 				document.form.ss_date_x_Fri.checked = getDateCheck(document.form.ss_schedule.value, 5);
 				document.form.ss_date_x_Sat.checked = getDateCheck(document.form.ss_schedule.value, 6);
-				document.form.ss_time_x_hour.value = getrebootTimeRange(document.form.ss_schedule.value, 0);
-				document.form.ss_time_x_min.value = getrebootTimeRange(document.form.ss_schedule.value, 1);
+				document.form.ss_time_x_hour.value = getssTimeRange(document.form.ss_schedule.value, 0);
+				document.form.ss_time_x_min.value = getssTimeRange(document.form.ss_schedule.value, 1);
 				document.getElementById('ss_schedule_enable_tr').style.display = "";
 				change_on();
 			} else {
@@ -1445,13 +1445,13 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 				document.getElementById('ss_schedule_time_tr').style.display = "";
 			}
 		}
-		function getrebootTimeRange(str, pos) {
+		function getssTimeRange(str, pos) {
 			if (pos == 0)
 				return str.substring(7, 9);
 			else if (pos == 1)
 				return str.substring(9, 11);
 		}
-		function setrebootTimeRange(rd, rh, rm) {
+		function setssTimeRange(rd, rh, rm) {
 			return (rd.value + rh.value + rm.value);
 		}
 		function updateDateTime() {
@@ -1466,12 +1466,13 @@ setTimeout('document.getElementById("btn_ctime").style.display="none";',1000);
 					document.form.ss_date_x_Thu,
 					document.form.ss_date_x_Fri,
 					document.form.ss_date_x_Sat);
-				document.form.ss_schedule.value = setrebootTimeRange(
+				document.form.ss_schedule.value = setssTimeRange(
 					document.form.ss_schedule,
 					document.form.ss_time_x_hour,
 					document.form.ss_time_x_min);
-			} else
+			} else {
 				document.form.ss_schedule_enable.value = "0";
+			}
 		}
 		//点击保存节点按钮
 		function showNodeData(idName, obj) {
