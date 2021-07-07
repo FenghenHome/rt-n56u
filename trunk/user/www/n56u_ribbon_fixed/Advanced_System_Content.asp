@@ -235,9 +235,9 @@ function updateDateTime()
 		document.form.reboot_schedule,
 		document.form.reboot_time_x_hour,
 		document.form.reboot_time_x_min);
-	}
-	else
+	} else {
 		document.form.reboot_schedule_enable.value = "0";
+	}
 }
 
 </script>
