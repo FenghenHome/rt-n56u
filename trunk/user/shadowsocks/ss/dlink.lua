@@ -243,6 +243,10 @@ local function processData(szType, content)
 				else
 					result.plugin = plugin_info
 				end
+				-- 部分机场下发的插件名为 simple-obfs，这里应该改为 obfs-local
+				if result.plugin == "simple-obfs" then
+					result.plugin = "obfs-local"
+				end
 			end
 		else
 			result.server_port = host[2]
@@ -264,8 +268,9 @@ local function processData(szType, content)
 		result.plugin_opts = content.plugin_options
 		result.alias = "[" .. content.airport .. "] " .. content.remarks
 		if checkTabValue(encrypt_methods_ss)[result.encrypt_method_ss] then
-			-- 1202 年了还不支持 SS AEAD 的屑机场
 			result.server = nil
+		elseif result.plugin == "simple-obfs" then
+			result.plugin = "obfs-local"
 		end
 	elseif szType == "trojan" then
 		local idx_sp = 0
@@ -363,7 +368,6 @@ local function processData(szType, content)
 			if params.type == 'grpc' then
 				result.serviceName = params.serviceName
 			end
-			
 			if params.security == "tls" then
 				result.tls = "1"
 				result.tls_host = params.sni
